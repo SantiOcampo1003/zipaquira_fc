@@ -9,28 +9,28 @@ import { scrollToId } from "@/lib/scroll";
 
 export function PlayersSection() {
   return (
-    <section id="jugadores" className="scroll-mt-20 border-t border-white/[0.06] bg-background py-20 sm:py-28">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-16">
-          <RevealOnScroll>
-            <h2 className="font-heading text-4xl font-normal uppercase leading-tight tracking-wide text-white sm:text-5xl">
+    <section id="jugadores" className="rz-section border-t border-white/[0.06] bg-background">
+      <div className="rz-container">
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
+          <RevealOnScroll className="min-w-0">
+            <h2 className="rz-h2 text-balance">
               Convocatorias {convocatoriaDateLabel}
             </h2>
-            <p className="mt-6 text-lg leading-relaxed text-muted-foreground sm:text-xl">
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:mt-6 sm:text-base lg:text-lg xl:text-xl">
               Si quieres representar a tu ciudad, competir con disciplina y crecer dentro de un
               proyecto serio, {clubName} quiere conocerte. Completa la ficha del jugador para
               inscribirte.
             </p>
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <div className="rz-cta-row mt-8 sm:mt-10">
               <InscripcionButton
                 label="Completar ficha e inscribirme"
-                className="h-12 px-8 text-sm font-semibold uppercase tracking-wide"
+                className="h-12 w-full px-6 text-sm font-semibold uppercase tracking-wide sm:w-auto sm:px-8"
               />
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => scrollToId("galeria")}
-                className="h-12 border-white/15 bg-transparent px-6 text-sm font-semibold uppercase tracking-wide text-white hover:bg-white/10"
+                className="h-12 w-full border-white/15 bg-transparent px-6 text-sm font-semibold uppercase tracking-wide text-white hover:bg-white/10 sm:w-auto"
               >
                 Galería del club
               </Button>

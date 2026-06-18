@@ -38,7 +38,7 @@ export function ImageLightbox({
         )}
       >
         <DialogTitle className="sr-only">{alt}</DialogTitle>
-        <div className="relative flex min-h-[min(86dvh,820px)] w-full items-center justify-center bg-black sm:min-h-[min(88dvh,880px)]">
+        <div className="relative flex min-h-[min(72dvh,640px)] w-full items-center justify-center bg-black sm:min-h-[min(86dvh,820px)] lg:min-h-[min(88dvh,880px)]">
           <Image
             src={src}
             alt={alt}

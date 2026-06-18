@@ -19,6 +19,12 @@ const montserratDisplay = Montserrat({
   display: "swap",
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   title: `${clubNameUpper} | ${brandTagline}`,
   description:
@@ -40,7 +46,7 @@ export default function RootLayout({
     <html lang="es" className="dark">
       <body
         className={cn(
-          "relative min-h-screen bg-background font-sans antialiased",
+          "relative min-h-screen overflow-x-clip bg-background font-sans antialiased",
           montserrat.variable,
           montserratDisplay.variable
         )}

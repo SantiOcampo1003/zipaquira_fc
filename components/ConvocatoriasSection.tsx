@@ -16,23 +16,23 @@ export function ConvocatoriasSection() {
   return (
     <section
       id="convocatorias"
-      className="scroll-mt-20 border-t border-primary/25 bg-gradient-to-b from-[#121215] via-[#0e1210] to-[#121215] py-20 sm:py-28"
+      className="rz-section scroll-mt-[3.5rem] border-t border-primary/25 bg-gradient-to-b from-[#121215] via-[#0e1210] to-[#121215] sm:scroll-mt-16"
     >
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <RevealOnScroll className="text-center">
           <SectionBadge>{convocatoriaHeadline}</SectionBadge>
-          <h2 className="mt-6 font-heading text-4xl font-normal uppercase leading-tight tracking-wide text-white sm:text-5xl">
+          <h2 className="rz-h2 mt-5 text-balance sm:mt-6">
             Tu oportunidad es el{" "}
             <span className="text-primary">{convocatoriaDateLabel}</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base lg:text-lg">
             {clubName} abre sus convocatorias para jugadores. Completa la ficha oficial con tus
             datos deportivos y personales para participar el {convocatoriaDateFull}.
           </p>
           <Separator className="mx-auto mt-8 max-w-xs bg-primary/30" />
         </RevealOnScroll>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2">
+        <div className="mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4">
           {convocatoriaHighlights.map((item, i) => (
             <RevealOnScroll key={item.title} delay={0.05 * i}>
               <article className="flex h-full gap-4 rounded-2xl border border-white/[0.08] bg-[#18181B]/70 p-5 ring-1 ring-white/[0.04]">
@@ -51,7 +51,7 @@ export function ConvocatoriasSection() {
         </div>
 
         <RevealOnScroll className="mt-12" delay={0.08}>
-          <div className="rounded-2xl border border-primary/25 bg-rz-forest/30 p-6 sm:p-8">
+          <div className="rounded-2xl border border-primary/25 bg-rz-forest/30 p-4 sm:p-6 lg:p-8">
             <h3 className="font-heading text-lg font-normal uppercase tracking-wide text-white">
               Cómo inscribirte
             </h3>

@@ -38,7 +38,7 @@ export function HeroSection() {
   return (
     <section
       id="inicio"
-      className="relative overflow-hidden bg-background pb-20 pt-14 sm:pb-28 sm:pt-20 lg:pb-32 lg:pt-24"
+      className="relative overflow-hidden bg-background pb-14 pt-8 sm:pb-28 sm:pt-16 lg:pb-32 lg:pt-24"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
@@ -72,12 +72,12 @@ export function HeroSection() {
         </div>
       ) : null}
 
-      <div className="relative z-10 mx-auto grid max-w-6xl gap-14 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16 lg:px-8">
+      <div className="relative z-10 mx-auto grid max-w-6xl gap-8 px-4 sm:gap-12 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16 lg:px-8">
         <motion.div
           variants={staggerCinematic}
           initial="hidden"
           animate="visible"
-          className="flex flex-col gap-6"
+          className="flex min-w-0 flex-col gap-4 sm:gap-6"
         >
           <motion.div variants={fadeInUp}>
             <SectionBadge>{convocatoriaHeadline} · {convocatoriaDateLabel}</SectionBadge>
@@ -85,7 +85,7 @@ export function HeroSection() {
 
           <motion.h1
             variants={fadeInUp}
-            className="font-heading text-5xl font-normal uppercase leading-[0.92] tracking-wide text-white drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)] sm:text-6xl lg:text-7xl"
+            className="font-heading text-[2.35rem] font-normal uppercase leading-[0.95] tracking-wide text-white drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)] sm:text-5xl lg:text-7xl"
             style={{ textShadow: "0 0 80px rgba(169,146,89,0.12)" }}
           >
             <span className="text-white">Zipaquirá</span>
@@ -94,7 +94,7 @@ export function HeroSection() {
 
           <motion.p
             variants={fadeInUp}
-            className="max-w-xl font-heading text-lg font-semibold uppercase leading-snug tracking-[0.12em] text-rz-cream sm:text-xl"
+            className="max-w-xl font-heading text-sm font-semibold uppercase leading-snug tracking-[0.08em] text-rz-cream sm:text-lg sm:tracking-[0.12em] lg:text-xl"
           >
             {brandTagline}
           </motion.p>
@@ -108,7 +108,7 @@ export function HeroSection() {
 
           <motion.p
             variants={fadeInUp}
-            className="font-heading text-2xl font-normal uppercase leading-tight tracking-wide text-rz-cream/95 sm:text-3xl lg:text-4xl"
+            className="font-heading text-xl font-normal uppercase leading-tight tracking-wide text-rz-cream/95 sm:text-2xl lg:text-4xl"
           >
             Convocatorias abiertas.
             <span className="mt-1 block text-white">Inscríbete antes del {convocatoriaDateLabel}.</span>
@@ -116,22 +116,22 @@ export function HeroSection() {
 
           <motion.p
             variants={fadeInUp}
-            className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg"
+            className="max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base lg:text-lg"
           >
             Si quieres vestir los colores de Zipaquirá, completa la ficha del jugador y presenta el
             día de las convocatorias con disciplina y hambre de historia.
           </motion.p>
 
-          <motion.div variants={fadeInUp} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <motion.div variants={fadeInUp} className="rz-cta-row sm:items-center">
             <InscripcionButton
               label="Inscribirme ahora"
-              className="h-12 gap-2 bg-primary px-6 text-sm font-semibold uppercase tracking-wide text-primary-foreground shadow-lift transition-[transform,box-shadow] duration-300 ease-out hover:scale-[1.03] hover:bg-primary/92 hover:shadow-[0_0_36px_-4px_rgba(169,146,89,0.55)] active:scale-[0.98] motion-reduce:hover:scale-100 motion-reduce:hover:shadow-lift"
+              className="h-12 w-full gap-2 bg-primary px-6 text-sm font-semibold uppercase tracking-wide text-primary-foreground shadow-lift transition-[transform,box-shadow] duration-300 ease-out hover:scale-[1.03] hover:bg-primary/92 hover:shadow-[0_0_36px_-4px_rgba(169,146,89,0.55)] active:scale-[0.98] sm:w-auto motion-reduce:hover:scale-100 motion-reduce:hover:shadow-lift"
             />
             <Button
               type="button"
               variant="outline"
               onClick={() => scrollToId("convocatorias")}
-              className="h-12 border-white/15 bg-white/5 px-6 text-sm font-semibold uppercase tracking-wide text-white transition-[transform,box-shadow,background-color] duration-300 ease-out hover:scale-[1.02] hover:bg-white/10 hover:shadow-[0_0_28px_-8px_rgba(169,146,89,0.2)] active:scale-[0.99] motion-reduce:hover:scale-100"
+              className="h-12 w-full border-white/15 bg-white/5 px-6 text-sm font-semibold uppercase tracking-wide text-white transition-[transform,box-shadow,background-color] duration-300 ease-out hover:scale-[1.02] hover:bg-white/10 hover:shadow-[0_0_28px_-8px_rgba(169,146,89,0.2)] active:scale-[0.99] sm:w-auto motion-reduce:hover:scale-100"
             >
               Ver detalles
               <ArrowRight className="size-4" aria-hidden />
@@ -148,7 +148,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.72, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mx-auto w-full max-w-md lg:mx-0 lg:max-w-none"
+          className="relative mx-auto w-full min-w-0 max-w-md lg:mx-0 lg:max-w-none"
         >
           <div className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-rz-forest via-[#0f2e14] to-background p-1 shadow-card">
             <div
@@ -158,9 +158,9 @@ export function HeroSection() {
                   "linear-gradient(135deg, rgba(169,146,89,0.4) 0%, transparent 45%), repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(255,255,255,0.04) 18px, rgba(255,255,255,0.04) 19px)",
               }}
             />
-            <div className="relative rounded-[0.9rem] bg-[#0e0e12]/90 p-6 sm:p-8">
-              <div className="mb-8 flex flex-col items-center border-b border-white/10 pb-8 sm:pb-8">
-                <div className="relative mx-auto w-full max-w-[min(100%,340px)] sm:max-w-[380px]">
+            <div className="relative rounded-[0.9rem] bg-[#0e0e12]/90 p-4 sm:p-8">
+              <div className="mb-6 flex flex-col items-center border-b border-white/10 pb-6 sm:mb-8 sm:pb-8">
+                <div className="relative mx-auto w-full max-w-[min(100%,280px)] sm:max-w-[380px]">
                   {!reduce ? (
                     <motion.div
                       className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[118%] w-[118%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl"

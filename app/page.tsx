@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main>
+      <main className="overflow-x-clip">
         <HeroSection />
         <SectionDivider />
         <ConvocatoriasSection />

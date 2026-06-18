@@ -58,11 +58,11 @@ function BrandLockup({ onClick }: { onClick: () => void }) {
         sizes="52px"
         className="h-11 w-11 rounded-xl border border-primary/30 shadow-[0_0_24px_rgba(169,146,89,0.14)] ring-1 ring-white/[0.06] transition-[border-color,box-shadow,transform] duration-300 group-hover:border-primary/45 group-hover:shadow-[0_0_32px_rgba(169,146,89,0.22)] sm:h-12 sm:w-12"
       />
-      <span className="flex flex-col justify-center leading-none">
-        <span className="font-heading text-[15px] font-bold tracking-[0.1em] text-white sm:text-base lg:text-[17px]">
+      <span className="hidden flex-col justify-center leading-none min-[380px]:flex">
+        <span className="font-heading text-sm font-bold tracking-[0.08em] text-white sm:text-base lg:text-[17px]">
           {clubNameMain}
         </span>
-        <span className="mt-1 font-heading text-[9px] font-semibold tracking-[0.32em] text-primary sm:text-[10px]">
+        <span className="mt-0.5 font-heading text-[8px] font-semibold tracking-[0.28em] text-primary sm:mt-1 sm:text-[10px]">
           F.C.
         </span>
       </span>
@@ -129,7 +129,7 @@ export function Header() {
         aria-hidden
       />
 
-      <div className="relative mx-auto flex h-[3.25rem] max-w-[1400px] items-center gap-4 px-4 sm:h-14 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex h-14 max-w-[1400px] items-center gap-2 px-3 sm:gap-4 sm:px-6 lg:px-8">
         <BrandLockup onClick={() => go("inicio")} />
 
         <nav
@@ -141,8 +141,8 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          <HeaderCta className="hidden h-9 sm:inline-flex lg:h-9" />
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
+          <HeaderCta className="hidden h-8 px-3 text-[9px] min-[400px]:inline-flex sm:h-9 sm:px-5 sm:text-[11px]" />
 
           <button
             type="button"
@@ -180,7 +180,7 @@ export function Header() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: reduceMotion ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-x-0 top-[3.25rem] z-50 max-h-[calc(100dvh-3.25rem)] overflow-y-auto border-b border-white/[0.08] bg-[rgba(6,26,10,0.97)] shadow-[0_24px_64px_-20px_rgba(0,0,0,0.8)] backdrop-blur-2xl sm:top-14 lg:hidden"
+              className="fixed inset-x-0 top-14 z-50 max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-b border-white/[0.08] bg-[rgba(6,26,10,0.97)] shadow-[0_24px_64px_-20px_rgba(0,0,0,0.8)] backdrop-blur-2xl lg:hidden"
             >
               <div className="mx-auto max-w-[1400px] px-4 py-5 sm:px-6">
                 <nav className="flex flex-col gap-0.5" aria-label="Móvil">

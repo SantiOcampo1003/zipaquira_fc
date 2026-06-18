@@ -9,7 +9,7 @@ export function CommunityFunnelSection() {
   return (
     <section
       id="comunidad"
-      className="relative scroll-mt-20 overflow-hidden border-t border-white/[0.06] py-20 sm:py-28"
+      className="rz-section relative overflow-hidden border-t border-white/[0.06]"
     >
       <SectionStoryBackdrop
         imageSrc={sectionStoryImages.community}
@@ -17,17 +17,17 @@ export function CommunityFunnelSection() {
         focal="left"
         positionY="32%"
       />
-      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="rz-container relative z-10">
         <RevealOnScroll className="mx-auto max-w-3xl text-center">
-          <h2 className="font-heading text-4xl font-normal uppercase tracking-wide text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.85)] sm:text-5xl">
+          <h2 className="rz-h2 text-balance drop-shadow-[0_2px_20px_rgba(0,0,0,0.85)]">
             De seguidor a hincha fundador
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-3 text-sm text-muted-foreground sm:mt-4 sm:text-base lg:text-lg">
             Un camino claro para quien quiere vivir el club desde el primer día.
           </p>
         </RevealOnScroll>
 
-        <div className="mt-16 lg:hidden">
+        <div className="mt-10 lg:hidden">
           <div className="flex flex-col gap-4">
             {funnelSteps.map((step, i) => (
               <RevealOnScroll key={step.title} delay={0.05 * i}>
@@ -38,7 +38,7 @@ export function CommunityFunnelSection() {
                   <div>
                     <div className="flex items-center gap-2">
                       <step.icon className="size-4 text-primary" aria-hidden />
-                      <h3 className="font-heading text-lg font-normal uppercase tracking-wide text-white">
+                      <h3 className="font-heading text-base font-normal uppercase leading-snug tracking-wide text-white sm:text-lg">
                         {step.title}
                       </h3>
                     </div>

@@ -8,15 +8,15 @@ import { sectionStoryImages } from "@/lib/section-story-images";
 
 export function NewGenerationSection() {
   return (
-    <section className="relative overflow-hidden border-t border-white/[0.06] py-20 sm:py-28">
+    <section className="rz-section relative overflow-hidden border-t border-white/[0.06]">
       <SectionStoryBackdrop
         imageSrc={sectionStoryImages.newGeneration}
         overlay="medium"
         focal="left"
       />
-      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="rz-container relative z-10">
         <RevealOnScroll className="max-w-3xl">
-          <h2 className="font-heading text-4xl font-normal uppercase leading-tight tracking-wide text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.85)] sm:text-5xl">
+          <h2 className="rz-h2 drop-shadow-[0_2px_20px_rgba(0,0,0,0.85)]">
             Nacemos desde la raíz de la ciudad
           </h2>
           <p className="mt-4 text-lg text-rz-cream/85">

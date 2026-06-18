@@ -11,7 +11,7 @@ export function ManifestoSection() {
   return (
     <section
       id="nosotros"
-      className="relative scroll-mt-20 overflow-hidden border-t border-white/[0.06] py-20 sm:py-28"
+      className="rz-section relative overflow-hidden border-t border-white/[0.06]"
     >
       <SectionStoryBackdrop
         imageSrc={sectionStoryImages.manifesto}
@@ -20,13 +20,13 @@ export function ManifestoSection() {
       />
       <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <RevealOnScroll>
-          <h2 className="font-heading text-4xl font-normal uppercase leading-[0.95] tracking-wide text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.85)] sm:text-5xl lg:text-6xl">
+          <h2 className="rz-h2 drop-shadow-[0_2px_20px_rgba(0,0,0,0.85)] lg:text-6xl">
             Nacemos desde la raíz de la ciudad.
           </h2>
         </RevealOnScroll>
 
         <RevealOnScroll className="mt-10" delay={0.05}>
-          <p className="font-heading text-2xl font-normal uppercase leading-snug tracking-wide text-primary sm:text-3xl">
+          <p className="font-heading text-lg font-normal uppercase leading-snug tracking-wide text-primary sm:text-2xl lg:text-3xl">
             Con valores de{" "}
             <span className="text-rz-cream">trabajo</span>,{" "}
             <span className="text-rz-cream">disciplina</span> y{" "}
@@ -36,12 +36,12 @@ export function ManifestoSection() {
         </RevealOnScroll>
 
         <RevealOnScroll className="mt-12" delay={0.08}>
-          <p className="font-heading text-center text-3xl font-normal uppercase leading-tight tracking-[0.06em] text-white sm:text-4xl md:text-5xl">
-            Una ciudad.
-            <span className="mx-2 text-rz-burgundy sm:mx-3">·</span>
-            Una identidad.
-            <span className="mx-2 text-primary sm:mx-3">·</span>
-            Un equipo.
+          <p className="flex flex-col items-center gap-2 font-heading text-center text-2xl font-normal uppercase leading-tight tracking-[0.04em] text-white sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-3 sm:text-3xl md:text-4xl lg:text-5xl">
+            <span>Una ciudad.</span>
+            <span className="hidden text-rz-burgundy sm:inline" aria-hidden>·</span>
+            <span>Una identidad.</span>
+            <span className="hidden text-primary sm:inline" aria-hidden>·</span>
+            <span>Un equipo.</span>
           </p>
         </RevealOnScroll>
 

@@ -11,7 +11,7 @@ export function StoryCTASection() {
   return (
     <section
       id="historia"
-      className="relative scroll-mt-20 overflow-hidden border-t border-primary/20 py-24 sm:py-32"
+      className="rz-section relative overflow-hidden border-t border-primary/20 py-16 sm:py-24 lg:py-32"
     >
       <SectionStoryBackdrop
         imageSrc={sectionStoryImages.storyCta}
@@ -34,11 +34,11 @@ export function StoryCTASection() {
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
         <RevealOnScroll>
-          <h2 className="font-heading text-4xl font-normal uppercase leading-tight tracking-wide text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.6)] sm:text-5xl lg:text-6xl">
+          <h2 className="rz-h2 text-balance drop-shadow-[0_2px_24px_rgba(0,0,0,0.6)] lg:text-6xl">
             Esta historia es de todos.
           </h2>
         </RevealOnScroll>
-        <RevealOnScroll className="mt-8 space-y-6 text-lg leading-relaxed text-muted-foreground sm:text-xl" delay={0.06}>
+        <RevealOnScroll className="mt-6 space-y-5 text-base leading-relaxed text-muted-foreground sm:mt-8 sm:space-y-6 sm:text-lg lg:text-xl" delay={0.06}>
           <p>
             {clubName} empieza con jóvenes que se atreven a probarse. Las convocatorias del{" "}
             {convocatoriaDateLabel} son tu puerta para vestir los colores de la ciudad con
@@ -54,10 +54,10 @@ export function StoryCTASection() {
             Si estás leyendo esto, ya haces parte.
           </motion.p>
         </RevealOnScroll>
-        <RevealOnScroll className="mt-12" delay={0.1}>
+        <RevealOnScroll className="mt-10 flex justify-center sm:mt-12" delay={0.1}>
           <InscripcionButton
             label="Inscribirme en las convocatorias"
-            className="h-14 min-w-[min(100%,280px)] px-10 text-sm font-semibold uppercase tracking-wide shadow-[0_0_40px_-8px_rgba(169,146,89,0.45)] transition-[transform,box-shadow,background-color] duration-300 ease-out hover:scale-[1.04] hover:bg-primary/92 hover:shadow-[0_0_52px_-6px_rgba(169,146,89,0.55)] active:scale-[0.98] sm:text-base motion-reduce:hover:scale-100"
+            className="h-12 w-full max-w-md px-6 text-xs font-semibold uppercase tracking-wide shadow-[0_0_40px_-8px_rgba(169,146,89,0.45)] transition-[transform,box-shadow,background-color] duration-300 ease-out hover:scale-[1.04] hover:bg-primary/92 hover:shadow-[0_0_52px_-6px_rgba(169,146,89,0.55)] active:scale-[0.98] sm:h-14 sm:px-10 sm:text-sm motion-reduce:hover:scale-100"
           />
         </RevealOnScroll>
       </div>

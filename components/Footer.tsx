@@ -33,13 +33,15 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/[0.06] bg-background py-14">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <RevealOnScroll className="flex flex-col items-center gap-10 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left">
-          <div className="flex flex-col items-center sm:items-start">
-            <div className="flex items-center gap-3">
-              <ClubCrest className="h-12 w-12 rounded-lg border border-primary/25 sm:h-14 sm:w-14" />
-              <p className="font-heading text-2xl tracking-[0.12em] text-white">{clubNameUpper}</p>
+    <footer className="border-t border-white/[0.06] bg-background py-10 sm:py-14">
+      <div className="rz-container">
+        <RevealOnScroll className="flex flex-col items-center gap-8 text-center sm:flex-row sm:items-start sm:justify-between sm:gap-10 sm:text-left">
+          <div className="flex min-w-0 flex-col items-center sm:items-start">
+            <div className="flex flex-col items-center gap-3 sm:flex-row">
+              <ClubCrest className="h-11 w-11 rounded-lg border border-primary/25 sm:h-14 sm:w-14" />
+              <p className="font-heading text-lg tracking-[0.1em] text-white sm:text-2xl sm:tracking-[0.12em]">
+                {clubNameUpper}
+              </p>
             </div>
             <p className="mt-2 max-w-xs text-sm text-rz-cream/80">{brandTagline}</p>
             <button

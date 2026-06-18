@@ -60,7 +60,7 @@ function JerseyKitStage({
   }
 
   return (
-    <div className="relative mx-auto max-w-lg lg:max-w-none">
+    <div className="relative mx-auto min-w-0 max-w-lg overflow-hidden lg:max-w-none">
       <motion.div
         className="pointer-events-none absolute -bottom-10 left-[8%] right-[8%] z-0 h-16 rounded-[100%]"
         aria-hidden
@@ -78,7 +78,7 @@ function JerseyKitStage({
           filter: "blur(18px)",
         }}
       />
-      <div className="absolute -inset-6 rounded-[2rem] bg-[radial-gradient(ellipse_at_50%_0%,rgba(169,146,89,0.12),transparent_58%)] blur-2xl" />
+      <div className="absolute -inset-2 rounded-[2rem] bg-[radial-gradient(ellipse_at_50%_0%,rgba(169,146,89,0.12),transparent_58%)] blur-2xl sm:-inset-6" />
       <div
         ref={wrapRef}
         className="relative z-10 [perspective:1400px]"
@@ -172,11 +172,11 @@ export function JerseyKitSection() {
   return (
     <section
       id="camiseta"
-      className="relative scroll-mt-20 border-t border-white/[0.07] bg-[#08080c] py-20 sm:py-28"
+      className="rz-section relative overflow-hidden border-t border-white/[0.07] bg-[#08080c]"
     >
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="rz-container relative">
         <div
-          className="pointer-events-none absolute -left-40 top-20 h-72 w-72 rounded-full bg-primary/5 blur-[100px] sm:top-32"
+          className="pointer-events-none absolute -left-20 top-20 hidden h-72 w-72 rounded-full bg-primary/5 blur-[100px] sm:block sm:top-32"
           aria-hidden
         />
         <div
@@ -184,17 +184,17 @@ export function JerseyKitSection() {
           aria-hidden
         />
 
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <div>
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="min-w-0">
             <RevealOnScroll>
-              <SectionBadge className="mb-5">Kit · Visual 3D · Temporada 01</SectionBadge>
-              <h2 className="font-heading text-4xl font-normal uppercase leading-[0.95] tracking-wide text-white sm:text-5xl lg:text-6xl">
+              <SectionBadge className="mb-4 sm:mb-5">Kit · Visual 3D · Temporada 01</SectionBadge>
+              <h2 className="rz-h2 lg:text-6xl">
                 La camiseta de nuestra historia.
               </h2>
             </RevealOnScroll>
 
             <RevealOnScroll
-              className="mt-8 space-y-5 text-lg leading-relaxed text-muted-foreground sm:text-xl"
+              className="mt-6 space-y-4 text-base leading-relaxed text-muted-foreground sm:mt-8 sm:space-y-5 sm:text-lg lg:text-xl"
               delay={0.06}
             >
               {kitFuturistNarrative.map((p, i) => (
@@ -205,11 +205,11 @@ export function JerseyKitSection() {
               </p>
             </RevealOnScroll>
 
-            <RevealOnScroll className="mt-10" delay={0.1}>
+            <RevealOnScroll className="mt-8" delay={0.1}>
               <InscripcionButton
                 label="Inscribirme en convocatorias"
                 variant="outline"
-                className="border-primary/35 bg-primary/5 text-sm font-semibold uppercase tracking-wide text-primary hover:bg-primary/15"
+                className="h-12 w-full border-primary/35 bg-primary/5 text-sm font-semibold uppercase tracking-wide text-primary hover:bg-primary/15 sm:w-auto"
               />
             </RevealOnScroll>
 
@@ -228,7 +228,7 @@ export function JerseyKitSection() {
             </RevealOnScroll>
           </div>
 
-          <RevealOnScroll className="relative" delay={0.08}>
+          <RevealOnScroll className="relative min-w-0" delay={0.08}>
             <JerseyKitStage
               lightboxOpen={lightboxOpen}
               onOpenLightbox={() => setLightboxOpen(true)}

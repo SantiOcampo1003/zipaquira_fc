@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils";
 
 export function SponsorsSection() {
   return (
-    <section id="patrocinadores" className="scroll-mt-20 border-t border-white/[0.06] bg-[#121215] py-20 sm:py-28">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <section id="patrocinadores" className="rz-section border-t border-white/[0.06] bg-[#121215]">
+      <div className="rz-container">
         <RevealOnScroll className="mx-auto max-w-3xl text-center">
-          <h2 className="font-heading text-4xl font-normal uppercase tracking-wide text-white sm:text-5xl">
+          <h2 className="rz-h2 text-balance">
             Marcas que crecen con la comunidad
           </h2>
-          <p className="mt-6 text-lg leading-relaxed text-muted-foreground sm:text-xl">
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:mt-6 sm:text-base lg:text-lg xl:text-xl">
             No buscamos solo logos en una camiseta. Queremos aliados que crean en Zipaquirá, en su
             gente y en el poder del deporte para conectar marcas con comunidad real.
           </p>
@@ -32,14 +32,14 @@ export function SponsorsSection() {
           ))}
         </div>
 
-        <RevealOnScroll className="mt-12 flex justify-center">
+        <RevealOnScroll className="mt-10 flex justify-center sm:mt-12">
           <a
             href="https://wa.me/573001234567"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
               buttonVariants(),
-              "h-12 px-8 text-sm font-semibold uppercase tracking-wide"
+              "h-12 w-full max-w-md px-6 text-xs font-semibold uppercase tracking-wide sm:w-auto sm:px-8 sm:text-sm"
             )}
           >
             Quiero ser patrocinador

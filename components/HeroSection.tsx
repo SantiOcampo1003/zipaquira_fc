@@ -9,7 +9,7 @@ import { ImageLightbox } from "@/components/ImageLightbox";
 import { SectionBadge } from "@/components/SectionBadge";
 import { StatCard } from "@/components/StatCard";
 import { fadeIn, fadeInUp, staggerCinematic } from "@/lib/motion";
-import { brandTagline, convocatoriaDateLabel, convocatoriaHeadline } from "@/lib/brand";
+import { brandTagline, convocatoriaDateLabel, convocatoriaDateShort, convocatoriaHeadline } from "@/lib/brand";
 import { scrollToId } from "@/lib/scroll";
 import { InscripcionButton } from "@/components/InscripcionButton";
 
@@ -212,12 +212,12 @@ export function HeroSection() {
                   Zipaquirá, Colombia
                 </p>
                 <p className="mt-4 inline-block rounded border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-widest text-rz-cream">
-                  6 de julio
+                  {convocatoriaDateLabel}
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-2 pt-2 sm:gap-3">
-                <StatCard compact label="fecha" value="6 JUL" />
+                <StatCard compact label="fecha" value={convocatoriaDateShort} />
                 <StatCard compact label="inscripción" value="ABIERTA" />
                 <StatCard compact label="ficha" value="WEB" />
               </div>

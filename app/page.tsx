@@ -13,6 +13,7 @@ import { SectionDivider } from "@/components/SectionDivider";
 import { SponsorsSection } from "@/components/SponsorsSection";
 import { StoryCTASection } from "@/components/StoryCTASection";
 import { ValuesGridSection } from "@/components/ValuesGridSection";
+import { showKitSection } from "@/lib/brand";
 
 export default function Home() {
   return (
@@ -24,8 +25,12 @@ export default function Home() {
         <ConvocatoriasSection />
         <SectionDivider />
         <AnimatedMarquee />
-        <SectionDivider />
-        <JerseyKitSection />
+        {showKitSection ? (
+          <>
+            <SectionDivider />
+            <JerseyKitSection />
+          </>
+        ) : null}
         <SectionDivider />
         <ManifestoSection />
         <SectionDivider />

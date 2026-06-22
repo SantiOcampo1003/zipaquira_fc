@@ -17,7 +17,7 @@ import {
   UsersRound,
   UserRound,
 } from "lucide-react";
-import { brandImpactPillars, clubNameUpper } from "@/lib/brand";
+import { brandImpactPillars, clubNameUpper, convocatoriaDateFull, convocatoriaMarqueeLabel } from "@/lib/brand";
 
 /**
  * Mismo archivo que `public/images/camiseta-real-zipaquira.png`.
@@ -204,7 +204,7 @@ export const galleryPlaceholders: { label: string; hint: string }[] = [
 
 export const marqueePhrases = [
   clubNameUpper,
-  "CONVOCATORIAS 6 DE JULIO",
+  convocatoriaMarqueeLabel,
   "JUGAMOS CON EL ALMA",
   "ZIPAQUIRÁ",
   "DISCIPLINA",
@@ -218,7 +218,7 @@ export const convocatoriaHighlights: {
 }[] = [
   {
     title: "Fecha",
-    description: "Convocatorias el domingo 6 de julio de 2026. Llega puntual y con actitud.",
+    description: `Convocatorias el ${convocatoriaDateFull}. Llega puntual y con actitud.`,
     icon: CalendarDays,
   },
   {

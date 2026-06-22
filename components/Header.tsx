@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ExternalLink, Menu, X } from "lucide-react";
 import { ClubCrest } from "@/components/ClubCrest";
-import { convocatoriaFormUrl, clubNameUpper } from "@/lib/brand";
+import { convocatoriaFormUrl, clubNameUpper, showKitSection } from "@/lib/brand";
 import { scrollToId } from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 
 const nav = [
   { label: "Convocatorias", id: "convocatorias" },
-  { label: "Camiseta", id: "camiseta" },
+  ...(showKitSection ? [{ label: "Camiseta", id: "camiseta" } as const] : []),
   { label: "Nosotros", id: "nosotros" },
   { label: "Jugadores", id: "jugadores" },
   { label: "Patrocinadores", id: "patrocinadores" },

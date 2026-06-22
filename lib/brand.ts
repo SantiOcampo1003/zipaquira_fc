@@ -9,12 +9,20 @@ export const clubNameUpper = "ZIPAQUIRÁ F.C.";
 export const brandTagline = "Desde lo más profundo, jugamos con el alma";
 
 /** Convocatorias de jugadores — formulario oficial (Google Forms). */
-export const convocatoriaFormUrl =
-  "https://docs.google.com/forms/d/e/1FAIpQLScN-N9k3rMuZ3w80UJaaddwb90fOs19jW5uRZILQWhk1H6y0Q/viewform";
+export const convocatoriaFormUrl = "https://forms.gle/g83wYCcFccxcHtsR7";
 
-export const convocatoriaDateLabel = "6 de julio";
-export const convocatoriaDateFull = "domingo 6 de julio de 2026";
+/** Contacto WhatsApp (Colombia · +57). */
+export const whatsappPhone = "3016129641";
+export const whatsappUrl = `https://wa.me/57${whatsappPhone}`;
+
+export const convocatoriaDateLabel = "11 de julio";
+export const convocatoriaDateFull = "sábado 11 de julio de 2026";
+export const convocatoriaDateShort = "11 JUL";
+export const convocatoriaMarqueeLabel = "CONVOCATORIAS 11 DE JULIO";
 export const convocatoriaHeadline = "Convocatorias de jugadores";
+
+/** Ocultar sección del kit en la landing (reactivar cuando esté listo). */
+export const showKitSection = false;
 
 export const brandColors = {
   green: "#0B2810",

@@ -1,5 +1,6 @@
 "use client";
 
+import { whatsappUrl } from "@/lib/brand";
 import { sponsorOffers } from "@/lib/landing-data";
 import { buttonVariants } from "@/components/ui/button";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
@@ -34,7 +35,7 @@ export function SponsorsSection() {
 
         <RevealOnScroll className="mt-10 flex justify-center sm:mt-12">
           <a
-            href="https://wa.me/573001234567"
+            href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

@@ -5,7 +5,7 @@ import { ClubCrest } from "@/components/ClubCrest";
 import { InscripcionButton } from "@/components/InscripcionButton";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { scrollToId } from "@/lib/scroll";
-import { brandTagline, clubName, clubNameUpper } from "@/lib/brand";
+import { brandTagline, clubName, clubNameUpper, whatsappUrl } from "@/lib/brand";
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -26,7 +26,7 @@ function TikTokIcon({ className }: { className?: string }) {
 const social = [
   { label: "Instagram", href: "https://www.instagram.com/", icon: InstagramIcon },
   { label: "TikTok", href: "https://www.tiktok.com/", icon: TikTokIcon },
-  { label: "WhatsApp", href: "https://wa.me/573001234567", icon: MessageCircle },
+  { label: "WhatsApp", href: whatsappUrl, icon: MessageCircle },
 ] as const;
 
 export function Footer() {
@@ -58,7 +58,7 @@ export function Footer() {
               className="mt-2 h-auto p-0 text-sm"
             />
             <a
-              href="https://wa.me/573001234567"
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-2 block text-sm text-muted-foreground underline-offset-4 hover:text-white hover:underline"

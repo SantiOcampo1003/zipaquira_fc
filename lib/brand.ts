@@ -12,7 +12,7 @@ export const brandTagline = "Desde lo más profundo, jugamos con el alma";
 export const convocatoriaFormUrl = "https://forms.gle/g83wYCcFccxcHtsR7";
 
 /** Contacto WhatsApp (Colombia · +57). */
-export const whatsappPhone = "3016129641";
+export const whatsappPhone = "3227895453";
 export const whatsappUrl = `https://wa.me/57${whatsappPhone}`;
 
 export const convocatoriaDateLabel = "11 de julio";

@@ -21,6 +21,13 @@ export const convocatoriaDateShort = "11 JUL";
 export const convocatoriaMarqueeLabel = "CONVOCATORIAS 11 DE JULIO";
 export const convocatoriaHeadline = "Convocatorias de jugadores";
 
+/** Inscripciones en línea (reactivar cuando abra una nueva convocatoria). */
+export const convocatoriaRegistrationsOpen = false;
+export const convocatoriaRegistrationStatusLabel = "CERRADA";
+export const convocatoriaClosedMessage = "Las inscripciones a las convocatorias ya cerraron.";
+export const convocatoriaClosedDetail =
+  "Gracias a todos los jugadores que completaron su ficha. Los inscritos deben presentarse el día de las convocatorias con documento de identidad y ropa deportiva.";
+
 /** Ocultar sección del kit en la landing (reactivar cuando esté listo). */
 export const showKitSection = false;
 

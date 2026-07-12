@@ -1,7 +1,7 @@
 "use client";
 
 import { playerPillars } from "@/lib/landing-data";
-import { clubName, convocatoriaDateLabel } from "@/lib/brand";
+import { convocatoriaClosedDetail, convocatoriaDateLabel } from "@/lib/brand";
 import { InscripcionButton } from "@/components/InscripcionButton";
 import { Button } from "@/components/ui/button";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
@@ -17,22 +17,18 @@ export function PlayersSection() {
               Convocatorias {convocatoriaDateLabel}
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:mt-6 sm:text-base lg:text-lg xl:text-xl">
-              Si quieres representar a tu ciudad, competir con disciplina y crecer dentro de un
-              proyecto serio, {clubName} quiere conocerte. Completa la ficha del jugador para
-              inscribirte.
+              Las inscripciones para las convocatorias del {convocatoriaDateLabel} ya cerraron.{" "}
+              {convocatoriaClosedDetail}
             </p>
             <div className="rz-cta-row mt-8 sm:mt-10">
-              <InscripcionButton
-                label="Completar ficha e inscribirme"
-                className="h-12 w-full px-6 text-sm font-semibold uppercase tracking-wide sm:w-auto sm:px-8"
-              />
+              <InscripcionButton className="h-12 w-full px-6 text-sm font-semibold uppercase tracking-wide sm:w-auto sm:px-8" />
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => scrollToId("galeria")}
+                onClick={() => scrollToId("convocatorias")}
                 className="h-12 w-full border-white/15 bg-transparent px-6 text-sm font-semibold uppercase tracking-wide text-white hover:bg-white/10 sm:w-auto"
               >
-                Galería del club
+                Ver convocatorias
               </Button>
             </div>
           </RevealOnScroll>

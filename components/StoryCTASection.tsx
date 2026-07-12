@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { InscripcionButton } from "@/components/InscripcionButton";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { SectionStoryBackdrop } from "@/components/SectionStoryBackdrop";
-import { clubName, convocatoriaDateLabel } from "@/lib/brand";
+import { clubName, convocatoriaClosedMessage, convocatoriaDateLabel } from "@/lib/brand";
 import { sectionStoryImages } from "@/lib/section-story-images";
 
 export function StoryCTASection() {
@@ -41,8 +41,8 @@ export function StoryCTASection() {
         <RevealOnScroll className="mt-6 space-y-5 text-base leading-relaxed text-muted-foreground sm:mt-8 sm:space-y-6 sm:text-lg lg:text-xl" delay={0.06}>
           <p>
             {clubName} empieza con jóvenes que se atreven a probarse. Las convocatorias del{" "}
-            {convocatoriaDateLabel} son tu puerta para vestir los colores de la ciudad con
-            disciplina, hambre y compromiso.
+            {convocatoriaDateLabel} ya tienen inscripciones cerradas, pero la historia del club sigue
+            construyéndose con disciplina, hambre y compromiso.
           </p>
           <motion.p
             className="font-heading text-xl font-normal uppercase tracking-wide text-primary/95 sm:text-2xl"
@@ -54,11 +54,9 @@ export function StoryCTASection() {
             Si estás leyendo esto, ya haces parte.
           </motion.p>
         </RevealOnScroll>
-        <RevealOnScroll className="mt-10 flex justify-center sm:mt-12" delay={0.1}>
-          <InscripcionButton
-            label="Inscribirme en las convocatorias"
-            className="h-12 w-full max-w-md px-6 text-xs font-semibold uppercase tracking-wide shadow-[0_0_40px_-8px_rgba(169,146,89,0.45)] transition-[transform,box-shadow,background-color] duration-300 ease-out hover:scale-[1.04] hover:bg-primary/92 hover:shadow-[0_0_52px_-6px_rgba(169,146,89,0.55)] active:scale-[0.98] sm:h-14 sm:px-10 sm:text-sm motion-reduce:hover:scale-100"
-          />
+        <RevealOnScroll className="mt-10 flex flex-col items-center gap-3 sm:mt-12" delay={0.1}>
+          <InscripcionButton className="h-12 w-full max-w-md px-6 text-xs font-semibold uppercase tracking-wide sm:h-14 sm:px-10 sm:text-sm" />
+          <p className="max-w-md text-sm text-muted-foreground">{convocatoriaClosedMessage}</p>
         </RevealOnScroll>
       </div>
     </section>

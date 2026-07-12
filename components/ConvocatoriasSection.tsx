@@ -5,9 +5,12 @@ import { SectionBadge } from "@/components/SectionBadge";
 import { Separator } from "@/components/ui/separator";
 import {
   clubName,
+  convocatoriaClosedDetail,
+  convocatoriaClosedMessage,
   convocatoriaDateFull,
   convocatoriaDateLabel,
   convocatoriaHeadline,
+  convocatoriaRegistrationStatusLabel,
 } from "@/lib/brand";
 import { convocatoriaHighlights, convocatoriaSteps } from "@/lib/landing-data";
 import { InscripcionButton } from "./InscripcionButton";
@@ -22,12 +25,14 @@ export function ConvocatoriasSection() {
         <RevealOnScroll className="text-center">
           <SectionBadge>{convocatoriaHeadline}</SectionBadge>
           <h2 className="rz-h2 mt-5 text-balance sm:mt-6">
-            Tu oportunidad es el{" "}
-            <span className="text-primary">{convocatoriaDateLabel}</span>
+            Inscripciones{" "}
+            <span className="text-primary">{convocatoriaRegistrationStatusLabel.toLowerCase()}</span>
+            {" · "}
+            <span className="text-white">{convocatoriaDateLabel}</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base lg:text-lg">
-            {clubName} abre sus convocatorias para jugadores. Completa la ficha oficial con tus
-            datos deportivos y personales para participar el {convocatoriaDateFull}.
+            {convocatoriaClosedMessage} Las convocatorias de {clubName} se realizan el{" "}
+            {convocatoriaDateFull}.
           </p>
           <Separator className="mx-auto mt-8 max-w-xs bg-primary/30" />
         </RevealOnScroll>
@@ -53,8 +58,11 @@ export function ConvocatoriasSection() {
         <RevealOnScroll className="mt-12" delay={0.08}>
           <div className="rounded-2xl border border-primary/25 bg-rz-forest/30 p-4 sm:p-6 lg:p-8">
             <h3 className="font-heading text-lg font-normal uppercase tracking-wide text-white">
-              Cómo inscribirte
+              Estado de inscripciones
             </h3>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {convocatoriaClosedDetail}
+            </p>
             <ol className="mt-5 space-y-3">
               {convocatoriaSteps.map((step, i) => (
                 <li key={step} className="flex gap-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -67,12 +75,11 @@ export function ConvocatoriasSection() {
             </ol>
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <InscripcionButton
-                label="Completar ficha e inscribirme"
-                className="h-14 min-h-12 w-full gap-2 bg-primary px-8 text-sm font-semibold uppercase tracking-wide text-primary-foreground shadow-[0_0_40px_-8px_rgba(169,146,89,0.45)] transition-[transform,box-shadow,background-color] duration-300 ease-out hover:scale-[1.03] hover:bg-primary/92 hover:shadow-[0_0_52px_-6px_rgba(169,146,89,0.55)] active:scale-[0.98] sm:w-auto motion-reduce:hover:scale-100"
+                className="h-14 min-h-12 w-full gap-2 px-8 text-sm font-semibold uppercase tracking-wide sm:w-auto"
               />
             </div>
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              Se abrirá el formulario oficial en una nueva pestaña.
+              El registro en línea ya no está disponible.
             </p>
           </div>
         </RevealOnScroll>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ExternalLink, Menu, X } from "lucide-react";
 import { ClubCrest } from "@/components/ClubCrest";
-import { convocatoriaFormUrl, clubNameUpper, showKitSection } from "@/lib/brand";
+import { convocatoriaFormUrl, clubNameUpper, convocatoriaDateLabel, convocatoriaRegistrationsOpen, showKitSection } from "@/lib/brand";
 import { scrollToId } from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 
@@ -71,6 +71,20 @@ function BrandLockup({ onClick }: { onClick: () => void }) {
 }
 
 function HeaderCta({ className, showIcon = false }: { className?: string; showIcon?: boolean }) {
+  if (!convocatoriaRegistrationsOpen) {
+    return (
+      <span
+        aria-disabled="true"
+        className={cn(
+          "inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] px-5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground sm:text-[11px]",
+          className
+        )}
+      >
+        Inscripciones cerradas
+      </span>
+    );
+  }
+
   return (
     <a
       href={convocatoriaFormUrl}
@@ -210,7 +224,7 @@ export function Header() {
                 >
                   <HeaderCta className="h-11 w-full text-xs" showIcon />
                   <p className="mt-3 text-center text-[11px] text-muted-foreground">
-                    Convocatorias · Ficha oficial del jugador
+                    Inscripciones cerradas · Convocatorias {convocatoriaDateLabel}
                   </p>
                 </motion.div>
               </div>

@@ -235,14 +235,15 @@ export const convocatoriaHighlights: {
   },
   {
     title: "Dónde inscribirte",
-    description: "Completa la ficha del jugador en línea. El registro es obligatorio para participar.",
+    description:
+      "El registro en línea ya cerró. Los jugadores inscritos deben presentarse el día de las convocatorias.",
     icon: MapPin,
   },
 ];
 
 export const convocatoriaSteps = [
-  "Haz clic en «Completar ficha e inscribirme» para abrir el formulario oficial.",
-  "Llena todos los campos: datos personales, posición, experiencia y contacto de emergencia.",
-  "Revisa que la información sea verídica y envía el formulario.",
-  "Presenta el día de las convocatorias con ropa deportiva y documento de identidad.",
+  "Las inscripciones en línea ya no están disponibles.",
+  "Si completaste tu ficha, presenta el día de las convocatorias con ropa deportiva y documento de identidad.",
+  "Llega puntual, con actitud y listo para competir.",
+  "Para dudas, escríbenos por WhatsApp desde la sección de contacto.",
 ] as const;

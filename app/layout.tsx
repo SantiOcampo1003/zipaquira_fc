@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { brandTagline, clubName, clubNameUpper, convocatoriaDateLabel } from "@/lib/brand";
+import { brandTagline, clubName, clubNameUpper, convocatoriaDateLabel, convocatoriaClosedMessage } from "@/lib/brand";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -28,7 +28,7 @@ export const viewport = {
 export const metadata: Metadata = {
   title: `${clubNameUpper} | ${brandTagline}`,
   description:
-    `Convocatorias de jugadores de ${clubName} el ${convocatoriaDateLabel}. Completa la ficha oficial e inscríbete para representar a Zipaquirá.`,
+    `Convocatorias de jugadores de ${clubName} el ${convocatoriaDateLabel}. ${convocatoriaClosedMessage}`,
   openGraph: {
     title: clubNameUpper,
     description: brandTagline,

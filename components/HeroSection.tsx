@@ -9,7 +9,7 @@ import { ImageLightbox } from "@/components/ImageLightbox";
 import { SectionBadge } from "@/components/SectionBadge";
 import { StatCard } from "@/components/StatCard";
 import { fadeIn, fadeInUp, staggerCinematic } from "@/lib/motion";
-import { brandTagline, convocatoriaDateLabel, convocatoriaDateShort, convocatoriaHeadline } from "@/lib/brand";
+import { brandTagline, convocatoriaDateLabel, convocatoriaDateShort, convocatoriaHeadline, convocatoriaClosedMessage, convocatoriaRegistrationStatusLabel } from "@/lib/brand";
 import { scrollToId } from "@/lib/scroll";
 import { InscripcionButton } from "@/components/InscripcionButton";
 
@@ -110,15 +110,15 @@ export function HeroSection() {
             variants={fadeInUp}
             className="font-heading text-xl font-normal uppercase leading-tight tracking-wide text-rz-cream/95 sm:text-2xl lg:text-4xl"
           >
-            Convocatorias abiertas.
-            <span className="mt-1 block text-white">Inscríbete antes del {convocatoriaDateLabel}.</span>
+            Inscripciones cerradas.
+            <span className="mt-1 block text-white">Convocatorias del {convocatoriaDateLabel}.</span>
           </motion.p>
 
           <motion.p
             variants={fadeInUp}
             className="max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base lg:text-lg"
           >
-            Si quieres vestir los colores de Zipaquirá, completa la ficha del jugador y presenta el
+            {convocatoriaClosedMessage} Los jugadores que ya completaron su ficha deben presentarse el
             día de las convocatorias con disciplina y hambre de historia.
           </motion.p>
 
@@ -139,8 +139,8 @@ export function HeroSection() {
           </motion.div>
 
           <motion.p variants={fadeIn} className="text-sm text-muted-foreground">
-            Ficha oficial del jugador · Convocatorias{" "}
-            <span className="font-medium text-white">{convocatoriaDateLabel}</span>
+            Ficha oficial del jugador · Inscripciones{" "}
+            <span className="font-medium text-white">{convocatoriaRegistrationStatusLabel}</span>
           </motion.p>
         </motion.div>
 
@@ -218,7 +218,7 @@ export function HeroSection() {
 
               <div className="grid grid-cols-3 gap-2 pt-2 sm:gap-3">
                 <StatCard compact label="fecha" value={convocatoriaDateShort} />
-                <StatCard compact label="inscripción" value="ABIERTA" />
+                <StatCard compact label="inscripción" value={convocatoriaRegistrationStatusLabel} />
                 <StatCard compact label="ficha" value="WEB" />
               </div>
             </div>

@@ -5,7 +5,7 @@ import { ClubCrest } from "@/components/ClubCrest";
 import { InscripcionButton } from "@/components/InscripcionButton";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { scrollToId } from "@/lib/scroll";
-import { brandTagline, clubName, clubNameUpper, whatsappUrl } from "@/lib/brand";
+import { brandTagline, clubName, clubNameUpper, convocatoriaClosedMessage, whatsappUrl } from "@/lib/brand";
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -52,11 +52,11 @@ export function Footer() {
               Ver convocatorias
             </button>
             <InscripcionButton
-              label="Inscribirme"
               showIcon={false}
               variant="link"
               className="mt-2 h-auto p-0 text-sm"
             />
+            <p className="mt-2 max-w-xs text-xs text-muted-foreground">{convocatoriaClosedMessage}</p>
             <a
               href={whatsappUrl}
               target="_blank"

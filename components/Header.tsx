@@ -224,7 +224,7 @@ export function Header() {
                 >
                   <HeaderCta className="h-11 w-full text-xs" showIcon />
                   <p className="mt-3 text-center text-[11px] text-muted-foreground">
-                    Inscripciones cerradas · Convocatorias {convocatoriaDateLabel}
+                    Inscripciones reabiertas · {convocatoriaDateLabel}
                   </p>
                 </motion.div>
               </div>

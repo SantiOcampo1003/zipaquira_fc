@@ -13,11 +13,12 @@ import {
   Sparkles,
   Star,
   Target,
+  Trophy,
   Users,
   UsersRound,
   UserRound,
 } from "lucide-react";
-import { brandImpactPillars, clubNameUpper, convocatoriaDateFull, convocatoriaMarqueeLabel } from "@/lib/brand";
+import { brandImpactPillars, clubNameUpper, convocatoriaMarqueeLabel, convocatoriaMayores, convocatoriaSub20 } from "@/lib/brand";
 
 /**
  * Mismo archivo que `public/images/camiseta-real-zipaquira.png`.
@@ -209,7 +210,33 @@ export const marqueePhrases = [
   "ZIPAQUIRÁ",
   "DISCIPLINA",
   "CANTERA",
+  "TRES GRUPOS",
 ] as const;
+
+export const convocatoriaTeams: {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    title: "Primer equipo",
+    description:
+      `Plantel principal en la Liga El Dorado. Convocatoria mayores de 20: ${convocatoriaMayores.dateFull}${convocatoriaMayores.timeLabel ? `, ${convocatoriaMayores.timeLabel}` : ""}.`,
+    icon: Trophy,
+  },
+  {
+    title: "Equipo de reserva",
+    description:
+      `Proyección al primer equipo y torneos como Ascenso Trinche. Misma convocatoria mayores de 20: ${convocatoriaMayores.dateFull}, ${convocatoriaMayores.timeLabel}.`,
+    icon: Users,
+  },
+  {
+    title: "Sub-20",
+    description:
+      `Convocatoria el ${convocatoriaSub20.dateFull}, ${convocatoriaSub20.timeLabel}. Cantera clave: el primer equipo debe tener 6 jugadores Sub-20 inscritos y 2 en cancha. También enfrentarán torneos de preparación.`,
+    icon: GraduationCap,
+  },
+];
 
 export const convocatoriaHighlights: {
   title: string;
@@ -217,14 +244,14 @@ export const convocatoriaHighlights: {
   icon: LucideIcon;
 }[] = [
   {
-    title: "Fecha",
-    description: `Convocatorias el ${convocatoriaDateFull}. Llega puntual y con actitud.`,
+    title: "Fechas",
+    description: `Sub-20: ${convocatoriaSub20.dateFull}, ${convocatoriaSub20.timeLabel}. Mayores de 20: ${convocatoriaMayores.dateFull}, ${convocatoriaMayores.timeLabel}.`,
     icon: CalendarDays,
   },
   {
     title: "Para quién",
     description:
-      "Jugadores que quieran representar a Zipaquirá con disciplina, hambre y compromiso.",
+      "Jugadores que quieran representar a Zipaquirá con disciplina, hambre y compromiso. Si te quedaste por fuera, esta es tu nueva oportunidad.",
     icon: UserRound,
   },
   {
@@ -234,16 +261,16 @@ export const convocatoriaHighlights: {
     icon: ClipboardList,
   },
   {
-    title: "Dónde inscribirte",
+    title: "Tres grupos",
     description:
-      "El registro en línea ya cerró. Los jugadores inscritos deben presentarse el día de las convocatorias.",
-    icon: MapPin,
+      "Primer equipo, reserva y Sub-20. Cada grupo tiene un rol distinto dentro del mismo proyecto del club.",
+    icon: UsersRound,
   },
 ];
 
 export const convocatoriaSteps = [
-  "Las inscripciones en línea ya no están disponibles.",
-  "Si completaste tu ficha, presenta el día de las convocatorias con ropa deportiva y documento de identidad.",
-  "Llega puntual, con actitud y listo para competir.",
-  "Para dudas, escríbenos por WhatsApp desde la sección de contacto.",
+  "Elige tu convocatoria: Sub-20 (16 de julio) o reserva · primer equipo (18 de julio). Ambas a las 6:00 a.m.",
+  "Haz clic en el botón que te corresponda para abrir el formulario oficial.",
+  "Llena todos los campos: datos personales, posición, experiencia y contacto de emergencia.",
+  "Presenta el día y hora de tu convocatoria con ropa deportiva y documento de identidad.",
 ] as const;

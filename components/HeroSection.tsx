@@ -7,11 +7,24 @@ import { ClubCrest, ESCUDO_PATH, escudoAlt } from "@/components/ClubCrest";
 import { Button } from "@/components/ui/button";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { SectionBadge } from "@/components/SectionBadge";
-import { StatCard } from "@/components/StatCard";
 import { fadeIn, fadeInUp, staggerCinematic } from "@/lib/motion";
-import { brandTagline, convocatoriaDateLabel, convocatoriaDateShort, convocatoriaHeadline, convocatoriaClosedMessage, convocatoriaRegistrationStatusLabel } from "@/lib/brand";
+import { ConvocatoriaCtas } from "@/components/ConvocatoriaCtas";
+import {
+  brandIdentityLabel,
+  brandImpactHeading,
+  brandImpactPillars,
+  brandMissionStatement,
+  brandOriginStatement,
+  brandRootValues,
+  brandTagline,
+  convocatoriaDateLabel,
+  convocatoriaHeadline,
+  convocatoriaMayores,
+  convocatoriaReopenMessage,
+  convocatoriaRegistrationStatusLabel,
+  convocatoriaSub20,
+} from "@/lib/brand";
 import { scrollToId } from "@/lib/scroll";
-import { InscripcionButton } from "@/components/InscripcionButton";
 
 /** Posiciones fijas (SSR-safe) — polvo de sal / cristales. */
 const SALT_SPECKS: { l: number; t: number; s: number; dur: number; delay: number }[] = [
@@ -38,7 +51,7 @@ export function HeroSection() {
   return (
     <section
       id="inicio"
-      className="relative overflow-hidden bg-background pb-14 pt-8 sm:pb-28 sm:pt-16 lg:pb-32 lg:pt-24"
+      className="relative overflow-hidden bg-background pb-14 pt-5 sm:pb-28 sm:pt-10 lg:pb-32 lg:pt-16"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
@@ -110,22 +123,37 @@ export function HeroSection() {
             variants={fadeInUp}
             className="font-heading text-xl font-normal uppercase leading-tight tracking-wide text-rz-cream/95 sm:text-2xl lg:text-4xl"
           >
-            Inscripciones cerradas.
-            <span className="mt-1 block text-white">Convocatorias del {convocatoriaDateLabel}.</span>
+            Inscripciones reabiertas.
+            <span className="mt-1 block text-white">Dos convocatorias · {convocatoriaDateLabel}.</span>
           </motion.p>
 
           <motion.p
             variants={fadeInUp}
             className="max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base lg:text-lg"
           >
-            {convocatoriaClosedMessage} Los jugadores que ya completaron su ficha deben presentarse el
-            día de las convocatorias con disciplina y hambre de historia.
+            {convocatoriaReopenMessage}
           </motion.p>
 
-          <motion.div variants={fadeInUp} className="rz-cta-row sm:items-center">
-            <InscripcionButton
-              label="Inscribirme ahora"
-              className="h-12 w-full gap-2 bg-primary px-6 text-sm font-semibold uppercase tracking-wide text-primary-foreground shadow-lift transition-[transform,box-shadow] duration-300 ease-out hover:scale-[1.03] hover:bg-primary/92 hover:shadow-[0_0_36px_-4px_rgba(169,146,89,0.55)] active:scale-[0.98] sm:w-auto motion-reduce:hover:scale-100 motion-reduce:hover:shadow-lift"
+          <motion.div
+            variants={fadeInUp}
+            className="max-w-xl space-y-2 text-sm leading-relaxed text-muted-foreground sm:text-base"
+          >
+            <p>
+              <span className="font-medium text-white">Sub-20:</span> {convocatoriaSub20.dateFull},{" "}
+              {convocatoriaSub20.timeLabel}
+            </p>
+            <p>
+              <span className="font-medium text-white">Reserva · primer equipo:</span>{" "}
+              {convocatoriaMayores.dateFull}, {convocatoriaMayores.timeLabel}
+            </p>
+          </motion.div>
+
+          <motion.div variants={fadeInUp} className="rz-cta-row sm:items-stretch">
+            <ConvocatoriaCtas
+              layout="stack"
+              buttonClassName="h-12 gap-2 px-6 text-sm font-semibold uppercase tracking-wide shadow-lift transition-[transform,box-shadow] duration-300 ease-out hover:scale-[1.03] active:scale-[0.98] motion-reduce:hover:scale-100"
+              primaryButtonClassName="bg-primary text-primary-foreground hover:bg-primary/92 hover:shadow-[0_0_36px_-4px_rgba(169,146,89,0.55)]"
+              secondaryButtonClassName="border border-primary/35 bg-primary/10 text-primary hover:bg-primary/15 hover:shadow-[0_0_28px_-8px_rgba(169,146,89,0.2)]"
             />
             <Button
               type="button"
@@ -206,20 +234,50 @@ export function HeroSection() {
                   </button>
                 </div>
                 <p className="mt-6 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-primary">
-                  Convocatorias
+                  {brandIdentityLabel}
                 </p>
                 <p className="mt-2 text-center text-sm font-medium uppercase tracking-wider text-muted-foreground">
                   Zipaquirá, Colombia
                 </p>
-                <p className="mt-4 inline-block rounded border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-widest text-rz-cream">
-                  {convocatoriaDateLabel}
+                <p className="mt-4 max-w-sm text-center text-sm leading-relaxed text-rz-cream/90">
+                  {brandOriginStatement}
                 </p>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 pt-2 sm:gap-3">
-                <StatCard compact label="fecha" value={convocatoriaDateShort} />
-                <StatCard compact label="inscripción" value={convocatoriaRegistrationStatusLabel} />
-                <StatCard compact label="ficha" value="WEB" />
+              <p className="text-center text-sm leading-relaxed text-muted-foreground sm:text-[0.95rem]">
+                {brandMissionStatement}
+              </p>
+
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                {brandRootValues.map((value) => (
+                  <span
+                    key={value}
+                    className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-primary sm:text-[0.7rem]"
+                  >
+                    {value}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-6">
+                <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-primary">
+                  {brandImpactHeading}
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
+                {brandImpactPillars.map((pillar) => (
+                  <div
+                    key={pillar.title}
+                    className="min-w-0 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 text-center ring-1 ring-white/[0.04] sm:p-3.5"
+                  >
+                    <p className="font-heading text-[0.7rem] font-normal uppercase leading-snug tracking-wide text-white sm:text-xs">
+                      {pillar.title}
+                    </p>
+                    <p className="mt-2 text-[0.62rem] leading-relaxed text-muted-foreground sm:text-[0.65rem]">
+                      {pillar.body}
+                    </p>
+                  </div>
+                ))}
+                </div>
               </div>
             </div>
           </div>

@@ -207,7 +207,7 @@ export function JerseyKitSection() {
 
             <RevealOnScroll className="mt-8" delay={0.1}>
               <InscripcionButton
-                label="Inscribirme en convocatorias"
+                label="Quiero mi boleta"
                 variant="outline"
                 className="h-12 w-full border-primary/35 bg-primary/5 text-sm font-semibold uppercase tracking-wide text-primary hover:bg-primary/15 sm:w-auto"
               />

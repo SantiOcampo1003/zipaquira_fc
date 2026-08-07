@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ExternalLink, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ClubCrest } from "@/components/ClubCrest";
-import { convocatoriaFormUrl, clubNameUpper, convocatoriaDateLabel, convocatoriaRegistrationsOpen, showKitSection } from "@/lib/brand";
+import { clubNameUpper, matchTicketCta, showKitSection } from "@/lib/brand";
 import { scrollToId } from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { label: "Convocatorias", id: "convocatorias" },
+  { label: "Partido", id: "partido" },
   ...(showKitSection ? [{ label: "Camiseta", id: "camiseta" } as const] : []),
   { label: "Nosotros", id: "nosotros" },
   { label: "Jugadores", id: "jugadores" },
@@ -70,34 +70,21 @@ function BrandLockup({ onClick }: { onClick: () => void }) {
   );
 }
 
-function HeaderCta({ className, showIcon = false }: { className?: string; showIcon?: boolean }) {
-  if (!convocatoriaRegistrationsOpen) {
-    return (
-      <span
-        aria-disabled="true"
-        className={cn(
-          "inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] px-5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground sm:text-[11px]",
-          className
-        )}
-      >
-        Inscripciones cerradas
-      </span>
-    );
-  }
-
+function HeaderCta({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {
   return (
-    <a
-      href={convocatoriaFormUrl}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
+      onClick={() => {
+        onNavigate?.();
+        scrollToId("boletas");
+      }}
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-lg border border-primary/35 bg-primary px-5 text-[10px] font-bold uppercase tracking-[0.14em] text-primary-foreground shadow-[0_4px_22px_-6px_rgba(169,146,89,0.5)] transition-[transform,box-shadow,border-color,background-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/55 hover:bg-[#b9a468] hover:shadow-[0_10px_32px_-6px_rgba(169,146,89,0.62)] active:translate-y-0 motion-reduce:hover:translate-y-0 sm:text-[11px]",
         className
       )}
     >
-      Inscribirme
-      {showIcon ? <ExternalLink className="size-3.5 shrink-0 opacity-90" aria-hidden /> : null}
-    </a>
+      {matchTicketCta}
+    </button>
   );
 }
 
@@ -222,9 +209,9 @@ export function Header() {
                   transition={{ delay: reduceMotion ? 0 : 0.22, duration: 0.3 }}
                   className="mt-5 border-t border-white/[0.06] pt-5"
                 >
-                  <HeaderCta className="h-11 w-full text-xs" showIcon />
+                  <HeaderCta className="h-11 w-full text-xs" onNavigate={() => setOpen(false)} />
                   <p className="mt-3 text-center text-[11px] text-muted-foreground">
-                    Inscripciones reabiertas · {convocatoriaDateLabel}
+                    Partido inaugural · El Campín
                   </p>
                 </motion.div>
               </div>

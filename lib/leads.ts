@@ -1,4 +1,10 @@
-import { clubName } from "@/lib/brand";
+export type TicketInterestPayload = {
+  fullName: string;
+  documentId: string;
+  phone: string;
+  email: string;
+  city?: string;
+};
 
 export type LeadPayload = {
   fullName: string;
@@ -9,15 +15,23 @@ export type LeadPayload = {
   message?: string;
 };
 
-/**
- * Punto único para enviar leads. Hoy hace mock + console.
- *
- * TODO: Integrar backend — por ejemplo Supabase:
- *   createClient(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
- *   await supabase.from("leads").insert({ ...data })
- */
+/** Envía el interés de boleta a la API → Supabase. */
+export async function handleSubmitTicketInterest(data: TicketInterestPayload): Promise<void> {
+  const res = await fetch("/api/boletas", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const payload = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error || "No se pudo guardar el registro.");
+  }
+}
+
+/** Lead legado (comunidad). Mock. */
 export async function handleSubmitLead(data: LeadPayload): Promise<void> {
   await new Promise((r) => setTimeout(r, 650));
   // eslint-disable-next-line no-console
-  console.log(`[${clubName}] Lead recibido:`, data);
+  console.log("[Lead] recibido:", data);
 }

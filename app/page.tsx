@@ -1,6 +1,5 @@
 import { AnimatedMarquee } from "@/components/AnimatedMarquee";
 import { CommunityFunnelSection } from "@/components/CommunityFunnelSection";
-import { ConvocatoriasSection } from "@/components/ConvocatoriasSection";
 import { Footer } from "@/components/Footer";
 import { GalleryConceptSection } from "@/components/GalleryConceptSection";
 import { Header } from "@/components/Header";
@@ -8,6 +7,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { JerseyKitSection } from "@/components/JerseyKitSection";
 import { ManifestoSection } from "@/components/ManifestoSection";
 import { NewGenerationSection } from "@/components/NewGenerationSection";
+import { PartidoInauguralSection } from "@/components/PartidoInauguralSection";
 import { PlayersSection } from "@/components/PlayersSection";
 import { SectionDivider } from "@/components/SectionDivider";
 import { SponsorsSection } from "@/components/SponsorsSection";
@@ -21,10 +21,9 @@ export default function Home() {
       <Header />
       <main className="overflow-x-clip">
         <HeroSection />
-        <SectionDivider />
-        <ConvocatoriasSection />
-        <SectionDivider />
         <AnimatedMarquee />
+        <SectionDivider />
+        <PartidoInauguralSection />
         {showKitSection ? (
           <>
             <SectionDivider />

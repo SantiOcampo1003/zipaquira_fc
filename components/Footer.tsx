@@ -2,10 +2,9 @@
 
 import { MessageCircle } from "lucide-react";
 import { ClubCrest } from "@/components/ClubCrest";
-import { InscripcionButton } from "@/components/InscripcionButton";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { scrollToId } from "@/lib/scroll";
-import { brandTagline, clubName, clubNameUpper, convocatoriaReopenMessage, whatsappUrl } from "@/lib/brand";
+import { brandTagline, clubName, clubNameUpper, matchTicketCta, whatsappUrl } from "@/lib/brand";
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -46,18 +45,11 @@ export function Footer() {
             <p className="mt-2 max-w-xs text-sm text-rz-cream/80">{brandTagline}</p>
             <button
               type="button"
-              onClick={() => scrollToId("convocatorias")}
+              onClick={() => scrollToId("boletas")}
               className="mt-4 text-sm font-medium uppercase tracking-wide text-primary underline-offset-4 hover:underline"
             >
-              Ver convocatorias
+              {matchTicketCta}
             </button>
-            <InscripcionButton
-              label="Inscribirme"
-              showIcon={false}
-              variant="link"
-              className="mt-2 h-auto p-0 text-sm"
-            />
-            <p className="mt-2 max-w-xs text-xs text-muted-foreground">{convocatoriaReopenMessage}</p>
             <a
               href={whatsappUrl}
               target="_blank"

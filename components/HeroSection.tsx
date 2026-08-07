@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { SectionBadge } from "@/components/SectionBadge";
 import { fadeIn, fadeInUp, staggerCinematic } from "@/lib/motion";
-import { ConvocatoriaCtas } from "@/components/ConvocatoriaCtas";
 import {
   brandIdentityLabel,
   brandImpactHeading,
@@ -17,12 +16,15 @@ import {
   brandOriginStatement,
   brandRootValues,
   brandTagline,
-  convocatoriaDateLabel,
-  convocatoriaHeadline,
-  convocatoriaMayores,
-  convocatoriaReopenMessage,
-  convocatoriaRegistrationStatusLabel,
-  convocatoriaSub20,
+  matchChallengeBody,
+  matchChallengeHeadline,
+  matchChallengePunchline,
+  matchCompetition,
+  matchHeadline,
+  matchOpponent,
+  matchRole,
+  matchTicketCta,
+  matchVenue,
 } from "@/lib/brand";
 import { scrollToId } from "@/lib/scroll";
 
@@ -93,7 +95,9 @@ export function HeroSection() {
           className="flex min-w-0 flex-col gap-4 sm:gap-6"
         >
           <motion.div variants={fadeInUp}>
-            <SectionBadge>{convocatoriaHeadline} · {convocatoriaDateLabel}</SectionBadge>
+            <SectionBadge>
+              {matchHeadline} · {matchCompetition}
+            </SectionBadge>
           </motion.div>
 
           <motion.h1
@@ -114,61 +118,52 @@ export function HeroSection() {
 
           <motion.p
             variants={fadeInUp}
-            className="max-w-xl text-[0.95rem] font-medium italic leading-relaxed text-muted-foreground sm:text-base"
-          >
-            Esto no es contenido. Es el inicio de una historia.
-          </motion.p>
-
-          <motion.p
-            variants={fadeInUp}
             className="font-heading text-xl font-normal uppercase leading-tight tracking-wide text-rz-cream/95 sm:text-2xl lg:text-4xl"
           >
-            Inscripciones reabiertas.
-            <span className="mt-1 block text-white">Dos convocatorias · {convocatoriaDateLabel}.</span>
+            {matchChallengeHeadline}
+            <span className="mt-1 block text-white">{matchChallengePunchline}</span>
           </motion.p>
 
           <motion.p
             variants={fadeInUp}
             className="max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base lg:text-lg"
           >
-            {convocatoriaReopenMessage}
+            {matchChallengeBody}
           </motion.p>
 
           <motion.div
             variants={fadeInUp}
-            className="max-w-xl space-y-2 text-sm leading-relaxed text-muted-foreground sm:text-base"
+            className="max-w-xl space-y-1.5 text-sm text-rz-cream/90 sm:text-base"
           >
             <p>
-              <span className="font-medium text-white">Sub-20:</span> {convocatoriaSub20.dateFull},{" "}
-              {convocatoriaSub20.timeLabel}
+              <span className="font-medium text-white">vs {matchOpponent}</span> · {matchVenue}
             </p>
-            <p>
-              <span className="font-medium text-white">Reserva · primer equipo:</span>{" "}
-              {convocatoriaMayores.dateFull}, {convocatoriaMayores.timeLabel}
+            <p className="text-muted-foreground">
+              {matchCompetition} · {matchRole}
             </p>
           </motion.div>
 
-          <motion.div variants={fadeInUp} className="rz-cta-row sm:items-stretch">
-            <ConvocatoriaCtas
-              layout="stack"
-              buttonClassName="h-12 gap-2 px-6 text-sm font-semibold uppercase tracking-wide shadow-lift transition-[transform,box-shadow] duration-300 ease-out hover:scale-[1.03] active:scale-[0.98] motion-reduce:hover:scale-100"
-              primaryButtonClassName="bg-primary text-primary-foreground hover:bg-primary/92 hover:shadow-[0_0_36px_-4px_rgba(169,146,89,0.55)]"
-              secondaryButtonClassName="border border-primary/35 bg-primary/10 text-primary hover:bg-primary/15 hover:shadow-[0_0_28px_-8px_rgba(169,146,89,0.2)]"
-            />
+          <motion.div variants={fadeInUp} className="rz-cta-row sm:items-center">
+            <Button
+              type="button"
+              onClick={() => scrollToId("boletas")}
+              className="h-12 w-full gap-2 bg-primary px-6 text-sm font-semibold uppercase tracking-wide text-primary-foreground shadow-lift transition-[transform,box-shadow] duration-300 ease-out hover:scale-[1.03] hover:bg-primary/92 hover:shadow-[0_0_36px_-4px_rgba(169,146,89,0.55)] active:scale-[0.98] sm:w-auto motion-reduce:hover:scale-100 motion-reduce:hover:shadow-lift"
+            >
+              {matchTicketCta}
+            </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => scrollToId("convocatorias")}
+              onClick={() => scrollToId("nosotros")}
               className="h-12 w-full border-white/15 bg-white/5 px-6 text-sm font-semibold uppercase tracking-wide text-white transition-[transform,box-shadow,background-color] duration-300 ease-out hover:scale-[1.02] hover:bg-white/10 hover:shadow-[0_0_28px_-8px_rgba(169,146,89,0.2)] active:scale-[0.99] sm:w-auto motion-reduce:hover:scale-100"
             >
-              Ver detalles
+              Conocer el club
               <ArrowRight className="size-4" aria-hidden />
             </Button>
           </motion.div>
 
           <motion.p variants={fadeIn} className="text-sm text-muted-foreground">
-            Ficha oficial del jugador · Inscripciones{" "}
-            <span className="font-medium text-white">{convocatoriaRegistrationStatusLabel}</span>
+            Deja tus datos y te avisamos cuando salga la info de boletas.
           </motion.p>
         </motion.div>
 
@@ -186,9 +181,9 @@ export function HeroSection() {
                   "linear-gradient(135deg, rgba(169,146,89,0.4) 0%, transparent 45%), repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(255,255,255,0.04) 18px, rgba(255,255,255,0.04) 19px)",
               }}
             />
-            <div className="relative rounded-[0.9rem] bg-[#0e0e12]/90 p-4 sm:p-8">
-              <div className="mb-6 flex flex-col items-center border-b border-white/10 pb-6 sm:mb-8 sm:pb-8">
-                <div className="relative mx-auto w-full max-w-[min(100%,280px)] sm:max-w-[380px]">
+            <div className="relative rounded-[0.9rem] bg-[#0e0e12]/90 p-4 sm:p-6">
+              <div className="flex flex-col items-center border-b border-white/10 pb-5">
+                <div className="relative mx-auto w-full max-w-[min(100%,220px)] sm:max-w-[260px]">
                   {!reduce ? (
                     <motion.div
                       className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[118%] w-[118%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl"
@@ -212,11 +207,7 @@ export function HeroSection() {
                   >
                     <motion.div
                       className="relative aspect-square w-full"
-                      animate={
-                        reduce
-                          ? undefined
-                          : { scale: [1, 1.018, 1] }
-                      }
+                      animate={reduce ? undefined : { scale: [1, 1.018, 1] }}
                       transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
                     >
                       <ClubCrest
@@ -233,50 +224,47 @@ export function HeroSection() {
                     </motion.div>
                   </button>
                 </div>
-                <p className="mt-6 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-primary">
+                <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-primary">
                   {brandIdentityLabel}
                 </p>
-                <p className="mt-2 text-center text-sm font-medium uppercase tracking-wider text-muted-foreground">
+                <p className="mt-1.5 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground sm:text-sm">
                   Zipaquirá, Colombia
                 </p>
-                <p className="mt-4 max-w-sm text-center text-sm leading-relaxed text-rz-cream/90">
+                <p className="mt-3 max-w-sm text-center text-xs leading-relaxed text-rz-cream/90 sm:text-sm">
                   {brandOriginStatement}
                 </p>
               </div>
 
-              <p className="text-center text-sm leading-relaxed text-muted-foreground sm:text-[0.95rem]">
+              <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground sm:text-sm">
                 {brandMissionStatement}
               </p>
 
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {brandRootValues.map((value) => (
                   <span
                     key={value}
-                    className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-primary sm:text-[0.7rem]"
+                    className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-primary"
                   >
                     {value}
                   </span>
                 ))}
               </div>
 
-              <div className="mt-6">
+              <div className="mt-5">
                 <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-primary">
                   {brandImpactHeading}
                 </p>
-                <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
-                {brandImpactPillars.map((pillar) => (
-                  <div
-                    key={pillar.title}
-                    className="min-w-0 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 text-center ring-1 ring-white/[0.04] sm:p-3.5"
-                  >
-                    <p className="font-heading text-[0.7rem] font-normal uppercase leading-snug tracking-wide text-white sm:text-xs">
-                      {pillar.title}
-                    </p>
-                    <p className="mt-2 text-[0.62rem] leading-relaxed text-muted-foreground sm:text-[0.65rem]">
-                      {pillar.body}
-                    </p>
-                  </div>
-                ))}
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {brandImpactPillars.map((pillar) => (
+                    <div
+                      key={pillar.title}
+                      className="min-w-0 rounded-xl border border-white/[0.08] bg-white/[0.03] px-2.5 py-2.5 text-center ring-1 ring-white/[0.04]"
+                    >
+                      <p className="font-heading text-[0.65rem] font-normal uppercase leading-snug tracking-wide text-white sm:text-[0.7rem]">
+                        {pillar.title}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

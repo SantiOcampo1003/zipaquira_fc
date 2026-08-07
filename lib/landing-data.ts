@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   Briefcase,
   CalendarDays,
-  ClipboardList,
   GraduationCap,
   Heart,
   Landmark,
@@ -13,12 +12,10 @@ import {
   Sparkles,
   Star,
   Target,
-  Trophy,
   Users,
   UsersRound,
-  UserRound,
 } from "lucide-react";
-import { brandImpactPillars, clubNameUpper, convocatoriaMarqueeLabel, convocatoriaMayores, convocatoriaSub20 } from "@/lib/brand";
+import { brandImpactPillars, clubNameUpper, matchMarqueeLabel } from "@/lib/brand";
 
 /**
  * Mismo archivo que `public/images/camiseta-real-zipaquira.png`.
@@ -205,72 +202,10 @@ export const galleryPlaceholders: { label: string; hint: string }[] = [
 
 export const marqueePhrases = [
   clubNameUpper,
-  convocatoriaMarqueeLabel,
+  matchMarqueeLabel,
   "JUGAMOS CON EL ALMA",
   "ZIPAQUIRÁ",
-  "DISCIPLINA",
-  "CANTERA",
-  "TRES GRUPOS",
-] as const;
-
-export const convocatoriaTeams: {
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}[] = [
-  {
-    title: "Primer equipo",
-    description:
-      `Plantel principal en la Liga El Dorado. Convocatoria mayores de 20: ${convocatoriaMayores.dateFull}${convocatoriaMayores.timeLabel ? `, ${convocatoriaMayores.timeLabel}` : ""}.`,
-    icon: Trophy,
-  },
-  {
-    title: "Equipo de reserva",
-    description:
-      `Proyección al primer equipo y torneos como Ascenso Trinche. Misma convocatoria mayores de 20: ${convocatoriaMayores.dateFull}, ${convocatoriaMayores.timeLabel}.`,
-    icon: Users,
-  },
-  {
-    title: "Sub-20",
-    description:
-      `Convocatoria el ${convocatoriaSub20.dateFull}, ${convocatoriaSub20.timeLabel}. Cantera clave: el primer equipo debe tener 6 jugadores Sub-20 inscritos y 2 en cancha. También enfrentarán torneos de preparación.`,
-    icon: GraduationCap,
-  },
-];
-
-export const convocatoriaHighlights: {
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}[] = [
-  {
-    title: "Fechas",
-    description: `Sub-20: ${convocatoriaSub20.dateFull}, ${convocatoriaSub20.timeLabel}. Mayores de 20: ${convocatoriaMayores.dateFull}, ${convocatoriaMayores.timeLabel}.`,
-    icon: CalendarDays,
-  },
-  {
-    title: "Para quién",
-    description:
-      "Jugadores que quieran representar a Zipaquirá con disciplina, hambre y compromiso. Si te quedaste por fuera, esta es tu nueva oportunidad.",
-    icon: UserRound,
-  },
-  {
-    title: "Qué necesitas",
-    description:
-      "Documento de identidad, datos deportivos, contacto de emergencia y ficha médica básica.",
-    icon: ClipboardList,
-  },
-  {
-    title: "Tres grupos",
-    description:
-      "Primer equipo, reserva y Sub-20. Cada grupo tiene un rol distinto dentro del mismo proyecto del club.",
-    icon: UsersRound,
-  },
-];
-
-export const convocatoriaSteps = [
-  "Elige tu convocatoria: Sub-20 (16 de julio) o reserva · primer equipo (18 de julio). Ambas a las 6:00 a.m.",
-  "Haz clic en el botón que te corresponda para abrir el formulario oficial.",
-  "Llena todos los campos: datos personales, posición, experiencia y contacto de emergencia.",
-  "Presenta el día y hora de tu convocatoria con ropa deportiva y documento de identidad.",
+  "LIGA EL DORADO",
+  "EL CAMPÍN",
+  "VS SABANA",
 ] as const;

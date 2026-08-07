@@ -1,11 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ConvocatoriaCtas } from "@/components/ConvocatoriaCtas";
+import { Button } from "@/components/ui/button";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { SectionStoryBackdrop } from "@/components/SectionStoryBackdrop";
-import { clubName, convocatoriaMayores, convocatoriaReopenMessage, convocatoriaSub20 } from "@/lib/brand";
+import {
+  clubName,
+  matchChallengePunchline,
+  matchOpponent,
+  matchTicketCta,
+  matchVenue,
+} from "@/lib/brand";
 import { sectionStoryImages } from "@/lib/section-story-images";
+import { scrollToId } from "@/lib/scroll";
 
 export function StoryCTASection() {
   return (
@@ -40,9 +47,9 @@ export function StoryCTASection() {
         </RevealOnScroll>
         <RevealOnScroll className="mt-6 space-y-5 text-base leading-relaxed text-muted-foreground sm:mt-8 sm:space-y-6 sm:text-lg lg:text-xl" delay={0.06}>
           <p>
-            {clubName} empieza con jóvenes que se atreven a probarse. {convocatoriaReopenMessage}{" "}
-            Sub-20 el {convocatoriaSub20.dateLabel}, {convocatoriaSub20.timeLabel}; mayores de 20 el{" "}
-            {convocatoriaMayores.dateLabel}, {convocatoriaMayores.timeLabel}.
+            {clubName} llega al partido inaugural de la Liga El Dorado frente a {matchOpponent},
+            de visitantes en {matchVenue}. La gente duda si Zipaquirá puede llenar la tribuna.{" "}
+            {matchChallengePunchline}
           </p>
           <motion.p
             className="font-heading text-xl font-normal uppercase tracking-wide text-primary/95 sm:text-2xl"
@@ -55,13 +62,13 @@ export function StoryCTASection() {
           </motion.p>
         </RevealOnScroll>
         <RevealOnScroll className="mt-10 flex justify-center sm:mt-12" delay={0.1}>
-          <ConvocatoriaCtas
-            layout="stack"
-            className="w-full max-w-md"
-            buttonClassName="h-12 px-6 text-xs font-semibold uppercase tracking-wide shadow-[0_0_40px_-8px_rgba(169,146,89,0.45)] transition-[transform,box-shadow,background-color] duration-300 ease-out hover:scale-[1.04] active:scale-[0.98] sm:h-14 sm:px-10 sm:text-sm motion-reduce:hover:scale-100"
-            primaryButtonClassName="bg-primary text-primary-foreground hover:bg-primary/92 hover:shadow-[0_0_52px_-6px_rgba(169,146,89,0.55)]"
-            secondaryButtonClassName="border border-primary/35 bg-primary/10 text-primary hover:bg-primary/15"
-          />
+          <Button
+            type="button"
+            onClick={() => scrollToId("boletas")}
+            className="h-12 w-full max-w-md px-6 text-xs font-semibold uppercase tracking-wide shadow-[0_0_40px_-8px_rgba(169,146,89,0.45)] transition-[transform,box-shadow,background-color] duration-300 ease-out hover:scale-[1.04] hover:bg-primary/92 hover:shadow-[0_0_52px_-6px_rgba(169,146,89,0.55)] active:scale-[0.98] sm:h-14 sm:px-10 sm:text-sm motion-reduce:hover:scale-100"
+          >
+            {matchTicketCta}
+          </Button>
         </RevealOnScroll>
       </div>
     </section>

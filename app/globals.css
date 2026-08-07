@@ -39,7 +39,7 @@
   }
 
   .animate-rz-marquee {
-    animation: rz-marquee 34s linear infinite;
+    animation: rz-marquee 50s linear infinite;
   }
 
   /** Grano / sal mineral global (ligero, sobre todo el sitio). */

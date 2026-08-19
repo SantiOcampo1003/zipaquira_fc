@@ -5,6 +5,7 @@ import { GalleryConceptSection } from "@/components/GalleryConceptSection";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { JerseyKitSection } from "@/components/JerseyKitSection";
+import { MatchesSection } from "@/components/MatchesSection";
 import { ManifestoSection } from "@/components/ManifestoSection";
 import { NewGenerationSection } from "@/components/NewGenerationSection";
 import { PartidoInauguralSection } from "@/components/PartidoInauguralSection";
@@ -24,6 +25,8 @@ export default function Home() {
         <AnimatedMarquee />
         <SectionDivider />
         <PartidoInauguralSection />
+        <SectionDivider />
+        <MatchesSection />
         {showKitSection ? (
           <>
             <SectionDivider />

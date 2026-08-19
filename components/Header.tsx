@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { HeaderAuth } from "@/components/auth/HeaderAuth";
 import { ClubCrest } from "@/components/ClubCrest";
 import { clubNameUpper, matchTicketCta, showKitSection } from "@/lib/brand";
 import { scrollToId } from "@/lib/scroll";
@@ -10,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { label: "Partido", id: "partido" },
+  { label: "Partidos", id: "partidos" },
   ...(showKitSection ? [{ label: "Camiseta", id: "camiseta" } as const] : []),
   { label: "Nosotros", id: "nosotros" },
   { label: "Jugadores", id: "jugadores" },
@@ -142,7 +144,8 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <HeaderAuth className="hidden min-[480px]:inline-flex" />
           <HeaderCta className="hidden h-8 px-3 text-[9px] min-[400px]:inline-flex sm:h-9 sm:px-5 sm:text-[11px]" />
 
           <button
@@ -202,6 +205,15 @@ export function Header() {
                     </motion.button>
                   ))}
                 </nav>
+
+                <motion.div
+                  initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: reduceMotion ? 0 : 0.18, duration: 0.3 }}
+                  className="mt-5 border-t border-white/[0.06] pt-5"
+                >
+                  <HeaderAuth compact onNavigate={() => setOpen(false)} className="w-full justify-between" />
+                </motion.div>
 
                 <motion.div
                   initial={reduceMotion ? false : { opacity: 0, y: 8 }}

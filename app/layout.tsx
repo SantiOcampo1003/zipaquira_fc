@@ -1,3 +1,4 @@
+import { AppProviders } from "@/components/providers/AppProviders";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
@@ -55,7 +56,9 @@ export default function RootLayout({
           className="rz-film-grain pointer-events-none fixed inset-0 z-[1] opacity-[0.055] mix-blend-overlay"
           aria-hidden
         />
-        <div className="relative z-[2]">{children}</div>
+        <div className="relative z-[2]">
+          <AppProviders>{children}</AppProviders>
+        </div>
       </body>
     </html>
   );

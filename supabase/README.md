@@ -49,10 +49,14 @@ Ejecuta en orden en **SQL Editor**:
 ### Supabase → Authentication
 
 1. **URL Configuration**
-   - **Site URL:** `https://tu-dominio.vercel.app` (y `http://localhost:3000` en local)
-   - **Redirect URLs:**
-     - `http://localhost:3000/auth/callback`
-     - `https://tu-dominio.vercel.app/auth/callback`
+   - **Site URL (local):** `http://localhost:3000`
+   - **Site URL (producción):** `https://zipaquira-fc-eta.vercel.app`
+   - **Redirect URLs** (agrega todas; el wildcard evita fallos con `?next=`):
+     - `http://localhost:3000/**`
+     - `https://zipaquira-fc-eta.vercel.app/**`
+     - O explícitas: `http://localhost:3000/auth/callback` y la misma en producción
+
+   Si falta `/auth/callback` en Redirect URLs, Supabase manda el `?code=` a la **Site URL** (`/`). Eso rompe el login hasta que lo corrijas o uses el middleware del proyecto.
 
 2. **Providers → Google** → activar y pegar Client ID + Client Secret
 

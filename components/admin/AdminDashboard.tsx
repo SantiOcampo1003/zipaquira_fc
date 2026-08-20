@@ -529,7 +529,7 @@ export function AdminDashboard() {
   const duplicateSlots = hasDuplicateStarterSlots(squadDraft);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+    <div className="mx-auto min-w-0 max-w-5xl px-3 py-8 sm:px-6 sm:py-10">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-heading text-3xl uppercase tracking-wide text-white">Panel admin</h1>
@@ -575,7 +575,7 @@ export function AdminDashboard() {
       {errorMsg ? <p className="mt-4 text-sm text-red-400">{errorMsg}</p> : null}
 
       {tab === "partidos" ? (
-        <div className="mt-8 grid gap-8 lg:grid-cols-2">
+        <div className="mt-8 grid min-w-0 gap-6 lg:grid-cols-2 lg:gap-8">
           <form
             onSubmit={saveMatch}
             className="space-y-3 rounded-2xl border border-white/[0.08] bg-[#121215] p-5"

@@ -102,18 +102,18 @@ export function PlayerRatingPanel({ match }: PlayerRatingPanelProps) {
   const bench = match.squad.filter((p) => !p.is_starter).length;
 
   return (
-    <div className="rounded-2xl border border-primary/20 bg-primary/[0.06] p-5 sm:p-6">
-      <h4 className="font-heading text-lg uppercase tracking-wide text-white">
+    <div className="min-w-0 rounded-xl border border-primary/20 bg-primary/[0.06] p-4 sm:rounded-2xl sm:p-5 md:p-6">
+      <h4 className="font-heading text-base uppercase tracking-wide text-white sm:text-lg">
         Califica a los jugadores
       </h4>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:mt-3">
         Ponle nota del 1 al 10 a cada convocado. Un voto por hincha por jugador; puedes cambiar tu
         nota cuando quieras.
       </p>
 
-      <div className="mt-4 rounded-xl border border-white/[0.08] bg-black/20 px-4 py-3">
+      <div className="mt-4 rounded-xl border border-white/[0.08] bg-black/20 px-3 py-3 sm:px-4">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Convocados</p>
-        <p className="mt-1 text-2xl font-heading text-white">{match.squad.length}</p>
+        <p className="mt-1 font-heading text-2xl text-white">{match.squad.length}</p>
         <p className="mt-1 text-xs text-muted-foreground">
           {starters} titulares · {bench} suplentes
           {user ? ` · ${ratedCount} calificados por ti` : ""}
@@ -138,7 +138,7 @@ export function PlayerRatingPanel({ match }: PlayerRatingPanelProps) {
               Cargando tus votos…
             </div>
           ) : (
-            <ul className="mt-6 max-h-[28rem] space-y-3 overflow-y-auto pr-1">
+            <ul className="mt-5 max-h-[min(28rem,55dvh)] space-y-2.5 overflow-y-auto overscroll-contain pr-0.5 sm:mt-6 sm:max-h-[28rem] sm:space-y-3 sm:pr-1">
               {match.squad.map((entry) => {
                 const selected = draft[entry.player.id];
                 return (
@@ -147,7 +147,7 @@ export function PlayerRatingPanel({ match }: PlayerRatingPanelProps) {
                     className="rounded-xl border border-white/[0.08] bg-[#121215]/60 p-3 sm:p-4"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-white">
                           <span className="mr-2 font-heading text-primary">
                             #{entry.player.jersey_number}
@@ -162,20 +162,20 @@ export function PlayerRatingPanel({ match }: PlayerRatingPanelProps) {
                         </p>
                       </div>
                       {selected != null ? (
-                        <span className="rounded-full bg-primary/15 px-2.5 py-1 text-xs font-bold text-primary">
+                        <span className="shrink-0 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-bold text-primary">
                           Tu nota: {selected}
                         </span>
                       ) : null}
                     </div>
 
-                    <div className="mt-3 flex flex-wrap gap-1">
+                    <div className="mt-3 grid grid-cols-5 gap-1 sm:flex sm:flex-wrap sm:gap-1">
                       {RATING_SCALE.map((value) => (
                         <button
                           key={value}
                           type="button"
                           onClick={() => setPlayerRating(entry.player.id, value)}
                           className={cn(
-                            "size-8 rounded-md text-xs font-bold transition-colors sm:size-9",
+                            "flex h-9 items-center justify-center rounded-md text-xs font-bold transition-colors sm:size-9",
                             selected === value
                               ? "bg-primary text-primary-foreground"
                               : "border border-white/10 bg-white/[0.04] text-white/70 hover:border-primary/40 hover:text-primary"

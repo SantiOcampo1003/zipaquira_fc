@@ -10,11 +10,11 @@ const squadItemSchema = z.object({
   player_id: z.string().uuid(),
   is_starter: z.boolean(),
   pitch_slot: z.string().nullable().optional(),
-  bench_order: z.number().int().min(1).max(7).nullable().optional(),
+  bench_order: z.number().int().min(1).max(12).nullable().optional(),
 });
 
 const putSchema = z.object({
-  squad: z.array(squadItemSchema).max(18),
+  squad: z.array(squadItemSchema).max(23),
 });
 
 export async function GET(req: Request, { params }: RouteContext) {
@@ -59,11 +59,11 @@ export async function PUT(req: Request, { params }: RouteContext) {
   if (starters.length > 11) {
     return NextResponse.json({ error: "Máximo 11 titulares." }, { status: 400 });
   }
-  if (bench.length > 7) {
-    return NextResponse.json({ error: "Máximo 7 suplentes." }, { status: 400 });
+  if (bench.length > 12) {
+    return NextResponse.json({ error: "Máximo 12 suplentes." }, { status: 400 });
   }
-  if (squad.length > 18) {
-    return NextResponse.json({ error: "Máximo 18 convocados." }, { status: 400 });
+  if (squad.length > 23) {
+    return NextResponse.json({ error: "Máximo 23 convocados." }, { status: 400 });
   }
 
   for (const s of starters) {
@@ -73,7 +73,7 @@ export async function PUT(req: Request, { params }: RouteContext) {
   }
   for (const s of bench) {
     if (!s.bench_order) {
-      return NextResponse.json({ error: "Cada suplente necesita bench_order (1–7)." }, { status: 400 });
+      return NextResponse.json({ error: "Cada suplente necesita bench_order (1–12)." }, { status: 400 });
     }
   }
 

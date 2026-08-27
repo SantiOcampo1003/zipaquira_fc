@@ -41,8 +41,9 @@ Ejecuta en orden en **SQL Editor**:
 1. `migrations/002_matches.sql`
 2. `migrations/003_match_squad.sql`
 3. `migrations/004_player_ratings.sql`
-4. `seed/match_inaugural.sql` — partido vs Sabana + 18 convocados de ejemplo
-5. `seed/match_friendly.sql` — amistoso (opcional; edita rival y fecha)
+4. `seed/match_inaugural.sql` — partido vs Sabana + convocatoria de ejemplo
+5. `seed/match_aguilas_2026_08_27.sql` — partido vs Águilas FC (27 ago) + 19 convocados oficiales
+6. `seed/match_friendly.sql` — amistoso (opcional; edita rival y fecha)
 
 ## 6. Login con Google (hinchas y admin)
 

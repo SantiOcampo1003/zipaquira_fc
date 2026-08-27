@@ -323,7 +323,7 @@ export function AdminDashboard() {
     setSquadDraft((prev) => {
       const exists = prev.find((s) => s.player_id === playerId);
       if (exists) return prev.filter((s) => s.player_id !== playerId);
-      if (prev.length >= 18) return prev;
+      if (prev.length >= 23) return prev;
       const starters = prev.filter((s) => s.is_starter).length;
       const isStarter = starters < 11;
       const usedSlots = prev
@@ -335,7 +335,9 @@ export function AdminDashboard() {
           player_id: playerId,
           is_starter: isStarter,
           pitch_slot: isStarter ? defaultPitchSlot(formation, usedSlots) : null,
-          bench_order: isStarter ? null : Math.min(7, prev.filter((s) => !s.is_starter).length + 1),
+          bench_order: isStarter
+            ? null
+            : Math.min(12, prev.filter((s) => !s.is_starter).length + 1),
         },
       ];
     });
@@ -843,8 +845,8 @@ export function AdminDashboard() {
 
           <p className="text-xs text-muted-foreground">
             Formación: <strong className="text-white/90">{squadFormation}</strong> · Convocados:{" "}
-            {squadDraft.length}/18 · Titulares: {squadDraft.filter((s) => s.is_starter).length}/11 ·
-            Suplentes: {squadDraft.filter((s) => !s.is_starter).length}/7
+            {squadDraft.length}/23 · Titulares: {squadDraft.filter((s) => s.is_starter).length}/11 ·
+            Suplentes: {squadDraft.filter((s) => !s.is_starter).length}/12
           </p>
           <div className="max-h-[55vh] space-y-2 overflow-y-auto rounded-xl border border-white/[0.08] p-3">
             {players.map((p) => {
@@ -915,7 +917,7 @@ export function AdminDashboard() {
                           }
                           className="rounded border border-white/10 bg-[#18181B] px-2 py-1 text-xs text-white"
                         >
-                          {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => (
                             <option key={n} value={n}>
                               Banquillo {n}
                             </option>

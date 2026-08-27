@@ -51,7 +51,7 @@ export function MatchLineupViewer({ matches }: MatchLineupViewerProps) {
           <h2 className="rz-h2 mt-5 text-balance sm:mt-6">Partidos y alineación</h2>
           <p className="mx-auto mt-4 max-w-2xl px-1 text-sm leading-relaxed text-muted-foreground sm:text-base">
             Titulares en cancha, suplentes en banquillo y las calificaciones de la hinchada. Solo
-            los 18 convocados reciben voto.
+            los convocados del partido reciben voto.
           </p>
         </RevealOnScroll>
 

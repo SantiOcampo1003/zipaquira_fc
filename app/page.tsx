@@ -1,5 +1,6 @@
 import { AnimatedMarquee } from "@/components/AnimatedMarquee";
 import { CommunityFunnelSection } from "@/components/CommunityFunnelSection";
+import { ConvocatoriasSection } from "@/components/ConvocatoriasSection";
 import { Footer } from "@/components/Footer";
 import { GalleryConceptSection } from "@/components/GalleryConceptSection";
 import { Header } from "@/components/Header";
@@ -23,6 +24,8 @@ export default function Home() {
       <main className="overflow-x-clip">
         <HeroSection />
         <AnimatedMarquee />
+        <SectionDivider />
+        <ConvocatoriasSection />
         <SectionDivider />
         <PartidoInauguralSection />
         <SectionDivider />

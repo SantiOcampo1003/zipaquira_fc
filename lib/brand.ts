@@ -17,6 +17,62 @@ export const brandMissionStatement = `${clubName} nace desde su historia para tr
 export const brandIdentityLabel = "Nuestra identidad";
 export const brandImpactHeading = "Impacto en la ciudad";
 
+/** Convocatorias de jugadores — formulario oficial (Google Forms). */
+export const convocatoriaFormUrl =
+  "https://docs.google.com/forms/d/e/1FAIpQLSehDskJrSDVSef5--iYZtKVyZfhlb295W5yXtIjIewKeaXmTQ/viewform?usp=publish-editor";
+
+export const convocatoriaHeadline = "Última convocatoria";
+export const convocatoriaDateLabel = "Sub-20 · Reserva y Primer equipo";
+export const convocatoriaRegistrationsOpen = true;
+export const convocatoriaRegistrationStatusLabel = "ABIERTA";
+export const convocatoriaReopenMessage =
+  "Convocatoria oficial para conformar la plantilla de Zipaquirá F.C. en sus tres categorías.";
+export const convocatoriaOpenDetail =
+  "Completa la ficha oficial en línea según tu categoría: Sub-20 o mayores de 20 para reserva y primer equipo.";
+
+export type ConvocatoriaCall = {
+  id: "sub20" | "mayores";
+  title: string;
+  audience: string;
+  dateLabel: string;
+  dateFull: string;
+  dateShort: string;
+  timeLabel?: string;
+  groupsLabel: string;
+  inscripcionLabel: string;
+  presentationDetail: string;
+};
+
+export const convocatoriaSub20: ConvocatoriaCall = {
+  id: "sub20",
+  title: "Convocatoria Sub-20",
+  audience: "Jugadores Sub-20",
+  dateLabel: "Sub-20",
+  dateFull: "Categoría Sub-20 (Cantera y proyección)",
+  dateShort: "Sub-20",
+  timeLabel: "6:00 a.m.",
+  groupsLabel: "Sub-20",
+  inscripcionLabel: "Inscribirme Sub-20",
+  presentationDetail:
+    "Presentarse con ropa deportiva, hidratación y documento de identidad. 6 jugadores Sub-20 harán parte del plantel del primer equipo.",
+};
+
+export const convocatoriaMayores: ConvocatoriaCall = {
+  id: "mayores",
+  title: "Reserva y Primer equipo",
+  audience: "Mayores de 20 años",
+  dateLabel: "Reserva y Primer equipo",
+  dateFull: "Categoría mayores (Reserva y Primer equipo)",
+  dateShort: "Reserva · 1er equipo",
+  timeLabel: "6:00 a.m.",
+  groupsLabel: "Primer equipo y reserva",
+  inscripcionLabel: "Inscribirme Reserva y 1er equipo",
+  presentationDetail:
+    "Primer equipo y equipo de reserva. Presentarse con ropa deportiva, hidratación y documento de identidad.",
+};
+
+export const convocatoriaCalls = [convocatoriaSub20, convocatoriaMayores] as const;
+
 /** Contacto WhatsApp (Colombia · +57). */
 export const whatsappPhone = "3227895453";
 export const whatsappUrl = `https://wa.me/57${whatsappPhone}`;

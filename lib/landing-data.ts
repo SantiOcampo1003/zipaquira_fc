@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Briefcase,
   CalendarDays,
+  ClipboardList,
   GraduationCap,
   Heart,
   Landmark,
@@ -12,10 +13,18 @@ import {
   Sparkles,
   Star,
   Target,
+  Trophy,
+  UserRound,
   Users,
   UsersRound,
 } from "lucide-react";
-import { brandImpactPillars, clubNameUpper, matchMarqueeLabel } from "@/lib/brand";
+import {
+  brandImpactPillars,
+  clubNameUpper,
+  convocatoriaMayores,
+  convocatoriaSub20,
+  matchMarqueeLabel,
+} from "@/lib/brand";
 
 /**
  * Mismo archivo que `public/images/camiseta-real-zipaquira.png`.
@@ -199,6 +208,68 @@ export const galleryPlaceholders: { label: string; hint: string }[] = [
   { label: "Hinchas", hint: "Aliento y color local" },
   { label: "Aliados", hint: "Marcas que creen en el movimiento" },
 ];
+
+export const convocatoriaTeams: {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    title: "Primer equipo",
+    description:
+      `Plantel principal en la Liga El Dorado. ${convocatoriaMayores.presentationDetail}`,
+    icon: Trophy,
+  },
+  {
+    title: "Equipo de reserva",
+    description:
+      `Proyección al primer equipo y torneos competitivos de la región. Entrenamientos y fogueo continuo.`,
+    icon: Users,
+  },
+  {
+    title: "Sub-20",
+    description:
+      `Cantera clave: ${convocatoriaSub20.presentationDetail}`,
+    icon: GraduationCap,
+  },
+];
+
+export const convocatoriaHighlights: {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    title: "Categorías",
+    description: `Sub-20 (nacidos en categorías juveniles) y Mayores de 20 para Reserva y Primer Equipo.`,
+    icon: CalendarDays,
+  },
+  {
+    title: "Para quién",
+    description:
+      "Jugadores con disciplina, carácter y hambre de representar a Zipaquirá en el fútbol competitivo.",
+    icon: UserRound,
+  },
+  {
+    title: "Qué necesitas",
+    description:
+      "Documento de identidad, ropa deportiva adecuada, hidratación y diligenciar la ficha oficial previa.",
+    icon: ClipboardList,
+  },
+  {
+    title: "Tres grupos",
+    description:
+      "Primer equipo, reserva y Sub-20. Un solo proyecto estructurado con camino real de ascenso interno.",
+    icon: UsersRound,
+  },
+];
+
+export const convocatoriaSteps = [
+  "Elige tu categoría: Sub-20 o Reserva · Primer equipo.",
+  "Haz clic en el botón de inscripción para abrir la ficha oficial en Google Forms.",
+  "Completa tus datos personales, posición, trayectoria deportiva y contacto.",
+  "Presenta la jornada con tu indumentaria deportiva y documento original.",
+] as const;
 
 export const marqueePhrases = [
   clubNameUpper,

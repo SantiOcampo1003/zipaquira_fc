@@ -123,8 +123,9 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
   }, [accessToken]);
 
   useEffect(() => {
+    if (!accessToken) return;
     loadSession();
-  }, [loadSession]);
+  }, [accessToken, loadSession]);
 
   useEffect(() => {
     setHolderDrafts((prev) => {
@@ -249,6 +250,9 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
 
   const seatsComplete = selectedSeatIds.length === abonoCount;
   const isCompletedPurchase = sessionPurchase?.status === "completed";
+
+  // Sección privada: solo visible para quien entra con el link personal del correo.
+  if (!accessToken) return null;
 
   return (
     <section

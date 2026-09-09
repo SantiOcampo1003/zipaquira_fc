@@ -115,6 +115,71 @@ Ejecuta en **SQL Editor**:
 
 `supabase/migrations/006_match_mvp.sql`
 
+## 9. Silletería y abonos (tribuna)
+
+Ejecuta en **SQL Editor**:
+
+`supabase/migrations/007_stadium_seating.sql`
+
+Crea:
+
+| Tabla | Para qué |
+|-------|----------|
+| `stadium_seats` | Las 568 sillas y su estado (`available`, `reserved`, `courtesy`) |
+| `abono_purchases` | Cada compra en Tu Boleta (correo, cantidad 1–10, zona, token del link) |
+| `abono_registrations` | Cada abonado: silla + nombre + documento + talla camiseta |
+
+También incluye la función `confirm_abono_purchase()` para guardar todo en una sola transacción (sin doble reserva).
+
+### Flujo implementado
+
+1. **Sheet "compras tu boleta"** — filas con tipo de compra `abono`. Antes de enviar, llena la
+   columna **Zona** (`verde` / `blanca` / `roja`) de cada fila; el mapa de sillas depende de eso.
+2. **Apps Script del sheet** (`scripts/google-apps-script/enviar-correos-abonos.gs`, menú
+   **Tu Boleta → Enviar correos de silletería`) llama a `POST /api/abonos/create` con el correo,
+   la cantidad y la zona → crea (o reutiliza) la fila en `abono_purchases` con `access_token` único
+   y devuelve el link.
+3. **El propio Apps Script envía el correo** con `GmailApp` usando ese link
+   (`https://tudominio.com/?token=XXXX#silleteria`) y marca la fila como **Contactado**.
+4. **API `GET /api/abonos/session?token=`** → devuelve `abono_count`, `zone_id`, mapa de sillas ocupadas.
+5. **Frontend** → el mapa lee `stadium_seats` (no datos locales).
+6. **API `POST /api/abonos/confirm`** → llama `confirm_abono_purchase()` con service role.
+7. **Apps Script → Tu Boleta → Actualizar sillas y tallas** — llama `GET /api/abonos/registrations`
+   y llena de vuelta las columnas Silla / Talla / Estado del sheet con lo que cada hincha confirmó.
+
+### Configurar el envío de correos desde el sheet
+
+1. Variables de entorno en Vercel: `SITE_URL` (dominio del sitio) y `ABONOS_ADMIN_SECRET`
+   (secreto largo, cualquier valor — mismo en el paso 3).
+2. En el sheet: **Extensiones → Apps Script**, pega el contenido de
+   `scripts/google-apps-script/enviar-correos-abonos.gs`.
+3. **⚙️ Configuración del proyecto → Propiedades de secuencia de comandos**:
+   - `API_URL` = `https://tudominio.com/api/abonos/create`
+   - `REGISTRATIONS_URL` = `https://tudominio.com/api/abonos/registrations`
+   - `ADMIN_SECRET` = el mismo valor que `ABONOS_ADMIN_SECRET`
+4. Recarga el sheet → aparece el menú **Tu Boleta → Enviar correos de silletería**.
+   Al ejecutarlo la primera vez pedirá autorizar permisos de Gmail y de red.
+
+### Insertar compra de prueba (desarrollo)
+
+```sql
+insert into abono_purchases (
+  purchaser_email, abono_count, zone_id, access_token, expires_at
+) values (
+  'tu@correo.com', 2, 'blanca',
+  'demo-token-zipa-2026',
+  now() + interval '7 days'
+);
+```
+
+Luego abre: `http://localhost:3000/?token=demo-token-zipa-2026#silleteria`
+
+### Importante
+
+- El cliente **no escribe directo** en Supabase (igual que `ticket_interest` en `/api/boletas`).
+- Usa `getSupabaseAdmin()` en rutas API para confirmar.
+- RLS: solo lectura pública del mapa; reservas vía service role.
+
 En **`/admin` → Convocatoria**, al final verás la sección **MVP de la hinchada**:
 
 1. Revisa el top de jugadores mejor calificados.

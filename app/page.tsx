@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { AnimatedMarquee } from "@/components/AnimatedMarquee";
 import { CommunityFunnelSection } from "@/components/CommunityFunnelSection";
 import { ConvocatoriasSection } from "@/components/ConvocatoriasSection";
@@ -13,6 +14,7 @@ import { PartidoInauguralSection } from "@/components/PartidoInauguralSection";
 import { PlayersSection } from "@/components/PlayersSection";
 import { SectionDivider } from "@/components/SectionDivider";
 import { SponsorsSection } from "@/components/SponsorsSection";
+import { StadiumSeatingSection } from "@/components/stadium/StadiumSeatingSection";
 import { StoryCTASection } from "@/components/StoryCTASection";
 import { ValuesGridSection } from "@/components/ValuesGridSection";
 import { showKitSection } from "@/lib/brand";
@@ -26,6 +28,10 @@ export default function Home() {
         <AnimatedMarquee />
         <SectionDivider />
         <ConvocatoriasSection />
+        <SectionDivider />
+        <Suspense fallback={null}>
+          <StadiumSeatingSection />
+        </Suspense>
         <SectionDivider />
         <PartidoInauguralSection />
         <SectionDivider />

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { label: "Convocatorias", id: "convocatorias" },
+  { label: "Tribuna", id: "silleteria" },
   { label: "Partido", id: "partido" },
   { label: "Partidos", id: "partidos" },
   ...(showKitSection ? [{ label: "Camiseta", id: "camiseta" } as const] : []),

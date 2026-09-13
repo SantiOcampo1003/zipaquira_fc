@@ -140,7 +140,7 @@ También incluye la función `confirm_abono_purchase()` para guardar todo en una
    la cantidad y la zona → crea (o reutiliza) la fila en `abono_purchases` con `access_token` único
    y devuelve el link.
 3. **El propio Apps Script envía el correo** con `GmailApp` usando ese link
-   (`https://tudominio.com/tribuna?token=XXXX`) y marca la fila como **Contactado**.
+   (`https://tudominio.com/?token=XXXX#silleteria`) y marca la fila como **Contactado**.
 4. **API `GET /api/abonos/session?token=`** → devuelve `abono_count`, `zone_id`, mapa de sillas ocupadas.
 5. **Frontend** → el mapa lee `stadium_seats` (no datos locales).
 6. **API `POST /api/abonos/confirm`** → llama `confirm_abono_purchase()` con service role.
@@ -172,7 +172,7 @@ insert into abono_purchases (
 );
 ```
 
-Luego abre: `http://localhost:3000/tribuna?token=demo-token-zipa-2026`
+Luego abre: `http://localhost:3000/?token=demo-token-zipa-2026#silleteria`
 
 ### Importante
 

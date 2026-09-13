@@ -81,7 +81,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const link = `${getSiteUrl()}/tribuna?token=${token}`;
+    const link = `${getSiteUrl()}/?token=${token}#silleteria`;
 
     return NextResponse.json({ ok: true, token, link });
   } catch (err) {

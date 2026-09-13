@@ -51,10 +51,8 @@ export function HeroSection() {
   const reduce = useReducedMotion();
 
   return (
-    <section
-      id="inicio"
-      className="relative overflow-hidden bg-background pb-14 pt-5 sm:pb-28 sm:pt-10 lg:pb-32 lg:pt-16"
-    >
+    <section className="relative overflow-hidden bg-background pb-14 pt-5 sm:pb-28 sm:pt-10 lg:pb-32 lg:pt-16">
+
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
         style={{

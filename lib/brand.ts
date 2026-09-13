@@ -97,6 +97,15 @@ export const matchTicketFormBody =
 /** Ocultar sección del kit en la landing (reactivar cuando esté listo). */
 export const showKitSection = false;
 
+/** Camiseta conmemorativa de hincha oficial — venta cerrada por WhatsApp. */
+export const showJerseyOrderSection = true;
+export const jerseyOrderPrice = 89900;
+export const jerseySizes = ["S", "M", "L", "XL"] as const;
+export type JerseySizeOption = (typeof jerseySizes)[number];
+export const jerseyOrderHeadline = "Camiseta conmemorativa de hincha oficial";
+export const jerseyOrderSubheadline = "Edición histórica · 568 abonados";
+export const jerseyOrderCtaLabel = "Comprar por WhatsApp";
+
 export const brandColors = {
   green: "#0B2810",
   greenDark: "#061A0A",

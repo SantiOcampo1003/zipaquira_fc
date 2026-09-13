@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { AnimatedMarquee } from "@/components/AnimatedMarquee";
+import { CommemorativeJerseySection } from "@/components/CommemorativeJerseySection";
 import { CommunityFunnelSection } from "@/components/CommunityFunnelSection";
 import { ConvocatoriasSection } from "@/components/ConvocatoriasSection";
 import { Footer } from "@/components/Footer";
@@ -17,7 +18,7 @@ import { SponsorsSection } from "@/components/SponsorsSection";
 import { StadiumSeatingSection } from "@/components/stadium/StadiumSeatingSection";
 import { StoryCTASection } from "@/components/StoryCTASection";
 import { ValuesGridSection } from "@/components/ValuesGridSection";
-import { showKitSection } from "@/lib/brand";
+import { showJerseyOrderSection, showKitSection } from "@/lib/brand";
 
 export default function Home() {
   return (
@@ -40,6 +41,12 @@ export default function Home() {
           <>
             <SectionDivider />
             <JerseyKitSection />
+          </>
+        ) : null}
+        {showJerseyOrderSection ? (
+          <>
+            <SectionDivider />
+            <CommemorativeJerseySection />
           </>
         ) : null}
         <SectionDivider />

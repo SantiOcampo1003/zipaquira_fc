@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { HeaderAuth } from "@/components/auth/HeaderAuth";
 import { ClubCrest } from "@/components/ClubCrest";
-import { clubNameUpper, matchTicketCta, showKitSection } from "@/lib/brand";
+import { clubNameUpper, matchTicketCta, showJerseyOrderSection, showKitSection } from "@/lib/brand";
 import { scrollToId } from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,9 @@ const nav = [
   { label: "Partido", id: "partido" },
   { label: "Partidos", id: "partidos" },
   ...(showKitSection ? [{ label: "Camiseta", id: "camiseta" } as const] : []),
+  ...(showJerseyOrderSection
+    ? [{ label: "Camiseta oficial", id: "camiseta-conmemorativa" } as const]
+    : []),
   { label: "Nosotros", id: "nosotros" },
   { label: "Jugadores", id: "jugadores" },
   { label: "Patrocinadores", id: "patrocinadores" },

@@ -89,7 +89,7 @@ export function CommemorativeJerseySection() {
   return (
     <section
       id="camiseta-conmemorativa"
-      className="rz-section scroll-mt-[3.5rem] border-t border-primary/25 bg-gradient-to-b from-[#121215] via-[#09110d] to-[#121215] sm:scroll-mt-16"
+      className="rz-section scroll-mt-[3.5rem] bg-gradient-to-b from-[#121215] via-[#09110d] to-[#121215] pt-24 sm:scroll-mt-16 sm:pt-32"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <RevealOnScroll className="text-center">

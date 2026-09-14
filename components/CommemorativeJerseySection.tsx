@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Loader2, Minus, Plus } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { JerseyFlipCard } from "@/components/JerseyFlipCard";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { SectionBadge } from "@/components/SectionBadge";
 import { Button } from "@/components/ui/button";
@@ -106,25 +106,8 @@ export function CommemorativeJerseySection() {
         </RevealOnScroll>
 
         <div className="mt-5 grid gap-6 lg:grid-cols-2">
-          <RevealOnScroll className="grid grid-cols-2 gap-4">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-primary/25 bg-black/20">
-              <Image
-                src="/images/camiseta-conmemorativa-frente.png"
-                alt="Camiseta conmemorativa de hincha oficial — frente"
-                fill
-                sizes="(max-width: 1024px) 50vw, 25vw"
-                className="object-cover"
-              />
-            </div>
-            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-primary/25 bg-black/20">
-              <Image
-                src="/images/camiseta-conmemorativa-espalda.png"
-                alt="Camiseta conmemorativa de hincha oficial — espalda"
-                fill
-                sizes="(max-width: 1024px) 50vw, 25vw"
-                className="object-cover"
-              />
-            </div>
+          <RevealOnScroll className="flex justify-center">
+            <JerseyFlipCard />
           </RevealOnScroll>
 
           <RevealOnScroll>

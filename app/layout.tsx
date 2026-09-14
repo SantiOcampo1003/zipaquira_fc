@@ -1,4 +1,5 @@
 import { AppProviders } from "@/components/providers/AppProviders";
+import { WhatsappFloatButton } from "@/components/WhatsappFloatButton";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
@@ -59,6 +60,7 @@ export default function RootLayout({
         <div className="relative z-[2]">
           <AppProviders>{children}</AppProviders>
         </div>
+        <WhatsappFloatButton />
       </body>
     </html>
   );

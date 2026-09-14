@@ -35,7 +35,7 @@ const jerseyOrderSchema = z.object({
 type JerseyOrderFormValues = z.infer<typeof jerseyOrderSchema>;
 
 const fieldClassName = cn(
-  "h-11 w-full rounded-lg border border-white/15 bg-rz-cream px-3 text-base text-black outline-none",
+  "h-10 w-full rounded-lg border border-white/15 bg-rz-cream px-3 text-base text-black outline-none",
   "placeholder:text-black/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40",
   "aria-invalid:border-destructive md:text-sm"
 );
@@ -89,25 +89,25 @@ export function CommemorativeJerseySection() {
   return (
     <section
       id="camiseta-conmemorativa"
-      className="rz-section scroll-mt-[3.5rem] bg-gradient-to-b from-[#121215] via-[#09110d] to-[#121215] pt-24 sm:scroll-mt-16 sm:pt-32"
+      className="rz-section scroll-mt-[3.5rem] bg-gradient-to-b from-[#121215] via-[#09110d] to-[#121215] pt-6 sm:scroll-mt-16 sm:pt-8"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <RevealOnScroll className="text-center">
           <SectionBadge>Hincha oficial</SectionBadge>
-          <h2 className="rz-h2 mt-5 text-balance sm:mt-6">
+          <h2 className="rz-h2 mt-3 text-balance sm:mt-4">
             {jerseyOrderHeadline}
-            <span className="mt-2 block text-primary">{jerseyOrderSubheadline}</span>
+            <span className="mt-1 block text-primary">{jerseyOrderSubheadline}</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             Elige tu talla y cantidad. Al confirmar, guardamos tu pedido y se abre WhatsApp para
             cerrar el pago y la entrega directamente con el club.
           </p>
-          <Separator className="mx-auto mt-8 max-w-xs bg-primary/30" />
+          <Separator className="mx-auto mt-4 max-w-xs bg-primary/30" />
         </RevealOnScroll>
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-2">
+        <div className="mt-5 grid gap-6 lg:grid-cols-2">
           <RevealOnScroll className="grid grid-cols-2 gap-4">
-            <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-primary/25 bg-black/20">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-primary/25 bg-black/20">
               <Image
                 src="/images/camiseta-conmemorativa-frente.png"
                 alt="Camiseta conmemorativa de hincha oficial — frente"
@@ -116,7 +116,7 @@ export function CommemorativeJerseySection() {
                 className="object-cover"
               />
             </div>
-            <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-primary/25 bg-black/20">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-primary/25 bg-black/20">
               <Image
                 src="/images/camiseta-conmemorativa-espalda.png"
                 alt="Camiseta conmemorativa de hincha oficial — espalda"
@@ -128,7 +128,7 @@ export function CommemorativeJerseySection() {
           </RevealOnScroll>
 
           <RevealOnScroll>
-            <div className="rounded-2xl border border-primary/25 bg-[#18181B]/90 p-5 shadow-card sm:p-8">
+            <div className="rounded-2xl border border-primary/25 bg-[#18181B]/90 p-4 shadow-card sm:p-6">
               <AnimatePresence mode="wait">
                 {success ? (
                   <motion.div
@@ -165,7 +165,7 @@ export function CommemorativeJerseySection() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-5"
+                    className="space-y-3"
                     noValidate
                   >
                     <div className="flex items-baseline justify-between">
@@ -192,7 +192,7 @@ export function CommemorativeJerseySection() {
                             type="button"
                             onClick={() => form.setValue("size", option, { shouldValidate: true })}
                             className={cn(
-                              "h-11 rounded-lg border font-heading text-sm uppercase tracking-wide transition-colors",
+                              "h-10 rounded-lg border font-heading text-sm uppercase tracking-wide transition-colors",
                               size === option
                                 ? "border-primary bg-primary text-primary-foreground"
                                 : "border-white/15 bg-rz-cream/5 text-white/70 hover:border-primary/40"
@@ -214,7 +214,7 @@ export function CommemorativeJerseySection() {
                               shouldValidate: true,
                             })
                           }
-                          className="flex size-11 items-center justify-center rounded-lg border border-white/15 text-white/70 transition-colors hover:border-primary/40"
+                          className="flex size-10 items-center justify-center rounded-lg border border-white/15 text-white/70 transition-colors hover:border-primary/40"
                           aria-label="Reducir cantidad"
                         >
                           <Minus className="size-4" />
@@ -229,7 +229,7 @@ export function CommemorativeJerseySection() {
                               shouldValidate: true,
                             })
                           }
-                          className="flex size-11 items-center justify-center rounded-lg border border-white/15 text-white/70 transition-colors hover:border-primary/40"
+                          className="flex size-10 items-center justify-center rounded-lg border border-white/15 text-white/70 transition-colors hover:border-primary/40"
                           aria-label="Aumentar cantidad"
                         >
                           <Plus className="size-4" />
@@ -257,7 +257,7 @@ export function CommemorativeJerseySection() {
                       ) : null}
                     </div>
 
-                    <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="jersey-phone" className="text-muted-foreground">
                           Celular / WhatsApp <span className="text-primary">*</span>
@@ -300,7 +300,7 @@ export function CommemorativeJerseySection() {
                       </div>
                     </div>
 
-                    <div className="flex items-baseline justify-between border-t border-white/10 pt-4">
+                    <div className="flex items-baseline justify-between border-t border-white/10 pt-3">
                       <span className="font-heading text-sm uppercase tracking-wide text-muted-foreground">
                         Total
                       </span>

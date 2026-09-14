@@ -33,7 +33,7 @@ export type JerseyOrderPayload = {
   fullName: string;
   phone: string;
   email?: string;
-  size: "S" | "M" | "L" | "XL";
+  size: string;
   quantity: number;
 };
 

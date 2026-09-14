@@ -28,7 +28,7 @@ const jerseyOrderSchema = z.object({
   fullName: z.string().trim().min(2, { message: "El nombre es obligatorio" }),
   phone: z.string().trim().min(7, { message: "El celular es obligatorio" }),
   email: z.string().trim().email({ message: "Correo inválido" }).optional().or(z.literal("")),
-  size: z.enum(jerseySizes),
+  size: z.string().trim().min(1, { message: "Indica la talla" }).max(30, { message: "Talla muy larga" }),
   quantity: z.number().int().min(1).max(10),
 });
 
@@ -54,6 +54,7 @@ function buildWhatsappMessage(values: JerseyOrderFormValues): string {
 
 export function CommemorativeJerseySection() {
   const [success, setSuccess] = useState(false);
+  const [isCustomSize, setIsCustomSize] = useState(false);
 
   const form = useForm<JerseyOrderFormValues>({
     resolver: zodResolver(jerseyOrderSchema),
@@ -77,6 +78,7 @@ export function CommemorativeJerseySection() {
       window.open(`https://wa.me/57${whatsappPhone}?text=${encodeURIComponent(message)}`, "_blank");
       setSuccess(true);
       form.reset({ fullName: "", phone: "", email: "", size: "M", quantity: 1 });
+      setIsCustomSize(false);
     } catch (err) {
       form.setError("root", {
         message: err instanceof Error ? err.message : "No pudimos guardar tu pedido. Intenta de nuevo.",
@@ -168,15 +170,18 @@ export function CommemorativeJerseySection() {
                       <Label className="text-muted-foreground">
                         Talla <span className="text-primary">*</span>
                       </Label>
-                      <div className="grid grid-cols-4 gap-2">
+                      <div className="grid grid-cols-5 gap-2">
                         {jerseySizes.map((option) => (
                           <button
                             key={option}
                             type="button"
-                            onClick={() => form.setValue("size", option, { shouldValidate: true })}
+                            onClick={() => {
+                              setIsCustomSize(false);
+                              form.setValue("size", option, { shouldValidate: true });
+                            }}
                             className={cn(
                               "h-10 rounded-lg border font-heading text-sm uppercase tracking-wide transition-colors",
-                              size === option
+                              !isCustomSize && size === option
                                 ? "border-primary bg-primary text-primary-foreground"
                                 : "border-white/15 bg-rz-cream/5 text-white/70 hover:border-primary/40"
                             )}
@@ -184,7 +189,37 @@ export function CommemorativeJerseySection() {
                             {option}
                           </button>
                         ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsCustomSize(true);
+                            form.setValue("size", "", { shouldValidate: false });
+                          }}
+                          className={cn(
+                            "h-10 rounded-lg border font-heading text-[0.65rem] uppercase tracking-wide transition-colors",
+                            isCustomSize
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-white/15 bg-rz-cream/5 text-white/70 hover:border-primary/40"
+                          )}
+                        >
+                          Otra
+                        </button>
                       </div>
+                      {isCustomSize ? (
+                        <input
+                          autoFocus
+                          placeholder="Ej: Niño 10, XXXL, XXS"
+                          maxLength={30}
+                          className={fieldClassName}
+                          {...form.register("size")}
+                          aria-invalid={!!form.formState.errors.size}
+                        />
+                      ) : null}
+                      {form.formState.errors.size ? (
+                        <p className="text-sm text-destructive" role="alert">
+                          {form.formState.errors.size.message}
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="space-y-2">

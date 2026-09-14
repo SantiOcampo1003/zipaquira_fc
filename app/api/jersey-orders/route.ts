@@ -6,7 +6,7 @@ const orderSchema = z.object({
   fullName: z.string().trim().min(2, { message: "El nombre es obligatorio" }),
   phone: z.string().trim().min(7, { message: "El celular es obligatorio" }),
   email: z.string().trim().email().optional().or(z.literal("")),
-  size: z.enum(["S", "M", "L", "XL"]),
+  size: z.string().trim().min(1, { message: "Indica la talla" }).max(30),
   quantity: z.number().int().min(1).max(10),
 });
 

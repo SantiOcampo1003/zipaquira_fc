@@ -17,6 +17,14 @@ export const brandMissionStatement = `${clubName} nace desde su historia para tr
 export const brandIdentityLabel = "Nuestra identidad";
 export const brandImpactHeading = "Impacto en la ciudad";
 
+/** Convocatoria femenina — formulario oficial de inscripción. */
+export const convocatoriaFemeninaFormUrl = "https://forms.gle/n1w3mqWaVEe7iS749";
+export const convocatoriaFemeninaHeadline = "Convocatoria femenina";
+export const convocatoriaFemeninaDateLabel = "Fecha y horario por confirmar";
+export const convocatoriaFemeninaBody =
+  "Buscamos jugadoras para conformar el plantel femenino de Zipaquirá F.C. Completa la ficha oficial y te avisaremos la fecha y el horario de la presentación.";
+export const convocatoriaFemeninaCtaLabel = "Inscribirme";
+
 /** Contacto WhatsApp (Colombia · +57). */
 export const whatsappPhone = "3227895453";
 export const whatsappUrl = `https://wa.me/57${whatsappPhone}`;

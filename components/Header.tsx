@@ -13,6 +13,7 @@ const nav = [
   { label: "Tienda", id: "camiseta-conmemorativa" },
   { label: "Partidos", id: "partido" },
   ...(showKitSection ? [{ label: "Camiseta", id: "camiseta" } as const] : []),
+  { label: "Convocatorias", id: "convocatorias" },
   { label: "Nosotros", id: "nosotros" },
   { label: "Jugadores", id: "jugadores" },
   { label: "Patrocinadores", id: "patrocinadores" },

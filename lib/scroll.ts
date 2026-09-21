@@ -14,6 +14,7 @@ const ROUTE_BY_ID: Record<string, string> = {
   jugadores: "/jugadores",
   patrocinadores: "/patrocinadores",
   silleteria: "/tribuna",
+  convocatorias: "/convocatorias",
 };
 
 export function scrollToId(id: string) {

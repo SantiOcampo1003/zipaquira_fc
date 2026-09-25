@@ -20,6 +20,7 @@ export const brandImpactHeading = "Impacto en la ciudad";
 /** Convocatoria femenina — formulario oficial de inscripción. */
 export const convocatoriaFemeninaFormUrl = "https://forms.gle/n1w3mqWaVEe7iS749";
 export const convocatoriaFemeninaHeadline = "Convocatoria femenina";
+export const convocatoriaFemeninaCategoryLabel = "Primera convocatoria · Categoría 2010 a 2014";
 export const convocatoriaFemeninaDateLabel = "Fecha y horario por confirmar";
 export const convocatoriaFemeninaBody =
   "Buscamos jugadoras para conformar el plantel femenino de Zipaquirá F.C. Completa la ficha oficial y te avisaremos la fecha y el horario de la presentación.";

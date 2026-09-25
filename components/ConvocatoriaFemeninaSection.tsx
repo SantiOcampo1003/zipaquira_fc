@@ -4,6 +4,7 @@ import { SectionBadge } from "@/components/SectionBadge";
 import { Separator } from "@/components/ui/separator";
 import {
   convocatoriaFemeninaBody,
+  convocatoriaFemeninaCategoryLabel,
   convocatoriaFemeninaCtaLabel,
   convocatoriaFemeninaDateLabel,
   convocatoriaFemeninaFormUrl,
@@ -14,12 +15,15 @@ export function ConvocatoriaFemeninaSection() {
   return (
     <section
       id="convocatorias"
-      className="rz-section scroll-mt-[3.5rem] border-t border-primary/25 bg-background sm:scroll-mt-16"
+      className="rz-section scroll-mt-[3.5rem] bg-background pt-10 sm:scroll-mt-16 sm:pt-14"
     >
       <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <RevealOnScroll>
           <SectionBadge>Fútbol femenino</SectionBadge>
           <h2 className="rz-h2 mt-5 text-balance sm:mt-6">{convocatoriaFemeninaHeadline}</h2>
+          <p className="mt-3 font-heading text-sm uppercase tracking-wide text-primary sm:text-base">
+            {convocatoriaFemeninaCategoryLabel}
+          </p>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             {convocatoriaFemeninaBody}
           </p>

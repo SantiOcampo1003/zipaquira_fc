@@ -16,12 +16,18 @@
  *
  * COLUMNAS ESPERADAS (fila 1 = encabezado)
  * A Nombre Completo | B Correo | C Cedula | D Celular
- * E Tipo de compra (abono-boleta) | F Cantidad | G Estado
+ * E Tipo de compra (abono / nombre del partido) | F Cantidad | G Estado
  * H Talla | I Silla | J Zona | K Contactado | L Link (se llena solo)
  *
+ * La columna "Tipo de compra" acepta:
+ *   - "abono"                 → abono de temporada (silla para todos los partidos)
+ *   - "Zipa FC vs La Guajira"  → boleta solo para ESE partido puntual
+ *     (el texto debe coincidir exacto —sin importar mayúsculas— con el
+ *     "ticket_label" configurado en la tabla matches de Supabase)
+ *
  * Antes de ejecutar: llena la columna "Zona" (verde / blanca / roja) de cada
- * fila con tipo de compra "abono" — el mapa de sillas depende de la zona
- * comprada y el endpoint la rechaza si no es una de esas tres.
+ * fila — el mapa de sillas depende de la zona comprada y el endpoint la
+ * rechaza si no es una de esas tres.
  */
 
 const COL = {
@@ -71,12 +77,12 @@ function enviarCorreosSilleteria() {
 
     const nombre = String(row[COL.NOMBRE - 1] || "").trim();
     const correo = String(row[COL.CORREO - 1] || "").trim();
-    const tipo = String(row[COL.TIPO - 1] || "").trim().toLowerCase();
+    const tipoRaw = String(row[COL.TIPO - 1] || "").trim();
     const cantidadRaw = row[COL.CANTIDAD - 1];
     const zonaRaw = String(row[COL.ZONA - 1] || "").trim().toLowerCase();
     const contactado = String(row[COL.CONTACTADO - 1] || "").trim();
 
-    if (tipo !== "abono") continue;
+    if (!tipoRaw) continue;
     if (contactado) {
       saltados++;
       continue;
@@ -94,18 +100,24 @@ function enviarCorreosSilleteria() {
       continue;
     }
 
+    const esAbono = tipoRaw.toLowerCase() === "abono";
     const abonoCount = Number(cantidadRaw) > 0 ? Math.round(Number(cantidadRaw)) : 1;
 
     try {
+      const payload = {
+        email: correo,
+        abonoCount: abonoCount,
+        zoneId: zonaRaw,
+      };
+      if (!esAbono) {
+        payload.matchLabel = tipoRaw;
+      }
+
       const response = UrlFetchApp.fetch(apiUrl, {
         method: "post",
         contentType: "application/json",
         headers: { "x-admin-secret": adminSecret },
-        payload: JSON.stringify({
-          email: correo,
-          abonoCount: abonoCount,
-          zoneId: zonaRaw,
-        }),
+        payload: JSON.stringify(payload),
         muteHttpExceptions: true,
       });
 
@@ -119,7 +131,7 @@ function enviarCorreosSilleteria() {
       }
 
       const link = body.link;
-      enviarCorreo(correo, nombre, abonoCount, link);
+      enviarCorreo(correo, nombre, abonoCount, link, body.matchLabel);
 
       sheet.getRange(rowNumber, COL.CONTACTADO).setValue("Sí " + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm"));
       sheet.getRange(rowNumber, COL.LINK).setValue(link);
@@ -201,9 +213,15 @@ function actualizarSillasYTallas() {
   SpreadsheetApp.getUi().alert(`Filas actualizadas con silla y talla: ${actualizados}`);
 }
 
-function enviarCorreo(correo, nombre, abonoCount, link) {
+function enviarCorreo(correo, nombre, abonoCount, link, matchLabel) {
   const saludo = nombre ? nombre.split(" ")[0] : "Hincha";
-  const plural = abonoCount > 1 ? `tus ${abonoCount} abonos` : "tu abono";
+  const plural = matchLabel
+    ? abonoCount > 1
+      ? `tus ${abonoCount} boletas para ${matchLabel}`
+      : `tu boleta para ${matchLabel}`
+    : abonoCount > 1
+      ? `tus ${abonoCount} abonos`
+      : "tu abono";
 
   const asunto = "Elige tu silla — Real Zipaquirá FC";
   const cuerpo =

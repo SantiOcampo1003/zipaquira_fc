@@ -261,15 +261,26 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <RevealOnScroll className="text-center">
-          <SectionBadge>Abonados · Elección de silla</SectionBadge>
+          <SectionBadge>
+            {sessionPurchase?.purchaseType === "boleta"
+              ? "Boleta de partido · Elección de silla"
+              : "Abonados · Elección de silla"}
+          </SectionBadge>
           <h2 className="rz-h2 mt-5 text-balance sm:mt-6">
             Elige tu silla en la tribuna
             <span className="mt-2 block text-primary">Numeración oficial 001 – 568</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Si ya compraste tu abono por zona, selecciona aquí tu silla exacta y la talla de
-            camiseta. Puedes comprar entre 1 y 10 abonos con el mismo correo en Tu Boleta.
-          </p>
+          {sessionPurchase?.purchaseType === "boleta" && sessionPurchase.matchLabel ? (
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Tu boleta es solo para <strong className="text-primary">{sessionPurchase.matchLabel}</strong>.
+              Elige tu silla exacta y la talla de camiseta.
+            </p>
+          ) : (
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Si ya compraste tu abono por zona, selecciona aquí tu silla exacta y la talla de
+              camiseta. Puedes comprar entre 1 y 10 abonos con el mismo correo en Tu Boleta.
+            </p>
+          )}
           <Separator className="mx-auto mt-8 max-w-xs bg-primary/30" />
         </RevealOnScroll>
 

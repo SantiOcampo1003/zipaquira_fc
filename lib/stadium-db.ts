@@ -18,6 +18,9 @@ export type DbAbonoPurchaseRow = {
   status: "pending_seats" | "completed" | "expired" | "cancelled";
   expires_at: string | null;
   completed_at: string | null;
+  purchase_type: "abono" | "boleta";
+  match_id: string | null;
+  matches: { opponent: string; ticket_label: string | null; match_date: string } | null;
 };
 
 export type DbAbonoRegistrationRow = {
@@ -34,6 +37,8 @@ export type AbonoSessionPurchase = {
   zoneId: StadiumZoneId;
   status: DbAbonoPurchaseRow["status"];
   expiresAt: string | null;
+  purchaseType: "abono" | "boleta";
+  matchLabel: string | null;
 };
 
 export type AbonoSessionRegistration = {

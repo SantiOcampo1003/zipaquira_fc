@@ -36,7 +36,9 @@ export async function GET(req: Request) {
 
     const { data: purchaseRow, error: purchaseError } = await supabase
       .from("abono_purchases")
-      .select("id, purchaser_email, abono_count, zone_id, status, expires_at, completed_at")
+      .select(
+        "id, purchaser_email, abono_count, zone_id, status, expires_at, completed_at, purchase_type, match_id, matches(opponent, ticket_label, match_date)"
+      )
       .eq("access_token", token)
       .maybeSingle();
 
@@ -52,7 +54,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Enlace de abono inválido." }, { status: 404 });
     }
 
-    const purchase = purchaseRow as DbAbonoPurchaseRow;
+    const purchase = purchaseRow as unknown as DbAbonoPurchaseRow;
 
     if (
       purchase.status === "pending_seats" &&
@@ -70,12 +72,46 @@ export async function GET(req: Request) {
       );
     }
 
+    // Sillas ya ocupadas por OTRAS compras completadas, según el alcance de
+    // esta compra: un abono se bloquea por cualquier registro existente
+    // (de temporada o de un partido); una boleta solo por un abono de
+    // temporada o por otra boleta del MISMO partido.
+    if (purchase.status === "pending_seats") {
+      let conflictQuery = supabase
+        .from("abono_registrations")
+        .select("seat_number, match_id, abono_purchases!inner(status)")
+        .eq("abono_purchases.status", "completed");
+
+      if (purchase.purchase_type === "boleta" && purchase.match_id) {
+        conflictQuery = conflictQuery.or(`match_id.is.null,match_id.eq.${purchase.match_id}`);
+      }
+
+      const { data: conflictRows, error: conflictError } = await conflictQuery;
+
+      if (conflictError) {
+        console.error("[abonos/session] conflicts:", conflictError.message);
+        return NextResponse.json(
+          { error: "No pudimos cargar el mapa de sillas." },
+          { status: 500 }
+        );
+      }
+
+      const blocked = new Set((conflictRows ?? []).map((r) => r.seat_number as number));
+      for (const seat of seats) {
+        if (blocked.has(seat.seatNumber) && seat.status === "available") {
+          seat.status = "occupied";
+        }
+      }
+    }
+
     const purchasePayload: AbonoSessionPurchase = {
       purchaserEmail: purchase.purchaser_email,
       abonoCount: purchase.abono_count,
       zoneId: purchase.zone_id,
       status: purchase.status,
       expiresAt: purchase.expires_at,
+      purchaseType: purchase.purchase_type,
+      matchLabel: purchase.matches?.ticket_label ?? purchase.matches?.opponent ?? null,
     };
 
     let registrations: AbonoSessionRegistration[] = [];

@@ -85,10 +85,10 @@ export function mapRpcErrorToMessage(message: string): string {
     return "El correo no coincide con el de tu compra.";
   }
   if (message.includes("ABONO_COUNT_MISMATCH")) {
-    return "La cantidad de abonos no coincide con tu compra.";
+    return "La cantidad de sillas no coincide con tu compra.";
   }
   if (message.includes("ZONE_MISMATCH")) {
-    return "Una silla no pertenece a la zona de tu abono.";
+    return "Una silla no pertenece a la zona de tu compra.";
   }
   if (message.includes("SEAT_NOT_AVAILABLE")) {
     return "Una de las sillas ya fue tomada. Elige otras en el mapa.";
@@ -96,5 +96,5 @@ export function mapRpcErrorToMessage(message: string): string {
   if (message.includes("SEAT_NOT_FOUND")) {
     return "Número de silla inválido.";
   }
-  return "No pudimos confirmar tu abono. Intenta de nuevo.";
+  return "No pudimos confirmar tu compra. Intenta de nuevo.";
 }

@@ -30,6 +30,8 @@ type SeatBookingPanelProps = {
   confirmError?: string | null;
   onConfirm?: () => Promise<void>;
   readOnly?: boolean;
+  purchaseType?: "abono" | "boleta";
+  matchLabel?: string | null;
 };
 
 export function SeatBookingPanel({
@@ -48,11 +50,15 @@ export function SeatBookingPanel({
   confirmError = null,
   onConfirm,
   readOnly = false,
+  purchaseType = "abono",
+  matchLabel = null,
 }: SeatBookingPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const seatsComplete = selectedSeats.length === abonoCount;
   const allHoldersComplete = holderDrafts.every(isHolderDraftComplete);
   const zoneLabel = allowedZoneId ? STADIUM_ZONES[allowedZoneId].shortName : null;
+  const word = purchaseType === "boleta" ? "boleta" : "abono";
+  const matchSuffix = purchaseType === "boleta" && matchLabel ? ` para ${matchLabel}` : "";
 
   useEffect(() => {
     if (bookingStep === "details" && panelRef.current) {
@@ -93,7 +99,7 @@ export function SeatBookingPanel({
                 ? "Paso 1 · Elige las sillas"
                 : "Paso 1 · Elige tu silla"
               : bookingStep === "details"
-              ? "Paso 2 · Datos de cada abonado"
+              ? `Paso 2 · Datos de cada ${word === "boleta" ? "boleta" : "abonado"}`
               : "¡Registro completado!"}
           </h3>
         </div>
@@ -104,18 +110,20 @@ export function SeatBookingPanel({
               <strong className="text-white">
                 {abonoCount === 1 ? "tu silla" : `las ${abonoCount} sillas`}
               </strong>
-              . Después completarás nombre, documento y talla de camiseta de cada abonado.
+              . Después completarás nombre, documento y talla de camiseta de cada {word === "boleta" ? "boleta" : "abonado"}.
             </>
           ) : bookingStep === "details" ? (
             <>
-              Cada abono necesita sus datos. El correo de compra es único; nombre, documento y
+              Cada {word} necesita sus datos. El correo de compra es único; nombre, documento y
               camiseta van por persona.
             </>
           ) : (
             "Guardamos tu elección. Te enviaremos confirmación al correo de compra."
           )}
           {zoneLabel ? (
-            <span className="mt-1 block text-primary">Zona de tu abono: {zoneLabel}</span>
+            <span className="mt-1 block text-primary">
+              Zona de tu {word}{matchSuffix}: {zoneLabel}
+            </span>
           ) : null}
         </p>
       </div>
@@ -127,6 +135,7 @@ export function SeatBookingPanel({
             holderDrafts={holderDrafts}
             purchaserEmail={purchaserEmail}
             onEdit={readOnly ? undefined : () => onBookingStepChange("details")}
+            word={word}
           />
         ) : bookingStep === "details" ? (
           <DetailsForm
@@ -144,6 +153,7 @@ export function SeatBookingPanel({
             isSubmitting={isSubmitting}
             confirmError={confirmError}
             readOnly={readOnly}
+            word={word}
           />
         ) : (
           <SeatsStep
@@ -154,6 +164,7 @@ export function SeatBookingPanel({
             onClearSeat={onClearSeat}
             readOnly={readOnly}
             onContinue={handleContinueToDetails}
+            word={word}
           />
         )}
       </AnimatePresence>
@@ -168,6 +179,7 @@ function SeatsStep({
   onClearSeat,
   onContinue,
   readOnly,
+  word,
 }: {
   abonoCount: number;
   selectedSeats: Seat[];
@@ -175,7 +187,9 @@ function SeatsStep({
   onClearSeat: (index: number) => void;
   onContinue: () => void;
   readOnly?: boolean;
+  word: string;
 }) {
+  const Word = word.charAt(0).toUpperCase() + word.slice(1);
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -200,7 +214,7 @@ function SeatsStep({
               )}
             >
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Abono {index + 1}
+                {Word} {index + 1}
                 {isNext ? (
                   <span className="ml-2 text-primary">· Elige ahora en el mapa</span>
                 ) : null}
@@ -224,7 +238,9 @@ function SeatsStep({
                 <p className="mt-2 text-sm text-muted-foreground">
                   {isNext
                     ? "Haz clic en una silla disponible del mapa"
-                    : "Pendiente — completa los abonos anteriores primero"}
+                    : `Pendiente — completa ${
+                        word === "boleta" ? "las boletas anteriores" : "los abonos anteriores"
+                      } primero`}
                 </p>
               )}
             </div>
@@ -243,7 +259,7 @@ function SeatsStep({
         {seatsComplete ? (
           <p className="text-sm text-emerald-200">
             <CheckCircle2 className="mr-1 inline size-4" />
-            Todas las sillas elegidas. Siguiente paso: datos de cada abonado.
+            Todas las sillas elegidas. Siguiente paso: datos de cada {word === "boleta" ? "boleta" : "abonado"}.
           </p>
         ) : (
           <p className="text-sm text-muted-foreground">
@@ -292,6 +308,7 @@ function DetailsForm({
   isSubmitting,
   confirmError,
   readOnly,
+  word,
 }: {
   abonoCount: number;
   selectedSeats: Seat[];
@@ -306,6 +323,7 @@ function DetailsForm({
   isSubmitting?: boolean;
   confirmError?: string | null;
   readOnly?: boolean;
+  word: string;
 }) {
   return (
     <motion.form
@@ -332,7 +350,15 @@ function DetailsForm({
           )}
         />
         <p className="mt-1 text-[11px] text-muted-foreground">
-          El mismo correo con el que compraste {abonoCount > 1 ? "los abonos" : "el abono"}.
+          El mismo correo con el que compraste{" "}
+          {word === "boleta"
+            ? abonoCount > 1
+              ? "las boletas"
+              : "la boleta"
+            : abonoCount > 1
+            ? "los abonos"
+            : "el abono"}
+          .
         </p>
       </div>
 
@@ -368,13 +394,21 @@ function DetailsForm({
               : "bg-white/10 text-muted-foreground"
           )}
         >
-          {isSubmitting ? "Guardando…" : `Confirmar ${abonoCount > 1 ? "todos los abonos" : "mi abono"}`}
+          {isSubmitting
+            ? "Guardando…"
+            : `Confirmar ${
+                abonoCount > 1
+                  ? word === "boleta"
+                    ? "todas las boletas"
+                    : "todos los abonos"
+                  : `mi ${word}`
+              }`}
         </Button>
       </div>
 
       {!allHoldersComplete ? (
         <p className="text-center text-[11px] text-muted-foreground">
-          Completa nombre, documento, celular y talla de cada abonado para confirmar.
+          Completa nombre, documento, celular y talla de cada {word === "boleta" ? "boleta" : "abonado"} para confirmar.
         </p>
       ) : null}
     </motion.form>
@@ -468,12 +502,15 @@ function ConfirmedView({
   holderDrafts,
   purchaserEmail,
   onEdit,
+  word,
 }: {
   selectedSeats: Seat[];
   holderDrafts: AbonoHolderDraft[];
   purchaserEmail: string;
   onEdit?: () => void;
+  word: string;
 }) {
+  const Word = word.charAt(0).toUpperCase() + word.slice(1);
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
@@ -499,7 +536,7 @@ function ConfirmedView({
             className="rounded-xl border border-primary/30 bg-primary/10 p-4 text-left"
           >
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              Abonado {index + 1}
+              {Word} {index + 1}
             </p>
             <p className="font-mono text-2xl font-bold text-primary">#{seat.id}</p>
             <p className="text-sm text-white">{formatSeatLabel(seat)}</p>

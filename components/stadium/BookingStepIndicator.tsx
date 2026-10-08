@@ -16,6 +16,8 @@ type BookingStepIndicatorProps = {
   seatsSelected: number;
   purchaseLocked?: boolean;
   onAbonoCountChange?: (count: number) => void;
+  purchaseType?: "abono" | "boleta";
+  matchLabel?: string | null;
 };
 
 export function BookingStepIndicator({
@@ -24,31 +26,37 @@ export function BookingStepIndicator({
   seatsSelected,
   purchaseLocked = false,
   onAbonoCountChange,
+  purchaseType = "abono",
+  matchLabel = null,
 }: BookingStepIndicatorProps) {
   const currentIndex = STEPS.findIndex((s) => s.id === currentStep);
   const canEditCount = !purchaseLocked && currentStep === "seats" && onAbonoCountChange;
+  const word = purchaseType === "boleta" ? "boleta" : "abono";
+  const matchSuffix = purchaseType === "boleta" && matchLabel ? ` para ${matchLabel}` : "";
+  const cuantos = purchaseType === "boleta" ? "cuántas" : "cuántos";
 
   return (
     <div className="rounded-xl border border-white/10 bg-[#18181B]/80 p-4 sm:p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
-            Tu proceso de abono{abonoCount > 1 ? "s" : ""}
+            Tu proceso de {word}{abonoCount > 1 ? "s" : ""}
           </p>
           <p className="mt-1 text-sm text-white">
             {purchaseLocked
               ? abonoCount > 1
-                ? `Tu compra incluye ${abonoCount} abonos. Elige una silla por cada uno.`
-                : "Tu compra incluye 1 abono. Elige tu silla en el mapa."
+                ? `Tu compra incluye ${abonoCount} ${word}s${matchSuffix}. Elige una silla por cada uno.`
+                : `Tu compra incluye 1 ${word}${matchSuffix}. Elige tu silla en el mapa.`
               : abonoCount > 1
-              ? `Indica cuántos abonos compraste y elige ${abonoCount} sillas en el mapa.`
-              : "Si compraste 1 abono, elige 1 silla. Si compraste más, súbelo abajo."}
+              ? `Indica ${cuantos} ${word}s compraste y elige ${abonoCount} sillas en el mapa.`
+              : `Si compraste 1 ${word}, elige 1 silla. Si compraste más, súbelo abajo.`}
           </p>
 
           {canEditCount ? (
             <div className="mt-4 inline-flex flex-col gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
               <label className="text-[10px] font-semibold uppercase tracking-wider text-primary">
-                ¿Cuántos abonos compraste? (máx. {MAX_ABONOS_PER_EMAIL})
+                ¿{cuantos.charAt(0).toUpperCase() + cuantos.slice(1)} {word}s compraste? (máx.{" "}
+                {MAX_ABONOS_PER_EMAIL})
               </label>
               <div className="flex items-center gap-2">
                 <button
@@ -56,7 +64,7 @@ export function BookingStepIndicator({
                   onClick={() => onAbonoCountChange(Math.max(1, abonoCount - 1))}
                   disabled={abonoCount <= 1}
                   className="flex size-9 items-center justify-center rounded-lg border border-white/15 bg-black/40 text-white disabled:opacity-30"
-                  aria-label="Menos abonos"
+                  aria-label={`Menos ${word}s`}
                 >
                   <Minus className="size-4" />
                 </button>
@@ -70,7 +78,7 @@ export function BookingStepIndicator({
                   }
                   disabled={abonoCount >= MAX_ABONOS_PER_EMAIL}
                   className="flex size-9 items-center justify-center rounded-lg border border-white/15 bg-black/40 text-white disabled:opacity-30"
-                  aria-label="Más abonos"
+                  aria-label={`Más ${word}s`}
                 >
                   <Plus className="size-4" />
                 </button>
@@ -78,7 +86,7 @@ export function BookingStepIndicator({
             </div>
           ) : purchaseLocked ? (
             <p className="mt-3 text-xs text-muted-foreground">
-              Cantidad de abonos confirmada por tu compra en Tu Boleta.
+              Cantidad de {word}s confirmada por tu compra en Tu Boleta.
             </p>
           ) : null}
         </div>

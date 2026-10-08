@@ -58,6 +58,8 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
   }, [purchaseAbonoCount, sessionPurchase, localAbonoCount]);
 
   const allowedZoneId: StadiumZoneId | null = sessionPurchase?.zoneId ?? null;
+  const purchaseType = sessionPurchase?.purchaseType ?? "abono";
+  const purchaseWord = purchaseType === "boleta" ? "boleta" : "abono";
 
   const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
   const [hoveredSeat, setHoveredSeat] = useState<Seat | null>(null);
@@ -81,7 +83,7 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
       const data = (await res.json()) as SessionResponse;
 
       if (!res.ok) {
-        setSessionError(data.error ?? "No pudimos cargar tu sesión de abono.");
+        setSessionError(data.error ?? "No pudimos cargar tu sesión de compra.");
         setSeats(generateInitialStadiumSeats());
         return;
       }
@@ -167,7 +169,7 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
       if (bookingStep !== "seats") return;
       if (allowedZoneId && seat.zoneId !== allowedZoneId) {
         setSelectionMessage(
-          `Tu abono es ${STADIUM_ZONES[allowedZoneId].shortName}. Solo puedes elegir sillas de esa zona.`
+          `Tu ${purchaseWord} es ${STADIUM_ZONES[allowedZoneId].shortName}. Solo puedes elegir sillas de esa zona.`
         );
         return;
       }
@@ -181,7 +183,7 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
         if (prev.length >= abonoCount) {
           setSelectionMessage(
             abonoCount === 1
-              ? "Solo tienes 1 abono. Quita esta silla para cambiarla."
+              ? `Solo tienes 1 ${purchaseWord}. Quita esta silla para cambiarla.`
               : `Ya elegiste las ${abonoCount} sillas. Quita una para cambiarla.`
           );
           return prev;
@@ -189,7 +191,7 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
         return [...prev, seat.id];
       });
     },
-    [bookingStep, abonoCount, allowedZoneId]
+    [bookingStep, abonoCount, allowedZoneId, purchaseWord]
   );
 
   const clearSeatAt = useCallback((index: number) => {
@@ -241,7 +243,7 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
       const data = (await res.json()) as { error?: string };
 
       if (!res.ok) {
-        setConfirmError(data.error ?? "No pudimos confirmar tu abono.");
+        setConfirmError(data.error ?? "No pudimos confirmar tu compra.");
         await loadSession();
         return;
       }
@@ -313,6 +315,8 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
                   seatsSelected={selectedSeatIds.length}
                   purchaseLocked={purchaseLocked}
                   onAbonoCountChange={handleAbonoCountChange}
+                  purchaseType={sessionPurchase?.purchaseType ?? "abono"}
+                  matchLabel={sessionPurchase?.matchLabel ?? null}
                 />
               </RevealOnScroll>
             </div>
@@ -397,6 +401,8 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
                   isSubmitting={isSubmitting}
                   confirmError={confirmError}
                   onConfirm={accessToken ? handleConfirm : undefined}
+                  purchaseType={purchaseType}
+                  matchLabel={sessionPurchase?.matchLabel ?? null}
                   readOnly={isCompletedPurchase}
                 />
               </RevealOnScroll>

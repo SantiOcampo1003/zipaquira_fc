@@ -119,7 +119,9 @@ export async function GET(req: Request) {
     if (purchase.status === "completed") {
       const { data: regRows, error: regError } = await supabase
         .from("abono_registrations")
-        .select("abono_index, seat_number, holder_full_name, holder_document_id, jersey_size")
+        .select(
+          "abono_index, seat_number, holder_full_name, holder_document_id, holder_phone, jersey_size"
+        )
         .eq("purchase_id", purchase.id)
         .order("abono_index", { ascending: true });
 
@@ -137,6 +139,7 @@ export async function GET(req: Request) {
         seatId: formatSeatId(row.seat_number),
         holderFullName: row.holder_full_name ?? "",
         holderDocumentId: row.holder_document_id ?? "",
+        holderPhone: row.holder_phone ?? "",
         jerseySize: row.jersey_size!,
       }));
     }

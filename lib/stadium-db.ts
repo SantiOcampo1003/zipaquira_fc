@@ -28,6 +28,7 @@ export type DbAbonoRegistrationRow = {
   seat_number: number;
   holder_full_name: string | null;
   holder_document_id: string | null;
+  holder_phone: string | null;
   jersey_size: JerseySize | null;
 };
 
@@ -47,6 +48,7 @@ export type AbonoSessionRegistration = {
   seatId: string;
   holderFullName: string;
   holderDocumentId: string;
+  holderPhone: string;
   jerseySize: JerseySize;
 };
 

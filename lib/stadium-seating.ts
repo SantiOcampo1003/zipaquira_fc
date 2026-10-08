@@ -219,6 +219,7 @@ export function parseAbonoCountParam(raw: string | null | undefined): number {
 export type AbonoHolderDraft = {
   fullName: string;
   documentId: string;
+  phone: string;
   jerseySize: JerseySize | "";
 };
 
@@ -232,13 +233,16 @@ export function createEmptyHolderDrafts(count: number): AbonoHolderDraft[] {
   return Array.from({ length: count }, () => ({
     fullName: "",
     documentId: "",
+    phone: "",
     jerseySize: "",
   }));
 }
 
 export function isHolderDraftComplete(holder: AbonoHolderDraft | null | undefined): boolean {
   if (!holder) return false;
-  return Boolean(holder.fullName.trim() && holder.documentId.trim() && holder.jerseySize);
+  return Boolean(
+    holder.fullName.trim() && holder.documentId.trim() && holder.phone.trim() && holder.jerseySize
+  );
 }
 
 /** Pasos del flujo de elección (una compra puede incluir varios abonos). */

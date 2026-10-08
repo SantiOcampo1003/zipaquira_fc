@@ -105,6 +105,7 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
               .map((r) => ({
                 fullName: r.holderFullName,
                 documentId: r.holderDocumentId,
+                phone: r.holderPhone,
                 jerseySize: r.jerseySize,
               }))
           );
@@ -211,12 +212,18 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
 
     try {
       const assignments = selectedSeats.map((seat, index) => {
-        const holder = holderDrafts[index] ?? { fullName: "", documentId: "", jerseySize: "" as const };
+        const holder = holderDrafts[index] ?? {
+          fullName: "",
+          documentId: "",
+          phone: "",
+          jerseySize: "" as const,
+        };
         return {
           abono_index: index + 1,
           seat_number: seat.seatNumber,
           holder_full_name: holder.fullName.trim(),
           holder_document_id: holder.documentId.trim(),
+          holder_phone: holder.phone.trim(),
           jersey_size: holder.jerseySize,
         };
       });

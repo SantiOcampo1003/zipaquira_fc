@@ -342,7 +342,7 @@ function DetailsForm({
             key={seat.id}
             index={index}
             seat={seat}
-            holder={holderDrafts[index] ?? { fullName: "", documentId: "", jerseySize: "" }}
+            holder={holderDrafts[index] ?? { fullName: "", documentId: "", phone: "", jerseySize: "" }}
             onChange={(patch) => onHolderDraftChange(index, patch)}
           />
         ))}
@@ -374,7 +374,7 @@ function DetailsForm({
 
       {!allHoldersComplete ? (
         <p className="text-center text-[11px] text-muted-foreground">
-          Completa nombre, documento y talla de cada abonado para confirmar.
+          Completa nombre, documento, celular y talla de cada abonado para confirmar.
         </p>
       ) : null}
     </motion.form>
@@ -450,6 +450,14 @@ function HolderCard({
           onChange={(e) => onChange({ documentId: e.target.value })}
           className="h-10 rounded-lg border border-white/15 bg-black/50 px-3 text-sm text-white placeholder:text-white/40 focus:border-primary focus:outline-none"
         />
+        <input
+          type="tel"
+          inputMode="tel"
+          placeholder="Celular"
+          value={holder.phone}
+          onChange={(e) => onChange({ phone: e.target.value })}
+          className="h-10 rounded-lg border border-white/15 bg-black/50 px-3 text-sm text-white placeholder:text-white/40 focus:border-primary focus:outline-none sm:col-span-2"
+        />
       </div>
     </div>
   );
@@ -498,7 +506,7 @@ function ConfirmedView({
             {holder ? (
               <>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {holder.fullName} · Doc. {holder.documentId}
+                  {holder.fullName} · Doc. {holder.documentId} · Cel. {holder.phone}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Camiseta <strong className="text-white">{holder.jerseySize}</strong>

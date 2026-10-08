@@ -8,6 +8,7 @@ const assignmentSchema = z.object({
   seat_number: z.number().int().min(1).max(568),
   holder_full_name: z.string().trim().min(2),
   holder_document_id: z.string().trim().min(5),
+  holder_phone: z.string().trim().min(7),
   jersey_size: z.enum(["XS", "S", "M", "L", "XL", "XXL"]),
 });
 

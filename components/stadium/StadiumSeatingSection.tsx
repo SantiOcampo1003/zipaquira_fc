@@ -37,6 +37,7 @@ type SessionResponse = {
 export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSectionProps) {
   const searchParams = useSearchParams();
   const accessToken = searchParams.get("token")?.trim() || null;
+  const previewMode = !accessToken && searchParams.get("preview") === "1";
 
   const [localAbonoCount, setLocalAbonoCount] = useState(() =>
     parseAbonoCountParam(searchParams.get("abonos"))
@@ -126,9 +127,9 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
   }, [accessToken]);
 
   useEffect(() => {
-    if (!accessToken) return;
+    if (!accessToken && !previewMode) return;
     loadSession();
-  }, [accessToken, loadSession]);
+  }, [accessToken, previewMode, loadSession]);
 
   useEffect(() => {
     setHolderDrafts((prev) => {
@@ -260,8 +261,9 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
   const seatsComplete = selectedSeatIds.length === abonoCount;
   const isCompletedPurchase = sessionPurchase?.status === "completed";
 
-  // Sección privada: solo visible para quien entra con el link personal del correo.
-  if (!accessToken) return null;
+  // Sección privada: solo visible para quien entra con el link personal del
+  // correo, o con ?preview=1 (vista de solo lectura, sin poder elegir silla).
+  if (!accessToken && !previewMode) return null;
 
   return (
     <section
@@ -271,15 +273,22 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <RevealOnScroll className="text-center">
           <SectionBadge>
-            {sessionPurchase?.purchaseType === "boleta"
+            {previewMode
+              ? "Vista de solo lectura"
+              : sessionPurchase?.purchaseType === "boleta"
               ? "Boleta de partido · Elección de silla"
               : "Abonados · Elección de silla"}
           </SectionBadge>
           <h2 className="rz-h2 mt-5 text-balance sm:mt-6">
-            Elige tu silla en la tribuna
+            {previewMode ? "Mapa actual de la tribuna" : "Elige tu silla en la tribuna"}
             <span className="mt-2 block text-primary">Numeración oficial 001 – 568</span>
           </h2>
-          {sessionPurchase?.purchaseType === "boleta" && sessionPurchase.matchLabel ? (
+          {previewMode ? (
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Este enlace es solo para consulta: 0 sillas por escoger. Muestra el estado real de
+              ocupación, pero no permite seleccionar ni confirmar ninguna silla.
+            </p>
+          ) : sessionPurchase?.purchaseType === "boleta" && sessionPurchase.matchLabel ? (
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
               Tu boleta es solo para <strong className="text-primary">{sessionPurchase.matchLabel}</strong>.
               Elige tu silla exacta y la talla de camiseta.
@@ -307,19 +316,34 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
 
         {!sessionLoading ? (
           <>
-            <div className="mt-8">
-              <RevealOnScroll>
-                <BookingStepIndicator
-                  currentStep={bookingStep}
-                  abonoCount={abonoCount}
-                  seatsSelected={selectedSeatIds.length}
-                  purchaseLocked={purchaseLocked}
-                  onAbonoCountChange={handleAbonoCountChange}
-                  purchaseType={sessionPurchase?.purchaseType ?? "abono"}
-                  matchLabel={sessionPurchase?.matchLabel ?? null}
-                />
-              </RevealOnScroll>
-            </div>
+            {previewMode ? (
+              <div className="mt-8">
+                <RevealOnScroll>
+                  <div className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-[#18181B]/80 p-4 text-center sm:p-5">
+                    <span className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 font-mono text-lg font-bold text-primary">
+                      0 sillas por escoger
+                    </span>
+                    <p className="text-xs text-muted-foreground">
+                      Solo consulta — haz clic en una silla no hace nada en esta vista.
+                    </p>
+                  </div>
+                </RevealOnScroll>
+              </div>
+            ) : (
+              <div className="mt-8">
+                <RevealOnScroll>
+                  <BookingStepIndicator
+                    currentStep={bookingStep}
+                    abonoCount={abonoCount}
+                    seatsSelected={selectedSeatIds.length}
+                    purchaseLocked={purchaseLocked}
+                    onAbonoCountChange={handleAbonoCountChange}
+                    purchaseType={sessionPurchase?.purchaseType ?? "abono"}
+                    matchLabel={sessionPurchase?.matchLabel ?? null}
+                  />
+                </RevealOnScroll>
+              </div>
+            )}
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               {(Object.keys(STADIUM_ZONES) as StadiumZoneId[]).map((zoneId) => {
@@ -343,22 +367,22 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
                 <StadiumGrandstandMap
                   seats={seats}
                   selectedSeatIds={selectedSeatIds}
-                  onSelectSeat={selectSeat}
+                  onSelectSeat={previewMode ? () => {} : selectSeat}
                   hoveredSeat={hoveredSeat}
                   setHoveredSeat={setHoveredSeat}
                   activeZoneId={activeZoneId}
                   setActiveZoneId={setActiveZoneId}
                   allowedZoneId={allowedZoneId}
-                  selectionEnabled={bookingStep === "seats" && !isCompletedPurchase}
+                  selectionEnabled={!previewMode && bookingStep === "seats" && !isCompletedPurchase}
                   abonoCount={abonoCount}
                 />
               </RevealOnScroll>
 
-              {bookingStep === "seats" && selectionMessage ? (
+              {!previewMode && bookingStep === "seats" && selectionMessage ? (
                 <p className="mt-3 text-center text-sm text-amber-400">{selectionMessage}</p>
               ) : null}
 
-              {bookingStep === "seats" && seatsComplete ? (
+              {!previewMode && bookingStep === "seats" && seatsComplete ? (
                 <div className="mt-4 flex justify-center">
                   <button
                     type="button"
@@ -377,36 +401,38 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
               ) : null}
             </div>
 
-            <div id="booking-panel" className="mt-8 grid gap-8 lg:grid-cols-2">
-              <RevealOnScroll>
-                <StadiumPerspectiveView
-                  activeZoneId={activeZoneId}
-                  hoveredSeat={hoveredSeat ?? selectedSeats[selectedSeats.length - 1] ?? null}
-                />
-              </RevealOnScroll>
-              <RevealOnScroll>
-                <SeatBookingPanel
-                  abonoCount={abonoCount}
-                  bookingStep={bookingStep}
-                  onBookingStepChange={setBookingStep}
-                  selectedSeats={selectedSeats}
-                  holderDrafts={holderDrafts}
-                  onHolderDraftChange={updateHolderDraft}
-                  purchaserEmail={purchaserEmail}
-                  onPurchaserEmailChange={setPurchaserEmail}
-                  onClearSeat={clearSeatAt}
-                  allowedZoneId={allowedZoneId}
-                  accessToken={accessToken}
-                  emailLocked={purchaseLocked}
-                  isSubmitting={isSubmitting}
-                  confirmError={confirmError}
-                  onConfirm={accessToken ? handleConfirm : undefined}
-                  purchaseType={purchaseType}
-                  matchLabel={sessionPurchase?.matchLabel ?? null}
-                  readOnly={isCompletedPurchase}
-                />
-              </RevealOnScroll>
-            </div>
+            {!previewMode ? (
+              <div id="booking-panel" className="mt-8 grid gap-8 lg:grid-cols-2">
+                <RevealOnScroll>
+                  <StadiumPerspectiveView
+                    activeZoneId={activeZoneId}
+                    hoveredSeat={hoveredSeat ?? selectedSeats[selectedSeats.length - 1] ?? null}
+                  />
+                </RevealOnScroll>
+                <RevealOnScroll>
+                  <SeatBookingPanel
+                    abonoCount={abonoCount}
+                    bookingStep={bookingStep}
+                    onBookingStepChange={setBookingStep}
+                    selectedSeats={selectedSeats}
+                    holderDrafts={holderDrafts}
+                    onHolderDraftChange={updateHolderDraft}
+                    purchaserEmail={purchaserEmail}
+                    onPurchaserEmailChange={setPurchaserEmail}
+                    onClearSeat={clearSeatAt}
+                    allowedZoneId={allowedZoneId}
+                    accessToken={accessToken}
+                    emailLocked={purchaseLocked}
+                    isSubmitting={isSubmitting}
+                    confirmError={confirmError}
+                    onConfirm={accessToken ? handleConfirm : undefined}
+                    purchaseType={purchaseType}
+                    matchLabel={sessionPurchase?.matchLabel ?? null}
+                    readOnly={isCompletedPurchase}
+                  />
+                </RevealOnScroll>
+              </div>
+            ) : null}
           </>
         ) : null}
       </div>

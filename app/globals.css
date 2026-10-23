@@ -192,3 +192,28 @@
     padding-right: env(safe-area-inset-right);
   }
 }
+
+/* "Descargar PDF" del reporte de ocupación: solo imprime ese bloque. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #preview-report,
+  #preview-report * {
+    visibility: visible;
+  }
+  #preview-report {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: #fff !important;
+    color: #000 !important;
+    border: none !important;
+  }
+  #preview-report * {
+    background: transparent !important;
+    color: #000 !important;
+    border-color: #ccc !important;
+  }
+}

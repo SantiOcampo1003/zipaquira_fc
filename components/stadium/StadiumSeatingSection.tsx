@@ -6,6 +6,7 @@ import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { SectionBadge } from "@/components/SectionBadge";
 import { Separator } from "@/components/ui/separator";
 import { BookingStepIndicator } from "@/components/stadium/BookingStepIndicator";
+import { PreviewSummaryPanel } from "@/components/stadium/PreviewSummaryPanel";
 import { StadiumGrandstandMap } from "@/components/stadium/StadiumGrandstandMap";
 import { StadiumPerspectiveView } from "@/components/stadium/StadiumPerspectiveView";
 import { SeatBookingPanel } from "@/components/stadium/SeatBookingPanel";
@@ -411,6 +412,12 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
                 </div>
               ) : null}
             </div>
+
+            {previewMode ? (
+              <RevealOnScroll>
+                <PreviewSummaryPanel seats={seats} matchLabel={previewMatchLabel} />
+              </RevealOnScroll>
+            ) : null}
 
             {!previewMode ? (
               <div id="booking-panel" className="mt-8 grid gap-8 lg:grid-cols-2">

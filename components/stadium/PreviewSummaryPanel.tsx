@@ -129,7 +129,7 @@ export function PreviewSummaryPanel({ seats, matchLabel }: PreviewSummaryPanelPr
         </div>
       </div>
       <p className="mt-1 text-[11px] text-muted-foreground print:hidden">
-        "Descargar PDF" abre el diálogo de impresión — elige "Guardar como PDF" como destino.
+        &ldquo;Descargar PDF&rdquo; abre el diálogo de impresión — elige &ldquo;Guardar como PDF&rdquo; como destino.
       </p>
 
       <div className="mt-5 overflow-x-auto">

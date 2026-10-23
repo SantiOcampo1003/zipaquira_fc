@@ -67,6 +67,7 @@ export function PreviewSummaryPanel({ seats, matchLabel }: PreviewSummaryPanelPr
           seatId: s.id,
           zoneLabel: STADIUM_ZONES[s.zoneId].shortName,
           occupantName: s.occupantName as string,
+          typeLabel: s.occupantType === "boleta" ? "Boleta individual" : "Abono",
           price: s.price,
         })),
     [seats]
@@ -77,7 +78,7 @@ export function PreviewSummaryPanel({ seats, matchLabel }: PreviewSummaryPanelPr
     : "Resumen de ocupación de la tribuna";
 
   function handleDownloadCsv() {
-    const header = ["Silla", "Zona", "Ocupante", "Valor"];
+    const header = ["Silla", "Zona", "Ocupante", "Tipo", "Valor"];
     const lines = [header.join(";")];
     for (const row of roster) {
       lines.push(
@@ -85,6 +86,7 @@ export function PreviewSummaryPanel({ seats, matchLabel }: PreviewSummaryPanelPr
           row.seatId,
           csvEscape(row.zoneLabel),
           csvEscape(row.occupantName),
+          csvEscape(row.typeLabel),
           String(row.price),
         ].join(";")
       );
@@ -165,6 +167,7 @@ export function PreviewSummaryPanel({ seats, matchLabel }: PreviewSummaryPanelPr
               <th className="py-2 pl-3 pr-3">Silla</th>
               <th className="py-2 pr-3">Zona</th>
               <th className="py-2 pr-3">Ocupante</th>
+              <th className="py-2 pr-3">Tipo</th>
               <th className="py-2 pr-3">Valor</th>
             </tr>
           </thead>
@@ -174,12 +177,13 @@ export function PreviewSummaryPanel({ seats, matchLabel }: PreviewSummaryPanelPr
                 <td className="py-1.5 pl-3 pr-3 font-mono">#{row.seatId}</td>
                 <td className="py-1.5 pr-3">{row.zoneLabel}</td>
                 <td className="py-1.5 pr-3">{row.occupantName}</td>
+                <td className="py-1.5 pr-3">{row.typeLabel}</td>
                 <td className="py-1.5 pr-3 font-mono">{formatCop(row.price)}</td>
               </tr>
             ))}
             {roster.length === 0 ? (
               <tr>
-                <td colSpan={4} className="py-4 text-center text-muted-foreground">
+                <td colSpan={5} className="py-4 text-center text-muted-foreground">
                   No hay sillas ocupadas con nombre registrado todavía.
                 </td>
               </tr>

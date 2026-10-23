@@ -21,6 +21,10 @@ const ZOOM_MAX = 1.5;
 const ZOOM_DEFAULT = 0.75;
 const ZOOM_STEP = 0.05;
 
+function occupantTypeLabel(type: "abono" | "boleta"): string {
+  return type === "boleta" ? "Boleta individual" : "Abono";
+}
+
 function scaledSeatSize(zoom: number) {
   return Math.max(10, Math.round(BASE_SEAT_SIZE * zoom));
 }
@@ -548,7 +552,10 @@ function ZoneSegment({
                   )}
                 >
                   {seat.occupantName ? (
-                    <>#{id} — {seat.occupantName}</>
+                    <>
+                      #{id} — {seat.occupantName}
+                      {seat.occupantType ? ` (${occupantTypeLabel(seat.occupantType)})` : ""}
+                    </>
                   ) : (
                     <>{abonoOrder ? `${abonoOrder}·` : ""}#{id}</>
                   )}
@@ -564,14 +571,18 @@ function ZoneSegment({
                 disabled={!readOnlyHover && (isBlocked || (!selectionEnabled && !isSelected))}
                 aria-label={
                   seat.occupantName
-                    ? `Silla #${id} · Fila ${seat.row} · ocupada por ${seat.occupantName}`
+                    ? `Silla #${id} · Fila ${seat.row} · ocupada por ${seat.occupantName}${
+                        seat.occupantType ? ` (${occupantTypeLabel(seat.occupantType)})` : ""
+                      }`
                     : isCourtesy
                     ? `Cortesía · Silla #${id} · Fila ${seat.row} · no disponible`
                     : formatSeatLabel(seat)
                 }
                 title={
                   seat.occupantName
-                    ? `Silla #${id} — ${seat.occupantName}`
+                    ? `Silla #${id} — ${seat.occupantName}${
+                        seat.occupantType ? ` (${occupantTypeLabel(seat.occupantType)})` : ""
+                      }`
                     : isCourtesy
                     ? "Reservada para cortesía"
                     : undefined

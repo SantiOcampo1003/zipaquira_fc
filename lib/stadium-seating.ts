@@ -44,6 +44,8 @@ export type Seat = {
   price: number;
   /** Solo en vista de solo lectura (?preview=1&match=...): nombre de quien la compró. */
   occupantName?: string | null;
+  /** "abono" = temporada completa, "boleta" = solo el partido consultado. */
+  occupantType?: "abono" | "boleta" | null;
 };
 
 export type ZoneConfig = {

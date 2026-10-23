@@ -64,7 +64,7 @@ export async function GET(req: Request) {
 
       let conflictQuery = supabase
         .from("abono_registrations")
-        .select("seat_number, holder_full_name, abono_purchases!inner(status)")
+        .select("seat_number, holder_full_name, match_id, abono_purchases!inner(status)")
         .eq("abono_purchases.status", "completed");
 
       conflictQuery = matchIdResolved
@@ -82,12 +82,20 @@ export async function GET(req: Request) {
       }
 
       const occupantBySeat = new Map(
-        (conflictRows ?? []).map((r) => [r.seat_number as number, r.holder_full_name as string | null])
+        (conflictRows ?? []).map((r) => [
+          r.seat_number as number,
+          {
+            name: r.holder_full_name as string | null,
+            type: (r.match_id ? "boleta" : "abono") as "abono" | "boleta",
+          },
+        ])
       );
       for (const seat of seats) {
-        if (occupantBySeat.has(seat.seatNumber)) {
+        const occupant = occupantBySeat.get(seat.seatNumber);
+        if (occupant) {
           if (seat.status === "available") seat.status = "occupied";
-          seat.occupantName = occupantBySeat.get(seat.seatNumber) ?? null;
+          seat.occupantName = occupant.name;
+          seat.occupantType = occupant.type;
         }
       }
 

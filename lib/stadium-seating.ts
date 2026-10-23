@@ -46,6 +46,10 @@ export type Seat = {
   occupantName?: string | null;
   /** "abono" = temporada completa, "boleta" = solo el partido consultado. */
   occupantType?: "abono" | "boleta" | null;
+  /** Solo en vista admin: id de la compra, para poder editarla/borrarla. */
+  occupantPurchaseId?: string | null;
+  occupantDocumentId?: string | null;
+  occupantPhone?: string | null;
 };
 
 export type ZoneConfig = {

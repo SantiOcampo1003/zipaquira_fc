@@ -15,6 +15,9 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const token = url.searchParams.get("token")?.trim() || null;
     const previewMatchLabel = url.searchParams.get("match")?.trim() || null;
+    const tribunaAdminSecret = process.env.TRIBUNA_ADMIN_SECRET;
+    const isAdminCaller =
+      !!tribunaAdminSecret && req.headers.get("x-admin-secret") === tribunaAdminSecret;
     const supabase = getSupabaseAdmin();
 
     const { data: seatRows, error: seatsError } = await supabase
@@ -64,7 +67,9 @@ export async function GET(req: Request) {
 
       let conflictQuery = supabase
         .from("abono_registrations")
-        .select("seat_number, holder_full_name, match_id, abono_purchases!inner(status)")
+        .select(
+          "seat_number, holder_full_name, holder_document_id, holder_phone, match_id, purchase_id, abono_purchases!inner(status)"
+        )
         .eq("abono_purchases.status", "completed");
 
       conflictQuery = matchIdResolved
@@ -87,6 +92,9 @@ export async function GET(req: Request) {
           {
             name: r.holder_full_name as string | null,
             type: (r.match_id ? "boleta" : "abono") as "abono" | "boleta",
+            documentId: r.holder_document_id as string | null,
+            phone: r.holder_phone as string | null,
+            purchaseId: r.purchase_id as string,
           },
         ])
       );
@@ -96,6 +104,11 @@ export async function GET(req: Request) {
           if (seat.status === "available") seat.status = "occupied";
           seat.occupantName = occupant.name;
           seat.occupantType = occupant.type;
+          if (isAdminCaller) {
+            seat.occupantPurchaseId = occupant.purchaseId;
+            seat.occupantDocumentId = occupant.documentId;
+            seat.occupantPhone = occupant.phone;
+          }
         }
       }
 
@@ -104,6 +117,7 @@ export async function GET(req: Request) {
         registrations: [],
         seats,
         previewMatchLabel: matchLabelResolved,
+        previewMatchId: matchIdResolved,
       });
     }
 

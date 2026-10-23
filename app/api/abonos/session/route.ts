@@ -91,7 +91,7 @@ export async function GET(req: Request) {
           r.seat_number as number,
           {
             name: r.holder_full_name as string | null,
-            type: (r.match_id ? "boleta" : "abono") as "abono" | "boleta",
+            isMatchSpecific: !!r.match_id,
             documentId: r.holder_document_id as string | null,
             phone: r.holder_phone as string | null,
             purchaseId: r.purchase_id as string,
@@ -103,7 +103,8 @@ export async function GET(req: Request) {
         if (occupant) {
           if (seat.status === "available") seat.status = "occupied";
           seat.occupantName = occupant.name;
-          seat.occupantType = occupant.type;
+          seat.occupantType =
+            seat.status === "courtesy" ? "cortesia" : occupant.isMatchSpecific ? "boleta" : "abono";
           if (isAdminCaller) {
             seat.occupantPurchaseId = occupant.purchaseId;
             seat.occupantDocumentId = occupant.documentId;

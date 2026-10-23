@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { StadiumGrandstandMap } from "@/components/stadium/StadiumGrandstandMap";
+import { PreviewSummaryPanel } from "@/components/stadium/PreviewSummaryPanel";
 import { Button } from "@/components/ui/button";
 import {
   generateInitialStadiumSeats,
@@ -62,11 +63,15 @@ export function AdminSeatManager() {
   }, [adminKey]);
 
   const fetchSeats = useCallback(async () => {
+    if (!matchParam) {
+      setSeats([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ preview: "1" });
-      if (matchParam) params.set("match", matchParam);
+      const params = new URLSearchParams({ preview: "1", match: matchParam });
       const res = await fetch(`/api/abonos/session?${params.toString()}`, {
         headers: { "x-admin-secret": adminKey },
       });
@@ -97,6 +102,16 @@ export function AdminSeatManager() {
     fetchSeats();
   }, [adminKey, fetchMatches, fetchSeats]);
 
+  // Este panel es solo para boletería individual por partido (los abonos se
+  // registran directo en la base de datos) — si no hay partido en la URL,
+  // selecciona automáticamente el más próximo en vez de mostrar un mapa vacío.
+  useEffect(() => {
+    if (!matchParam && matches.length > 0) {
+      changeMatch(matches[0].ticket_label ?? matches[0].opponent);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchParam, matches]);
+
   function changeMatch(label: string) {
     const params = new URLSearchParams(searchParams.toString());
     if (label) params.set("match", label);
@@ -107,6 +122,10 @@ export function AdminSeatManager() {
   function openModal(seat: Seat) {
     if (seat.status === "courtesy") {
       alert("Esta silla es de cortesía y no se puede asignar desde acá.");
+      return;
+    }
+    if (seat.occupantType === "abono") {
+      alert("Esta silla es de un abono de temporada — se maneja directamente en la base de datos, no desde este panel.");
       return;
     }
     setModalError(null);
@@ -249,7 +268,7 @@ export function AdminSeatManager() {
           onChange={(e) => changeMatch(e.target.value)}
           className="h-10 rounded-lg border border-white/15 bg-black/50 px-3 text-sm text-white"
         >
-          <option value="">Abono de temporada</option>
+          {!matchParam ? <option value="">Selecciona un partido…</option> : null}
           {matches.map((m) => (
             <option key={m.id} value={m.ticket_label ?? m.opponent}>
               {m.ticket_label ?? m.opponent} — {m.match_date}
@@ -271,6 +290,10 @@ export function AdminSeatManager() {
 
       {loading ? (
         <p className="mt-10 text-center text-sm text-muted-foreground">Cargando mapa…</p>
+      ) : !matchParam ? (
+        <p className="mt-10 text-center text-sm text-muted-foreground">
+          Selecciona un partido arriba para ver y asignar sus sillas.
+        </p>
       ) : (
         <div className="mt-8">
           <StadiumGrandstandMap
@@ -286,6 +309,7 @@ export function AdminSeatManager() {
             readOnlyHover={true}
             abonoCount={1}
           />
+          <PreviewSummaryPanel seats={seats} matchLabel={matchParam || null} />
         </div>
       )}
 

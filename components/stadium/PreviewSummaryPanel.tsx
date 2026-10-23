@@ -67,7 +67,12 @@ export function PreviewSummaryPanel({ seats, matchLabel }: PreviewSummaryPanelPr
           seatId: s.id,
           zoneLabel: STADIUM_ZONES[s.zoneId].shortName,
           occupantName: s.occupantName as string,
-          typeLabel: s.occupantType === "boleta" ? "Boleta individual" : "Abono",
+          typeLabel:
+            s.occupantType === "boleta"
+              ? "Boleta individual"
+              : s.occupantType === "cortesia"
+              ? "Abono de cortesía"
+              : "Abono",
           price: s.price,
         })),
     [seats]

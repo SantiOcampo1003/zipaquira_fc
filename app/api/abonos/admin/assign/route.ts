@@ -16,7 +16,9 @@ const assignSchema = z.object({
   holderDocumentId: z.string().trim().min(3),
   holderPhone: z.string().trim().min(7),
   holderEmail: z.string().trim().email().optional().or(z.literal("")),
-  matchLabel: z.string().trim().max(120).optional(), // vacío/"abono" = abono de temporada
+  // Este panel es solo para boletería individual por partido; los abonos de
+  // temporada se registran directamente en la base de datos, no desde acá.
+  matchLabel: z.string().trim().min(1).max(120),
 });
 
 function generateToken(): string {
@@ -46,28 +48,23 @@ export async function POST(req: Request) {
       parsed.data;
     const supabase = getSupabaseAdmin();
 
-    const isAbono = !matchLabel || matchLabel.trim().toLowerCase() === "abono";
-    let matchId: string | null = null;
+    const { data: matchRow, error: matchError } = await supabase
+      .from("matches")
+      .select("id")
+      .ilike("ticket_label", matchLabel.trim())
+      .maybeSingle();
 
-    if (!isAbono) {
-      const { data: matchRow, error: matchError } = await supabase
-        .from("matches")
-        .select("id")
-        .ilike("ticket_label", matchLabel!.trim())
-        .maybeSingle();
-
-      if (matchError) {
-        console.error("[abonos/admin/assign] match lookup:", matchError.message);
-        return NextResponse.json({ error: "No pudimos buscar el partido." }, { status: 500 });
-      }
-      if (!matchRow) {
-        return NextResponse.json(
-          { error: `No encontramos el partido "${matchLabel}".` },
-          { status: 400 }
-        );
-      }
-      matchId = matchRow.id;
+    if (matchError) {
+      console.error("[abonos/admin/assign] match lookup:", matchError.message);
+      return NextResponse.json({ error: "No pudimos buscar el partido." }, { status: 500 });
     }
+    if (!matchRow) {
+      return NextResponse.json(
+        { error: `No encontramos el partido "${matchLabel}".` },
+        { status: 400 }
+      );
+    }
+    const matchId = matchRow.id;
 
     const purchaserEmail =
       holderEmail?.trim() ||
@@ -80,7 +77,7 @@ export async function POST(req: Request) {
         purchaser_email: purchaserEmail.toLowerCase(),
         abono_count: 1,
         zone_id: zoneId,
-        purchase_type: isAbono ? "abono" : "boleta",
+        purchase_type: "boleta",
         match_id: matchId,
         access_token: token,
         status: "pending_seats",

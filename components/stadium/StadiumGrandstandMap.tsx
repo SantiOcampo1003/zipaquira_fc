@@ -21,8 +21,10 @@ const ZOOM_MAX = 1.5;
 const ZOOM_DEFAULT = 0.75;
 const ZOOM_STEP = 0.05;
 
-function occupantTypeLabel(type: "abono" | "boleta"): string {
-  return type === "boleta" ? "Boleta individual" : "Abono";
+function occupantTypeLabel(type: "abono" | "boleta" | "cortesia"): string {
+  if (type === "boleta") return "Boleta individual";
+  if (type === "cortesia") return "Abono de cortesía";
+  return "Abono";
 }
 
 function scaledSeatSize(zoom: number) {

@@ -45,7 +45,7 @@ export type Seat = {
   /** Solo en vista de solo lectura (?preview=1&match=...): nombre de quien la compró. */
   occupantName?: string | null;
   /** "abono" = temporada completa, "boleta" = solo el partido consultado. */
-  occupantType?: "abono" | "boleta" | null;
+  occupantType?: "abono" | "boleta" | "cortesia" | null;
   /** Solo en vista admin: id de la compra, para poder editarla/borrarla. */
   occupantPurchaseId?: string | null;
   occupantDocumentId?: string | null;

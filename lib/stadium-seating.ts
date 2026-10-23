@@ -42,6 +42,8 @@ export type Seat = {
   seatNumber: number;
   status: SeatStatus;
   price: number;
+  /** Solo en vista de solo lectura (?preview=1&match=...): nombre de quien la compró. */
+  occupantName?: string | null;
 };
 
 export type ZoneConfig = {

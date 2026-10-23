@@ -44,6 +44,8 @@ type StadiumGrandstandMapProps = {
   allowedZoneId?: StadiumZoneId | null;
   selectionEnabled?: boolean;
   abonoCount?: number;
+  /** Vista de solo lectura: permite hover/tooltip aunque la silla esté ocupada o bloqueada. */
+  readOnlyHover?: boolean;
 };
 
 export function StadiumGrandstandMap({
@@ -57,6 +59,7 @@ export function StadiumGrandstandMap({
   allowedZoneId = null,
   selectionEnabled = true,
   abonoCount = 1,
+  readOnlyHover = false,
 }: StadiumGrandstandMapProps) {
   const [zoomLevel, setZoomLevel] = useState(ZOOM_DEFAULT);
 
@@ -245,6 +248,7 @@ export function StadiumGrandstandMap({
                   seatSize={seatSize}
                   seatGap={seatGap}
                   selectionEnabled={selectionEnabled}
+                  readOnlyHover={readOnlyHover}
                   onSelectSeat={onSelectSeat}
                   setHoveredSeat={setHoveredSeat}
                 />
@@ -406,6 +410,7 @@ function GrandstandRow({
   seatSize,
   seatGap,
   selectionEnabled,
+  readOnlyHover = false,
   onSelectSeat,
   setHoveredSeat,
 }: {
@@ -419,6 +424,7 @@ function GrandstandRow({
   seatSize: number;
   seatGap: number;
   selectionEnabled: boolean;
+  readOnlyHover?: boolean;
   onSelectSeat: (seat: Seat) => void;
   setHoveredSeat: (seat: Seat | null) => void;
 }) {
@@ -448,6 +454,7 @@ function GrandstandRow({
             seatSize={seatSize}
             seatGap={seatGap}
             selectionEnabled={selectionEnabled}
+            readOnlyHover={readOnlyHover}
             onSelectSeat={onSelectSeat}
             setHoveredSeat={setHoveredSeat}
           />
@@ -472,6 +479,7 @@ function ZoneSegment({
   seatSize,
   seatGap,
   selectionEnabled,
+  readOnlyHover = false,
   onSelectSeat,
   setHoveredSeat,
 }: {
@@ -486,6 +494,7 @@ function ZoneSegment({
   seatSize: number;
   seatGap: number;
   selectionEnabled: boolean;
+  readOnlyHover?: boolean;
   onSelectSeat: (seat: Seat) => void;
   setHoveredSeat: (seat: Seat | null) => void;
 }) {
@@ -538,7 +547,11 @@ function ZoneSegment({
                       : "border border-white/30 bg-black/90 text-white"
                   )}
                 >
-                  {abonoOrder ? `${abonoOrder}·` : ""}#{id}
+                  {seat.occupantName ? (
+                    <>#{id} — {seat.occupantName}</>
+                  ) : (
+                    <>{abonoOrder ? `${abonoOrder}·` : ""}#{id}</>
+                  )}
                 </div>
               ) : null}
               {isSelected && abonoOrder ? (
@@ -548,13 +561,21 @@ function ZoneSegment({
               ) : null}
               <button
                 type="button"
-                disabled={isBlocked || (!selectionEnabled && !isSelected)}
+                disabled={!readOnlyHover && (isBlocked || (!selectionEnabled && !isSelected))}
                 aria-label={
-                  isCourtesy
+                  seat.occupantName
+                    ? `Silla #${id} · Fila ${seat.row} · ocupada por ${seat.occupantName}`
+                    : isCourtesy
                     ? `Cortesía · Silla #${id} · Fila ${seat.row} · no disponible`
                     : formatSeatLabel(seat)
                 }
-                title={isCourtesy ? "Reservada para cortesía" : undefined}
+                title={
+                  seat.occupantName
+                    ? `Silla #${id} — ${seat.occupantName}`
+                    : isCourtesy
+                    ? "Reservada para cortesía"
+                    : undefined
+                }
                 onClick={() => onSelectSeat(seat)}
                 onMouseEnter={() => setHoveredSeat(seat)}
                 onMouseLeave={() => setHoveredSeat(null)}

@@ -12,7 +12,9 @@ import { getSupabaseAdmin } from "@/lib/supabase-server";
 
 export async function GET(req: Request) {
   try {
-    const token = new URL(req.url).searchParams.get("token")?.trim() || null;
+    const url = new URL(req.url);
+    const token = url.searchParams.get("token")?.trim() || null;
+    const previewMatchLabel = url.searchParams.get("match")?.trim() || null;
     const supabase = getSupabaseAdmin();
 
     const { data: seatRows, error: seatsError } = await supabase
@@ -31,6 +33,59 @@ export async function GET(req: Request) {
     const seats = (seatRows as DbStadiumSeatRow[]).map(mapDbSeatToSeat);
 
     if (!token) {
+      // Vista de solo lectura (?preview=1&match=...): superpone las sillas ya
+      // vendidas por boleta para ese partido puntual sobre el mapa base.
+      if (previewMatchLabel) {
+        const { data: matchRow, error: matchError } = await supabase
+          .from("matches")
+          .select("id, ticket_label, opponent")
+          .ilike("ticket_label", previewMatchLabel)
+          .maybeSingle();
+
+        if (matchError) {
+          console.error("[abonos/session] preview match lookup:", matchError.message);
+          return NextResponse.json({ error: "No pudimos buscar el partido." }, { status: 500 });
+        }
+
+        if (!matchRow) {
+          return NextResponse.json(
+            { error: `No encontramos el partido "${previewMatchLabel}".` },
+            { status: 404 }
+          );
+        }
+
+        const { data: conflictRows, error: conflictError } = await supabase
+          .from("abono_registrations")
+          .select("seat_number, holder_full_name, abono_purchases!inner(status)")
+          .eq("abono_purchases.status", "completed")
+          .eq("match_id", matchRow.id);
+
+        if (conflictError) {
+          console.error("[abonos/session] preview conflicts:", conflictError.message);
+          return NextResponse.json(
+            { error: "No pudimos cargar el mapa de sillas." },
+            { status: 500 }
+          );
+        }
+
+        const occupantBySeat = new Map(
+          (conflictRows ?? []).map((r) => [r.seat_number as number, r.holder_full_name as string | null])
+        );
+        for (const seat of seats) {
+          if (occupantBySeat.has(seat.seatNumber)) {
+            if (seat.status === "available") seat.status = "occupied";
+            seat.occupantName = occupantBySeat.get(seat.seatNumber) ?? null;
+          }
+        }
+
+        return NextResponse.json({
+          purchase: null,
+          registrations: [],
+          seats,
+          previewMatchLabel: matchRow.ticket_label ?? matchRow.opponent,
+        });
+      }
+
       return NextResponse.json({ purchase: null, registrations: [], seats });
     }
 

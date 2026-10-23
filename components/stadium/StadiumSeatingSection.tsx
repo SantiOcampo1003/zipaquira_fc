@@ -31,6 +31,7 @@ type SessionResponse = {
   purchase: AbonoSessionPurchase | null;
   registrations: AbonoSessionRegistration[];
   seats: Seat[];
+  previewMatchLabel?: string | null;
   error?: string;
 };
 
@@ -38,6 +39,8 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
   const searchParams = useSearchParams();
   const accessToken = searchParams.get("token")?.trim() || null;
   const previewMode = !accessToken && searchParams.get("preview") === "1";
+  const previewMatchParam = previewMode ? searchParams.get("match")?.trim() || null : null;
+  const [previewMatchLabel, setPreviewMatchLabel] = useState<string | null>(null);
 
   const [localAbonoCount, setLocalAbonoCount] = useState(() =>
     parseAbonoCountParam(searchParams.get("abonos"))
@@ -79,6 +82,7 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
     try {
       const params = new URLSearchParams();
       if (accessToken) params.set("token", accessToken);
+      if (previewMatchParam) params.set("match", previewMatchParam);
 
       const res = await fetch(`/api/abonos/session?${params.toString()}`);
       const data = (await res.json()) as SessionResponse;
@@ -90,6 +94,7 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
       }
 
       setSeats(data.seats);
+      setPreviewMatchLabel(data.previewMatchLabel ?? null);
 
       if (data.purchase) {
         setSessionPurchase(data.purchase);
@@ -124,7 +129,7 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
     } finally {
       setSessionLoading(false);
     }
-  }, [accessToken]);
+  }, [accessToken, previewMatchParam]);
 
   useEffect(() => {
     if (!accessToken && !previewMode) return;
@@ -285,6 +290,11 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
           </h2>
           {previewMode ? (
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {previewMatchLabel ? (
+                <>
+                  Ocupación para <strong className="text-primary">{previewMatchLabel}</strong>.{" "}
+                </>
+              ) : null}
               Este enlace es solo para consulta: 0 sillas por escoger. Muestra el estado real de
               ocupación, pero no permite seleccionar ni confirmar ninguna silla.
             </p>
@@ -374,6 +384,7 @@ export function StadiumSeatingSection({ purchaseAbonoCount }: StadiumSeatingSect
                   setActiveZoneId={setActiveZoneId}
                   allowedZoneId={allowedZoneId}
                   selectionEnabled={!previewMode && bookingStep === "seats" && !isCompletedPurchase}
+                  readOnlyHover={previewMode}
                   abonoCount={abonoCount}
                 />
               </RevealOnScroll>

@@ -120,8 +120,8 @@ export function AdminSeatManager() {
   }
 
   function openModal(seat: Seat) {
-    if (seat.status === "courtesy") {
-      alert("Esta silla es de cortesía y no se puede asignar desde acá.");
+    if (seat.status === "courtesy" && !seat.occupantPurchaseId) {
+      alert("Esta silla de cortesía está vacía — este panel solo permite mover a quien ya está asignado, no crear uno nuevo acá.");
       return;
     }
     if (seat.occupantType === "abono") {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { isCourtesySeatNumber } from "@/lib/stadium-seating";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 
 /** Borra una asignación de silla (por error de digitación, etc). Protegido por TRIBUNA_ADMIN_SECRET. */
@@ -55,9 +56,14 @@ export async function POST(req: Request) {
     }
 
     if (freedSeat != null) {
+      // Las sillas de cortesía (479-504) nunca vuelven a "available": siguen
+      // bloqueadas para el público aunque no tengan a nadie asignado.
       await supabase
         .from("stadium_seats")
-        .update({ status: "available", updated_at: new Date().toISOString() })
+        .update({
+          status: isCourtesySeatNumber(freedSeat) ? "courtesy" : "available",
+          updated_at: new Date().toISOString(),
+        })
         .eq("seat_number", freedSeat);
     }
 

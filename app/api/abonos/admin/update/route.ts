@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { mapRpcErrorToMessage } from "@/lib/stadium-db";
+import { isCourtesySeatNumber } from "@/lib/stadium-seating";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 
 /**
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
 
     const { data: registration, error: regError } = await supabase
       .from("abono_registrations")
-      .select("seat_number")
+      .select("seat_number, jersey_size")
       .eq("purchase_id", purchaseId)
       .maybeSingle();
 
@@ -115,7 +116,7 @@ export async function POST(req: Request) {
           holder_full_name: holderFullName.trim(),
           holder_document_id: holderDocumentId.trim(),
           holder_phone: holderPhone.trim(),
-          jersey_size: null,
+          jersey_size: registration.jersey_size,
         },
       ],
     });
@@ -138,7 +139,7 @@ export async function POST(req: Request) {
             holder_full_name: holderFullName.trim(),
             holder_document_id: holderDocumentId.trim(),
             holder_phone: holderPhone.trim(),
-            jersey_size: null,
+            jersey_size: registration.jersey_size,
           },
         ],
       });
@@ -147,11 +148,24 @@ export async function POST(req: Request) {
 
     // El RPC marca la silla nueva como "reserved" pero no libera la vieja
     // (solo aplica a abonos: las boletas de partido nunca tocan stadium_seats).
+    // Las sillas del bloque de cortesía (479-504) nunca deben quedar en
+    // "available" ni en "reserved": siempre son "courtesy", tenga o no
+    // alguien asignado, para que un hincha normal nunca pueda reservarlas.
     if (purchase.purchase_type === "abono") {
       await supabase
         .from("stadium_seats")
-        .update({ status: "available", updated_at: new Date().toISOString() })
+        .update({
+          status: isCourtesySeatNumber(registration.seat_number) ? "courtesy" : "available",
+          updated_at: new Date().toISOString(),
+        })
         .eq("seat_number", registration.seat_number);
+
+      if (isCourtesySeatNumber(newSeatNumber!)) {
+        await supabase
+          .from("stadium_seats")
+          .update({ status: "courtesy", updated_at: new Date().toISOString() })
+          .eq("seat_number", newSeatNumber!);
+      }
     }
 
     return NextResponse.json({ ok: true, seatNumber: newSeatNumber });

@@ -18,8 +18,8 @@ export const COURTESY_SEAT_RANGES: { from: number; to: number; label: string }[]
     label: "Cortesías zona blanca · Fila 4",
   },
   {
-    from: 492,
-    to: 493,
+    from: 490,
+    to: 492,
     label: "Cortesías zona blanca · Fila 4",
   },
   {

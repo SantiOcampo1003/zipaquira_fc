@@ -17,6 +17,11 @@ export const COURTESY_SEAT_RANGES: { from: number; to: number; label: string }[]
     to: 504,
     label: "Cortesías zona blanca · Fila 4",
   },
+  {
+    from: 337,
+    to: 342,
+    label: "Cortesías zona blanca · Fila 3",
+  },
 ];
 
 export function isCourtesySeatNumber(seatNumber: number): boolean {

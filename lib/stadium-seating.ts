@@ -13,18 +13,13 @@ export type SeatStatus = "available" | "occupied" | "courtesy" | "selected";
 /** Sillas reservadas para cortesías (no seleccionables por abonados). */
 export const COURTESY_SEAT_RANGES: { from: number; to: number; label: string }[] = [
   {
-    from: 479,
-    to: 485,
-    label: "Cortesías zona blanca · Fila 4",
-  },
-  {
     from: 490,
     to: 491,
     label: "Cortesías zona blanca · Fila 4",
   },
   {
     from: 494,
-    to: 495,
+    to: 502,
     label: "Cortesías zona blanca · Fila 4",
   },
   {

@@ -33,9 +33,9 @@ export const COURTESY_SEAT_RANGES: { from: number; to: number; label: string }[]
     label: "Cortesías zona blanca · Fila 3",
   },
   {
-    from: 229,
-    to: 232,
-    label: "Cortesías zona blanca · Fila 2",
+    from: 371,
+    to: 374,
+    label: "Cortesías zona blanca · Fila 3",
   },
 ];
 

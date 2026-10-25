@@ -14,6 +14,16 @@ export type SeatStatus = "available" | "occupied" | "courtesy" | "selected";
 export const COURTESY_SEAT_RANGES: { from: number; to: number; label: string }[] = [
   {
     from: 479,
+    to: 489,
+    label: "Cortesías zona blanca · Fila 4",
+  },
+  {
+    from: 492,
+    to: 493,
+    label: "Cortesías zona blanca · Fila 4",
+  },
+  {
+    from: 495,
     to: 496,
     label: "Cortesías zona blanca · Fila 4",
   },
@@ -24,7 +34,7 @@ export const COURTESY_SEAT_RANGES: { from: number; to: number; label: string }[]
   },
   {
     from: 337,
-    to: 342,
+    to: 345,
     label: "Cortesías zona blanca · Fila 3",
   },
 ];

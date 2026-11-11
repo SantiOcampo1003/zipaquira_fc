@@ -45,8 +45,47 @@ export function TicketScanner() {
     let scanner: import("html5-qrcode").Html5QrcodeScanner | null = null;
     let cancelled = false;
 
-    import("html5-qrcode").then(({ Html5QrcodeScanner }) => {
+    Promise.all([
+      import("html5-qrcode"),
+      // La librería no trae i18n propio — se traducen sus textos de UI en español
+      // sobrescribiendo sus strings estáticos antes de montar el escáner.
+      import("html5-qrcode/esm/strings"),
+    ]).then(([{ Html5QrcodeScanner }, { Html5QrcodeScannerStrings }]) => {
       if (cancelled) return;
+
+      Object.assign(Html5QrcodeScannerStrings, {
+        scanningStatus: () => "Escaneando",
+        idleStatus: () => "Inactivo",
+        errorStatus: () => "Error",
+        permissionStatus: () => "Permiso",
+        noCameraFoundErrorStatus: () => "Sin cámaras",
+        lastMatch: (decodedText: string) => `Última lectura: ${decodedText}`,
+        codeScannerTitle: () => "Escáner de código",
+        cameraPermissionTitle: () => "Solicitar permiso de cámara",
+        cameraPermissionRequesting: () => "Solicitando permiso de cámara…",
+        noCameraFound: () => "No se encontró cámara",
+        scanButtonStopScanningText: () => "Detener escaneo",
+        scanButtonStartScanningText: () => "Iniciar escaneo",
+        torchOnButton: () => "Encender linterna",
+        torchOffButton: () => "Apagar linterna",
+        torchOnFailedMessage: () => "No se pudo encender la linterna",
+        torchOffFailedMessage: () => "No se pudo apagar la linterna",
+        scanButtonScanningStarting: () => "Iniciando cámara…",
+        textIfCameraScanSelected: () => "Escanear un archivo de imagen",
+        textIfFileScanSelected: () => "Escanear directo con la cámara",
+        selectCamera: () => "Elegir cámara",
+        fileSelectionChooseImage: () => "Elegir imagen",
+        fileSelectionChooseAnother: () => "Elegir otra",
+        fileSelectionNoImageSelected: () => "Ninguna imagen elegida",
+        anonymousCameraPrefix: () => "Cámara anónima",
+        dragAndDropMessage: () => "O arrastra una imagen para escanear",
+        dragAndDropMessageOnlyImages: () =>
+          "O arrastra una imagen para escanear (no se admiten otros archivos)",
+        loadingImage: () => "Cargando imagen…",
+        cameraScanAltText: () => "Escaneo con cámara",
+        fileScanAltText: () => "Escaneo con archivo",
+      });
+
       scanner = new Html5QrcodeScanner(
         SCANNER_ELEMENT_ID,
         { fps: 10, qrbox: { width: 250, height: 250 } },

@@ -10,6 +10,7 @@ import { scrollToId } from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 
 const nav = [
+  { label: "Boletería", id: "boletas" },
   { label: "Tienda", id: "camiseta-conmemorativa" },
   { label: "Partidos", id: "partido" },
   ...(showKitSection ? [{ label: "Camiseta", id: "camiseta" } as const] : []),

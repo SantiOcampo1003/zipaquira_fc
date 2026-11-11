@@ -26,6 +26,8 @@ const postSchema = z.object({
   goals_against: z.number().int().min(0).nullable().optional(),
   slug: z.string().trim().optional(),
   is_featured: z.boolean().optional(),
+  /** Si tiene valor, el partido aparece en la venta de boletas en línea (/boletas). */
+  ticket_label: z.string().trim().min(2).nullable().optional(),
 });
 
 const patchSchema = postSchema.partial().extend({
@@ -98,6 +100,7 @@ export async function POST(req: Request) {
       goals_against: input.goals_against ?? null,
       slug,
       is_featured: input.is_featured ?? false,
+      ticket_label: input.ticket_label ?? null,
     })
     .select("*")
     .single();

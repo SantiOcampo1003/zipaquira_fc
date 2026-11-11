@@ -1,8 +1,8 @@
 /** Ruta donde vive cada id de sección, para navegar cuando no está en la página actual. */
 const ROUTE_BY_ID: Record<string, string> = {
-  inicio: "/",
-  "camiseta-conmemorativa": "/",
-  camiseta: "/",
+  inicio: "/boletas",
+  "camiseta-conmemorativa": "/tienda",
+  camiseta: "/tienda",
   partido: "/partidos",
   partidos: "/partidos",
   boletas: "/boletas",

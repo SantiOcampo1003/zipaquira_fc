@@ -14,7 +14,7 @@ import {
 } from "@/lib/formations";
 import type { PlayerRow } from "@/lib/types/match";
 import { cn } from "@/lib/utils";
-import { Award, Loader2, LogOut, Star } from "lucide-react";
+import { Award, Loader2, LogOut, Star, Ticket } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -32,6 +32,7 @@ type AdminMatch = {
   status: "scheduled" | "played" | "cancelled";
   slug: string;
   is_featured: boolean;
+  ticket_label: string | null;
   squad_count?: number;
 };
 
@@ -78,6 +79,8 @@ type MatchFormState = {
   goals_for: string;
   goals_against: string;
   is_featured: boolean;
+  ticket_sales_enabled: boolean;
+  ticket_label: string;
 };
 
 const emptyMatchForm: MatchFormState = {
@@ -92,7 +95,14 @@ const emptyMatchForm: MatchFormState = {
   goals_for: "",
   goals_against: "",
   is_featured: true,
+  ticket_sales_enabled: false,
+  ticket_label: "",
 };
+
+/** Sugerencia de etiqueta para /boletas — el admin puede editarla antes de guardar. */
+function suggestTicketLabel(opponent: string): string {
+  return opponent.trim() ? `Zipaquirá FC vs ${opponent.trim()}` : "";
+}
 
 function matchToForm(m: AdminMatch): MatchFormState {
   return {
@@ -107,6 +117,8 @@ function matchToForm(m: AdminMatch): MatchFormState {
     goals_for: m.goals_for != null ? String(m.goals_for) : "",
     goals_against: m.goals_against != null ? String(m.goals_against) : "",
     is_featured: m.is_featured,
+    ticket_sales_enabled: Boolean(m.ticket_label),
+    ticket_label: m.ticket_label ?? "",
   };
 }
 
@@ -283,10 +295,14 @@ export function AdminDashboard() {
     setStatusMsg(null);
     setErrorMsg(null);
 
+    const { ticket_sales_enabled, ticket_label, ...rest } = matchForm;
     const payload = {
-      ...matchForm,
+      ...rest,
       goals_for: matchForm.goals_for !== "" ? Number(matchForm.goals_for) : null,
       goals_against: matchForm.goals_against !== "" ? Number(matchForm.goals_against) : null,
+      ticket_label: ticket_sales_enabled
+        ? ticket_label.trim() || suggestTicketLabel(matchForm.opponent)
+        : null,
     };
 
     const res = await adminFetch("/api/admin/matches", {
@@ -678,6 +694,32 @@ export function AdminDashboard() {
               />
               Mostrar destacado en la web
             </label>
+            <label className="flex items-center gap-2 text-sm text-white/80">
+              <input
+                type="checkbox"
+                checked={matchForm.ticket_sales_enabled}
+                onChange={(e) =>
+                  setMatchForm((f) => ({
+                    ...f,
+                    ticket_sales_enabled: e.target.checked,
+                    ticket_label: e.target.checked && !f.ticket_label ? suggestTicketLabel(f.opponent) : f.ticket_label,
+                  }))
+                }
+              />
+              Vender boletas en línea para este partido (aparece en /boletas)
+            </label>
+            {matchForm.ticket_sales_enabled ? (
+              <label className="block text-xs text-muted-foreground">
+                Etiqueta interna de boletas
+                <input
+                  type="text"
+                  value={matchForm.ticket_label}
+                  onChange={(e) => setMatchForm((f) => ({ ...f, ticket_label: e.target.value }))}
+                  placeholder={suggestTicketLabel(matchForm.opponent)}
+                  className="mt-1 h-10 w-full rounded-lg border border-white/10 bg-[#F4EFE5] px-3 text-sm text-black"
+                />
+              </label>
+            ) : null}
             <div className="flex flex-wrap gap-2 pt-1">
               <Button type="submit" className="h-11 flex-1 min-w-[8rem]">
                 {editingMatchId ? "Guardar cambios" : "Crear partido"}
@@ -713,6 +755,12 @@ export function AdminDashboard() {
                       vs {m.opponent}
                       {m.is_featured ? (
                         <Star className="ml-1 inline size-4 fill-primary text-primary" aria-hidden />
+                      ) : null}
+                      {m.ticket_label ? (
+                        <Ticket
+                          className="ml-1 inline size-4 text-primary"
+                          aria-label="Venta de boletas en línea activa"
+                        />
                       ) : null}
                     </p>
                     <p className="text-xs text-muted-foreground">

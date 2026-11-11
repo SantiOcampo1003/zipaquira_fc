@@ -1,10 +1,4 @@
 import { redirect } from "next/navigation";
-import { AnimatedMarquee } from "@/components/AnimatedMarquee";
-import { BuyTicketSection } from "@/components/BuyTicketSection";
-import { CommemorativeJerseySection } from "@/components/CommemorativeJerseySection";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { SectionDivider } from "@/components/SectionDivider";
 
 type HomeProps = {
   searchParams: Promise<{ token?: string }>;
@@ -19,16 +13,5 @@ export default async function Home({ searchParams }: HomeProps) {
     redirect(`/tribuna?token=${encodeURIComponent(token)}`);
   }
 
-  return (
-    <>
-      <Header />
-      <main id="inicio" className="overflow-x-clip">
-        <BuyTicketSection />
-        <SectionDivider />
-        <CommemorativeJerseySection />
-        <AnimatedMarquee />
-      </main>
-      <Footer />
-    </>
-  );
+  redirect("/boletas");
 }

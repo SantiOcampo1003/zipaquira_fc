@@ -37,7 +37,6 @@ export const matchOpponent = "Sabana";
 export const matchOpponentDetail = "el equipo de Omar Pérez";
 export const matchVenue = "Estadio El Campín";
 export const matchRole = "Visitantes";
-export const matchMarqueeLabel = "PARTIDO INAUGURAL · EL CAMPÍN";
 export const matchChallengeHeadline = "Dicen que no llenamos El Campín.";
 export const matchChallengePunchline = "Demostremos que se equivocan.";
 export const matchChallengeBody =

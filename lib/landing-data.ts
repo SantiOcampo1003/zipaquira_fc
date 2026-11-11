@@ -15,7 +15,7 @@ import {
   Users,
   UsersRound,
 } from "lucide-react";
-import { brandImpactPillars, clubNameUpper, matchMarqueeLabel } from "@/lib/brand";
+import { brandImpactPillars, clubNameUpper } from "@/lib/brand";
 
 /**
  * Mismo archivo que `public/images/camiseta-real-zipaquira.png`.
@@ -202,10 +202,7 @@ export const galleryPlaceholders: { label: string; hint: string }[] = [
 
 export const marqueePhrases = [
   clubNameUpper,
-  matchMarqueeLabel,
-  "JUGAMOS CON EL ALMA",
-  "ZIPAQUIRÁ",
   "LIGA EL DORADO",
-  "EL CAMPÍN",
-  "VS SABANA",
+  "EL EQUIPO DEL PUEBLO",
+  "JUGAMOS CON EL ALMA",
 ] as const;

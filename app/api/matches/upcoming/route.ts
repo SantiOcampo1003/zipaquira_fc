@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 
+// Sin esto, Next.js la trata como ruta estática (sin request.url/cookies) y la
+// congela en el build: los cambios de /admin no se reflejarían en /boletas.
+export const dynamic = "force-dynamic";
+
 /** Partidos públicos disponibles para comprar boleta: con ticket_label, agendados y no jugados. */
 export async function GET() {
   try {

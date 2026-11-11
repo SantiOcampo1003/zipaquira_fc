@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { AnimatedMarquee } from "@/components/AnimatedMarquee";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { BoletaAuthGate } from "@/components/stadium/BoletaAuthGate";
@@ -11,6 +12,7 @@ export default function BoletasPage() {
         <Suspense fallback={null}>
           <BoletaAuthGate />
         </Suspense>
+        <AnimatedMarquee />
       </main>
       <Footer />
     </>

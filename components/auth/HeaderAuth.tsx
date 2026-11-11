@@ -33,22 +33,16 @@ export function HeaderAuth({ className, compact = false, onNavigate }: HeaderAut
     const label = user.user_metadata?.full_name ?? user.email?.split("@")[0] ?? "Cuenta";
     return (
       <div className={cn("flex items-center gap-1.5 sm:gap-2", className)}>
-        <span
-          className={cn(
-            "hidden max-w-[7rem] truncate text-[10px] font-medium text-white/70 sm:inline sm:max-w-[9rem] sm:text-[11px]",
-            compact && "inline"
-          )}
-          title={user.email ?? undefined}
-        >
-          {label}
-        </span>
         <Link
           href="/boletas/mis-boletas"
           onClick={() => onNavigate?.()}
-          className="inline-flex h-8 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 text-[9px] font-semibold uppercase tracking-wide text-white/70 transition-colors hover:border-white/20 hover:text-white sm:h-9 sm:px-3 sm:text-[10px]"
+          title={user.email ?? undefined}
+          className="inline-flex h-8 min-w-0 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 text-[9px] font-semibold uppercase tracking-wide text-white/70 transition-colors hover:border-white/20 hover:text-white sm:h-9 sm:px-3 sm:text-[10px]"
         >
           <Ticket className="size-3.5 shrink-0" aria-hidden />
-          <span className={compact ? "inline" : "hidden sm:inline"}>Mis boletas</span>
+          <span className={cn("max-w-[5rem] truncate sm:max-w-[7rem]", !compact && "hidden sm:inline")}>
+            {label}
+          </span>
         </Link>
         <button
           type="button"

@@ -14,7 +14,7 @@ import {
 } from "@/lib/formations";
 import type { PlayerRow } from "@/lib/types/match";
 import { cn } from "@/lib/utils";
-import { Award, Loader2, LogOut, Star, Ticket } from "lucide-react";
+import { Award, Loader2, LogOut, ScanLine, Star, Ticket, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -61,6 +61,16 @@ type MvpAdminData = {
   leaderboard: MvpLeaderboardEntry[];
   total_votes: number;
   total_voters: number;
+};
+
+type CheckinTicket = {
+  id: string;
+  ticketCode: string;
+  holderFullName: string;
+  seatNumber: number | null;
+  zoneId: string;
+  checkedInAt: string | null;
+  checkedInBy: string | null;
 };
 
 type Tab = "jugadores" | "partidos" | "convocatoria";
@@ -140,6 +150,51 @@ export function AdminDashboard() {
   const [mvpData, setMvpData] = useState<MvpAdminData | null>(null);
   const [mvpLoading, setMvpLoading] = useState(false);
   const [mvpWorking, setMvpWorking] = useState(false);
+
+  const [checkinsMatch, setCheckinsMatch] = useState<AdminMatch | null>(null);
+  const [checkinsTickets, setCheckinsTickets] = useState<CheckinTicket[] | null>(null);
+  const [checkinsLoading, setCheckinsLoading] = useState(false);
+
+  async function loadCheckins(match: AdminMatch) {
+    setCheckinsMatch(match);
+    setCheckinsTickets(null);
+    setCheckinsLoading(true);
+    try {
+      const res = await adminFetch(`/api/admin/matches/${match.id}/checkins`);
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMsg("No pudimos cargar los ingresos.");
+        return;
+      }
+      setCheckinsTickets(data.tickets ?? []);
+    } finally {
+      setCheckinsLoading(false);
+    }
+  }
+
+  function downloadCheckinsCsv() {
+    if (!checkinsMatch || !checkinsTickets) return;
+
+    const csvEscape = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const header = ["Titular", "Tribuna/Silla", "Código", "Estado", "Hora de ingreso", "Escaneado por"];
+    const rows = checkinsTickets.map((t) => [
+      t.holderFullName,
+      t.zoneId === "general" ? "General" : `Silla #${t.seatNumber}`,
+      t.ticketCode,
+      t.checkedInAt ? "Ingresó" : "Sin ingresar",
+      t.checkedInAt ? new Date(t.checkedInAt).toLocaleString("es-CO") : "",
+      t.checkedInBy ?? "",
+    ]);
+    const csv = [header, ...rows].map((row) => row.map(csvEscape).join(",")).join("\r\n");
+
+    const blob = new Blob([`﻿${csv}`], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `ingresos-vs-${checkinsMatch.opponent.toLowerCase().replace(/\s+/g, "-")}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   const checkAdmin = useCallback(async () => {
     const res = await adminFetch("/api/admin/me");
@@ -790,6 +845,18 @@ export function AdminDashboard() {
                     >
                       Convocatoria
                     </Button>
+                    {m.ticket_label ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="text-[10px] uppercase"
+                        onClick={() => void loadCheckins(m)}
+                      >
+                        <ScanLine className="mr-1 size-3.5" aria-hidden />
+                        Ver ingresos
+                      </Button>
+                    ) : null}
                     {!m.is_featured ? (
                       <Button
                         type="button"
@@ -1073,6 +1140,94 @@ export function AdminDashboard() {
                 Supabase si no cargan los datos de MVP.
               </p>
             )}
+          </div>
+        </div>
+      ) : null}
+
+      {checkinsMatch ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4">
+          <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-primary/30 bg-[#18181B] p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-heading text-lg uppercase text-white">Ingresos — vs {checkinsMatch.opponent}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {checkinsTickets
+                    ? `${checkinsTickets.filter((t) => t.checkedInAt).length} de ${checkinsTickets.length} boletas ingresadas`
+                    : "Cargando…"}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                {checkinsTickets && checkinsTickets.length > 0 ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="text-[10px] uppercase"
+                    onClick={downloadCheckinsCsv}
+                  >
+                    Descargar Excel
+                  </Button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCheckinsMatch(null);
+                    setCheckinsTickets(null);
+                  }}
+                  aria-label="Cerrar"
+                  className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-white/10 hover:text-white"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 flex-1 space-y-2 overflow-y-auto">
+              {checkinsLoading ? (
+                <div className="flex justify-center py-10">
+                  <Loader2 className="size-6 animate-spin text-primary" />
+                </div>
+              ) : !checkinsTickets || checkinsTickets.length === 0 ? (
+                <p className="py-10 text-center text-sm text-muted-foreground">
+                  No hay boletas pagadas para este partido todavía.
+                </p>
+              ) : (
+                checkinsTickets.map((t) => (
+                  <div
+                    key={t.id}
+                    className={cn(
+                      "flex items-center justify-between gap-3 rounded-lg border p-3",
+                      t.checkedInAt
+                        ? "border-emerald-500/30 bg-emerald-500/5"
+                        : "border-white/10 bg-black/20"
+                    )}
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-white">{t.holderFullName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t.zoneId === "general" ? "General" : `Silla #${t.seatNumber}`} · {t.ticketCode}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right text-xs">
+                      {t.checkedInAt ? (
+                        <>
+                          <p className="font-semibold text-emerald-400">Ingresó</p>
+                          <p className="text-muted-foreground">
+                            {new Date(t.checkedInAt).toLocaleTimeString("es-CO", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                            {t.checkedInBy ? ` · ${t.checkedInBy}` : ""}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-muted-foreground">Sin ingresar</p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       ) : null}

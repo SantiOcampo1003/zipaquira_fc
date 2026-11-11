@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, ShieldAlert, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const SCANNER_ELEMENT_ID = "ticket-qr-reader";
+const STAFF_NAME_KEY = "gate-staff-name";
 
 type ScanResult = {
   result: "OK" | "ALREADY_USED" | "INVALID";
@@ -20,9 +22,25 @@ export function TicketScanner() {
   const [lastResult, setLastResult] = useState<ScanResult | null>(null);
   const [checking, setChecking] = useState(false);
   const busyRef = useRef(false);
+  const [staffName, setStaffName] = useState<string | null>(null);
+  const [staffNameInput, setStaffNameInput] = useState("");
+  const [staffNameLoaded, setStaffNameLoaded] = useState(false);
 
   useEffect(() => {
-    if (!adminKey) return;
+    setStaffName(window.localStorage.getItem(STAFF_NAME_KEY));
+    setStaffNameLoaded(true);
+  }, []);
+
+  function saveStaffName(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = staffNameInput.trim();
+    if (!trimmed) return;
+    window.localStorage.setItem(STAFF_NAME_KEY, trimmed);
+    setStaffName(trimmed);
+  }
+
+  useEffect(() => {
+    if (!adminKey || !staffName) return;
 
     let scanner: import("html5-qrcode").Html5QrcodeScanner | null = null;
     let cancelled = false;
@@ -44,7 +62,7 @@ export function TicketScanner() {
             const res = await fetch("/api/tickets/checkin", {
               method: "POST",
               headers: { "Content-Type": "application/json", "x-admin-secret": adminKey },
-              body: JSON.stringify({ ticketCode: decodedText }),
+              body: JSON.stringify({ ticketCode: decodedText, checkedBy: staffName }),
             });
             const data = await res.json();
             setLastResult({
@@ -70,7 +88,7 @@ export function TicketScanner() {
       cancelled = true;
       scanner?.clear().catch(() => {});
     };
-  }, [adminKey]);
+  }, [adminKey, staffName]);
 
   if (!adminKey) {
     return (
@@ -84,11 +102,53 @@ export function TicketScanner() {
     );
   }
 
+  if (!staffNameLoaded) {
+    return null;
+  }
+
+  if (!staffName) {
+    return (
+      <div className="mx-auto max-w-sm px-4 py-24 text-white">
+        <h1 className="font-heading text-2xl uppercase">¿Quién va a escanear?</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Escribe tu nombre — queda guardado en este celular, para saber quién validó cada boleta.
+        </p>
+        <form onSubmit={saveStaffName} className="mt-6 flex flex-col gap-3">
+          <input
+            type="text"
+            autoFocus
+            value={staffNameInput}
+            onChange={(e) => setStaffNameInput(e.target.value)}
+            placeholder="Tu nombre"
+            className="h-12 w-full rounded-lg border border-white/15 bg-black/50 px-4 text-sm text-white placeholder:text-white/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/40"
+          />
+          <Button type="submit" disabled={!staffNameInput.trim()} className="h-12">
+            Empezar a escanear
+          </Button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-lg px-4 py-10 text-white">
       <h1 className="font-heading text-2xl uppercase">Escanear boleta</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Apunta la cámara al código QR de la boleta de cada persona en la entrada.
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Escaneando como <strong className="text-white">{staffName}</strong> ·{" "}
+        <button
+          type="button"
+          onClick={() => {
+            window.localStorage.removeItem(STAFF_NAME_KEY);
+            setStaffName(null);
+            setStaffNameInput("");
+          }}
+          className="underline hover:text-white"
+        >
+          Cambiar
+        </button>
       </p>
 
       <div id={SCANNER_ELEMENT_ID} className="mt-6 overflow-hidden rounded-2xl border border-primary/25" />
@@ -123,7 +183,8 @@ export function TicketScanner() {
           </p>
           {lastResult.holderFullName ? (
             <p className="mt-1 text-sm text-white">
-              {lastResult.holderFullName} · Silla #{lastResult.seatNumber}
+              {lastResult.holderFullName}
+              {lastResult.seatNumber ? ` · Silla #${lastResult.seatNumber}` : " · General"}
             </p>
           ) : lastResult.message ? (
             <p className="mt-1 text-sm text-muted-foreground">{lastResult.message}</p>

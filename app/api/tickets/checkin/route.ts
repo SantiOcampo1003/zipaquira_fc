@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from "@/lib/supabase-server";
 /** Valida y marca el ingreso de una boleta escaneando su QR. Protegido por GATE_STAFF_SECRET. */
 const checkinSchema = z.object({
   ticketCode: z.string().trim().min(1),
+  checkedBy: z.string().trim().min(1).max(80).nullable().optional(),
 });
 
 export async function POST(req: Request) {
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
 
     await supabase
       .from("abono_registrations")
-      .update({ checked_in_at: new Date().toISOString() })
+      .update({ checked_in_at: new Date().toISOString(), checked_in_by: parsed.data.checkedBy ?? null })
       .eq("id", reg.id);
 
     return NextResponse.json({

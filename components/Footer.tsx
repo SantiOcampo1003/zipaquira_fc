@@ -23,8 +23,8 @@ function TikTokIcon({ className }: { className?: string }) {
 }
 
 const social = [
-  { label: "Instagram", href: "https://www.instagram.com/", icon: InstagramIcon },
-  { label: "TikTok", href: "https://www.tiktok.com/", icon: TikTokIcon },
+  { label: "Instagram", href: "https://www.instagram.com/zipaquirafc/", icon: InstagramIcon },
+  { label: "TikTok", href: "https://www.tiktok.com/@zipaquirafc?lang=es-419", icon: TikTokIcon },
   { label: "WhatsApp", href: whatsappUrl, icon: MessageCircle },
 ] as const;
 
@@ -32,8 +32,39 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/[0.06] bg-background py-10 sm:py-14">
-      <div className="rz-container">
+    <footer className="border-t border-white/[0.06] bg-background">
+      <div className="bg-rz-burgundy py-10 text-center sm:py-12">
+        <div className="rz-container">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rz-cream/80">
+            Afiliados a
+          </p>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-5 sm:gap-7">
+            <span className="font-heading text-2xl font-bold uppercase tracking-wide text-white">
+              I.F.A.
+            </span>
+            <span className="hidden h-8 w-px bg-white/25 sm:block" aria-hidden />
+            <span className="font-heading text-xl font-bold uppercase tracking-wide text-white">
+              Liga El Dorado
+            </span>
+          </div>
+          <p className="mt-3 text-sm text-rz-cream/80">
+            Descubre la <strong className="font-semibold text-white">Institución del Fútbol Asociado</strong>
+          </p>
+
+          <div className="mx-auto mt-8 max-w-md border-t border-white/15 pt-8">
+            <p className="text-xs font-semibold uppercase tracking-wider text-rz-cream/70">
+              Patrocinadores oficiales
+            </p>
+            <div className="mt-5 flex flex-wrap justify-center gap-4">
+              <span className="rounded-xl border border-white/25 px-6 py-3 font-heading text-lg font-bold uppercase tracking-wide text-white">
+                Reebok
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rz-container py-10 sm:py-14">
         <RevealOnScroll className="flex flex-col items-center gap-8 text-center sm:flex-row sm:items-start sm:justify-between sm:gap-10 sm:text-left">
           <div className="flex min-w-0 flex-col items-center sm:items-start">
             <div className="flex flex-col items-center gap-3 sm:flex-row">

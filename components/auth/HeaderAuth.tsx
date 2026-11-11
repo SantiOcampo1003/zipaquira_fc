@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useFanAuth } from "@/components/auth/FanAuthProvider";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { defaultAuthNextPath } from "@/lib/auth-redirect";
 import { cn } from "@/lib/utils";
-import { LogOut } from "lucide-react";
+import { LogOut, Ticket } from "lucide-react";
 
 type HeaderAuthProps = {
   className?: string;
@@ -41,6 +42,14 @@ export function HeaderAuth({ className, compact = false, onNavigate }: HeaderAut
         >
           {label}
         </span>
+        <Link
+          href="/boletas/mis-boletas"
+          onClick={() => onNavigate?.()}
+          className="inline-flex h-8 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 text-[9px] font-semibold uppercase tracking-wide text-white/70 transition-colors hover:border-white/20 hover:text-white sm:h-9 sm:px-3 sm:text-[10px]"
+        >
+          <Ticket className="size-3.5 shrink-0" aria-hidden />
+          <span className={compact ? "inline" : "hidden sm:inline"}>Mis boletas</span>
+        </Link>
         <button
           type="button"
           onClick={() => {

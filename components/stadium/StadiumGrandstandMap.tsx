@@ -18,7 +18,7 @@ const BASE_SEAT_GAP = 4;
 const ZONE_PADDING = 16;
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 1.5;
-const ZOOM_DEFAULT = 0.75;
+const ZOOM_DEFAULT = 0.55;
 const ZOOM_STEP = 0.05;
 
 function occupantTypeLabel(type: "abono" | "boleta" | "cortesia"): string {
@@ -52,6 +52,8 @@ type StadiumGrandstandMapProps = {
   abonoCount?: number;
   /** Vista de solo lectura: permite hover/tooltip aunque la silla esté ocupada o bloqueada. */
   readOnlyHover?: boolean;
+  /** Texto del contador de progreso ("Abono" para /tribuna, "Boleta" para venta individual). */
+  itemLabel?: string;
 };
 
 export function StadiumGrandstandMap({
@@ -66,6 +68,7 @@ export function StadiumGrandstandMap({
   selectionEnabled = true,
   abonoCount = 1,
   readOnlyHover = false,
+  itemLabel = "Abono",
 }: StadiumGrandstandMapProps) {
   const [zoomLevel, setZoomLevel] = useState(ZOOM_DEFAULT);
 
@@ -194,6 +197,7 @@ export function StadiumGrandstandMap({
             ? { selected: selectedSeatIds.length, total: abonoCount }
             : null
         }
+        itemLabel={itemLabel}
       />
 
       <div className="relative mt-4 overflow-hidden rounded-t-xl border-x border-t border-blue-500/30 bg-gradient-to-r from-blue-900 via-sky-700 to-blue-900 px-4 py-2.5 text-center">
@@ -292,10 +296,12 @@ function SeatPreviewPanel({
   highlightSeat,
   isSelectedHighlight,
   seatsProgress,
+  itemLabel,
 }: {
   highlightSeat: Seat | null;
   isSelectedHighlight: boolean;
   seatsProgress: { selected: number; total: number } | null;
+  itemLabel: string;
 }) {
   const headline = highlightSeat
     ? highlightSeat.status === "courtesy"
@@ -334,7 +340,7 @@ function SeatPreviewPanel({
       </p>
       {seatsProgress ? (
         <p className="mb-1 font-mono text-xs text-primary/80">
-          Abono {seatsProgress.selected} de {seatsProgress.total} · sillas en el mapa
+          {itemLabel} {seatsProgress.selected} de {seatsProgress.total} · sillas en el mapa
         </p>
       ) : null}
       <p

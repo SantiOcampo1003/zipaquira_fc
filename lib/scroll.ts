@@ -5,7 +5,7 @@ const ROUTE_BY_ID: Record<string, string> = {
   camiseta: "/",
   partido: "/partidos",
   partidos: "/partidos",
-  boletas: "/partidos",
+  boletas: "/boletas",
   historia: "/partidos",
   nosotros: "/nosotros",
   comunidad: "/nosotros",

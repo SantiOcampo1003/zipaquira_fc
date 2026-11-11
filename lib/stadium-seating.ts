@@ -8,6 +8,17 @@
 
 export type StadiumZoneId = "verde" | "blanca" | "roja";
 
+/**
+ * Precio real por silla para venta directa en línea (Wompi). Toda la tribuna
+ * Catedral de Sal (verde+blanca+roja) tiene el mismo precio — "General" es
+ * otra tribuna aparte que no existe en este mapa. Distinto de los precios
+ * cosméticos por zona en STADIUM_ZONES (esos no se usan para cobrar).
+ */
+export const CATEDRAL_TICKET_PRICE_COP = 35100;
+
+/** Precio de boleta de tribuna General — sin silla, tribuna aparte de la Catedral. */
+export const GENERAL_TICKET_PRICE_COP = 15000;
+
 export type SeatStatus = "available" | "occupied" | "courtesy" | "selected";
 
 /** Sillas reservadas para cortesías (no seleccionables por abonados). */

@@ -65,12 +65,17 @@ export async function GET(req: Request) {
         matchLabelResolved = matchRow.ticket_label ?? matchRow.opponent;
       }
 
+      // "completed" bloquea siempre; "awaiting_payment" bloquea solo mientras
+      // no haya vencido (alguien más está pagando esa silla ahora mismo).
       let conflictQuery = supabase
         .from("abono_registrations")
         .select(
-          "seat_number, holder_full_name, holder_document_id, holder_phone, match_id, purchase_id, abono_purchases!inner(status)"
+          "seat_number, holder_full_name, holder_document_id, holder_phone, match_id, purchase_id, abono_purchases!inner(status, expires_at)"
         )
-        .eq("abono_purchases.status", "completed");
+        .or(
+          `status.eq.completed,and(status.eq.awaiting_payment,expires_at.gt.${new Date().toISOString()})`,
+          { referencedTable: "abono_purchases" }
+        );
 
       conflictQuery = matchIdResolved
         ? conflictQuery.or(`match_id.is.null,match_id.eq.${matchIdResolved}`)
@@ -145,17 +150,22 @@ export async function GET(req: Request) {
     const purchase = purchaseRow as unknown as DbAbonoPurchaseRow;
 
     if (
-      purchase.status === "pending_seats" &&
+      (purchase.status === "pending_seats" || purchase.status === "awaiting_payment") &&
       purchase.expires_at &&
       new Date(purchase.expires_at) < new Date()
     ) {
+      // "awaiting_payment" ya tiene sillas reservadas (a diferencia de
+      // "pending_seats"): hay que borrarlas para liberar la silla de verdad.
+      if (purchase.status === "awaiting_payment") {
+        await supabase.from("abono_registrations").delete().eq("purchase_id", purchase.id);
+      }
       await supabase
         .from("abono_purchases")
         .update({ status: "expired" })
         .eq("id", purchase.id);
 
       return NextResponse.json(
-        { error: "Este enlace expiró. Contacta al club." },
+        { error: "El tiempo para pagar esta compra expiró. Vuelve a elegir tu silla." },
         { status: 410 }
       );
     }
@@ -193,6 +203,7 @@ export async function GET(req: Request) {
     }
 
     const purchasePayload: AbonoSessionPurchase = {
+      id: purchase.id,
       purchaserEmail: purchase.purchaser_email,
       abonoCount: purchase.abono_count,
       zoneId: purchase.zone_id,
@@ -204,7 +215,7 @@ export async function GET(req: Request) {
 
     let registrations: AbonoSessionRegistration[] = [];
 
-    if (purchase.status === "completed") {
+    if (purchase.status === "completed" || purchase.status === "awaiting_payment") {
       const { data: regRows, error: regError } = await supabase
         .from("abono_registrations")
         .select(

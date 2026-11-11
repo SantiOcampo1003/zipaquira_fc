@@ -15,7 +15,7 @@ export type DbAbonoPurchaseRow = {
   purchaser_email: string;
   abono_count: number;
   zone_id: StadiumZoneId;
-  status: "pending_seats" | "completed" | "expired" | "cancelled";
+  status: "pending_seats" | "awaiting_payment" | "completed" | "expired" | "cancelled";
   expires_at: string | null;
   completed_at: string | null;
   purchase_type: "abono" | "boleta";
@@ -33,6 +33,7 @@ export type DbAbonoRegistrationRow = {
 };
 
 export type AbonoSessionPurchase = {
+  id: string;
   purchaserEmail: string;
   abonoCount: number;
   zoneId: StadiumZoneId;
@@ -95,6 +96,12 @@ export function mapRpcErrorToMessage(message: string): string {
   }
   if (message.includes("SEAT_NOT_FOUND")) {
     return "Número de silla inválido.";
+  }
+  if (message.includes("PURCHASE_NOT_FOUND")) {
+    return "No encontramos esa compra.";
+  }
+  if (message.includes("PURCHASE_NOT_AWAITING_PAYMENT")) {
+    return "Esta compra no está esperando un pago.";
   }
   return "No pudimos confirmar tu compra. Intenta de nuevo.";
 }

@@ -17,6 +17,7 @@ export async function GET(_req: Request, { params }: { params: { purchaseId: str
       return NextResponse.json({ error: "Esta compra todavía no está pagada." }, { status: 409 });
     }
     console.error("[boletas/pdf]:", message);
-    return NextResponse.json({ error: "No pudimos generar la boleta." }, { status: 500 });
+    // TEMPORAL: exponer el error real para diagnosticar el 500 en producción.
+    return NextResponse.json({ error: "No pudimos generar la boleta.", debug: message }, { status: 500 });
   }
 }

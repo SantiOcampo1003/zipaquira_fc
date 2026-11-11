@@ -1,4 +1,3 @@
-import path from "path";
 import QRCode from "qrcode";
 import { Document, Page, View, Text, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import { STADIUM_ZONES, formatSeatId, type StadiumZoneId } from "@/lib/stadium-seating";
@@ -150,6 +149,26 @@ async function qrDataUrl(code: string): Promise<string> {
   return QRCode.toDataURL(code, { margin: 1, width: 300, color: { dark: "#061A0A", light: "#F4EFE5" } });
 }
 
+function getSiteUrl(): string {
+  return process.env.SITE_URL?.replace(/\/$/, "") || "https://zipaquira-fc-eta.vercel.app";
+}
+
+let crestDataUrlPromise: Promise<string> | null = null;
+
+/**
+ * Se descarga desde la URL pública (no se lee del disco con fs): en las
+ * funciones serverless de Vercel la carpeta public/ no está disponible como
+ * archivo local, solo servida por el CDN.
+ */
+function getCrestDataUrl(): Promise<string> {
+  if (!crestDataUrlPromise) {
+    crestDataUrlPromise = fetch(`${getSiteUrl()}/images/escudo-zipa-fc.jpg`)
+      .then((res) => res.arrayBuffer())
+      .then((buf) => `data:image/jpeg;base64,${Buffer.from(buf).toString("base64")}`);
+  }
+  return crestDataUrlPromise;
+}
+
 function TicketPage({ data, qrSrc, crestSrc }: { data: TicketData; qrSrc: string; crestSrc: string }) {
   const zone = data.zoneId ? STADIUM_ZONES[data.zoneId] : null;
   return (
@@ -225,7 +244,7 @@ function TicketPage({ data, qrSrc, crestSrc }: { data: TicketData; qrSrc: string
 }
 
 export async function renderTicketsPdfBuffer(tickets: TicketData[]): Promise<Buffer> {
-  const crestSrc = path.join(process.cwd(), "public", "images", "escudo-zipa-fc.jpg");
+  const crestSrc = await getCrestDataUrl();
   const pages = await Promise.all(
     tickets.map(async (data) => ({ data, qrSrc: await qrDataUrl(data.ticketCode) }))
   );

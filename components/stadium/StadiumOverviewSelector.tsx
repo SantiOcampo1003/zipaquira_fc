@@ -11,12 +11,13 @@ import { cn } from "@/lib/utils";
 type StandZone = "catedral" | "general";
 
 /**
- * Posiciones en % sobre la foto aérea (estadio-aereo.png) — Catedral (silla
- * numerada) abajo, General arriba. Confirmado por el usuario contra la foto real.
+ * Posiciones en % sobre la foto aérea (estadio-aereo.png), ajustadas a cada
+ * tribuna real: General = techo gris arriba, Catedral = techo azul abajo.
+ * El rótulo queda centrado justo encima de su tribuna.
  */
 const HOTSPOTS: Record<StandZone, { left: string; top: string; width: string; height: string; label: string }> = {
-  general: { left: "8%", top: "16%", width: "84%", height: "34%", label: "General" },
-  catedral: { left: "8%", top: "50%", width: "84%", height: "34%", label: "Catedral" },
+  general: { left: "37.5%", top: "1.2%", width: "22%", height: "14%", label: "General" },
+  catedral: { left: "27%", top: "85%", width: "41%", height: "13.5%", label: "Catedral" },
 };
 
 export function StadiumOverviewSelector({
@@ -74,11 +75,11 @@ export function StadiumOverviewSelector({
               "hover:border-primary/70 hover:bg-primary/20 focus:border-primary/70 focus:bg-primary/20 focus:outline-none"
             )}
           >
-            <span className="flex flex-col items-center gap-1 rounded-lg bg-black/70 px-4 py-2 opacity-90 backdrop-blur-sm transition-opacity group-hover:opacity-100">
-              <span className="font-heading text-base uppercase tracking-wide text-white sm:text-lg">
+            <span className="flex flex-col items-center gap-0.5 whitespace-nowrap rounded-lg bg-black/70 px-2 py-1 sm:gap-1 sm:px-4 sm:py-2 opacity-90 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+              <span className="font-heading text-xs uppercase tracking-wide text-white sm:text-lg">
                 {spot.label}
               </span>
-              <span className="text-xs text-primary">
+              <span className="text-[10px] text-primary sm:text-xs">
                 {formatCop(id === "catedral" ? CATEDRAL_TICKET_PRICE_COP : GENERAL_TICKET_PRICE_COP)}
               </span>
             </span>

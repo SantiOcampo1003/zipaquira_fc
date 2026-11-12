@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { CalendarDays, Loader2, MapPin, Ticket } from "lucide-react";
 import { StadiumOverviewSelector } from "@/components/stadium/StadiumOverviewSelector";
 
@@ -26,6 +27,16 @@ function formatMatchDate(matchDate: string, kickoffTime: string | null): string 
   const period = h >= 12 ? "p.m." : "a.m.";
   const h12 = h % 12 === 0 ? 12 : h % 12;
   return `${capitalized} — ${h12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+/** Afiche oficial por rival (public/images/partidos). Sin afiche → tarjeta de texto. */
+function posterFor(opponent: string): string | null {
+  const o = opponent
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+  if (o.includes("caqueta")) return "/images/partidos/zipa-vs-caqueta.jpg";
+  return null;
 }
 
 export function MatchSelectorSection({ userEmail }: { userEmail: string }) {
@@ -68,13 +79,42 @@ export function MatchSelectorSection({ userEmail }: { userEmail: string }) {
           No hay partidos con venta de boletas abierta en este momento.
         </p>
       ) : (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {matches.map((match) => (
+        <div className="mt-8 flex flex-wrap justify-center gap-6">
+          {matches.map((match) => {
+            const poster = posterFor(match.opponent);
+            if (poster) {
+              return (
+                <button
+                  key={match.id}
+                  type="button"
+                  onClick={() => setSelected(match)}
+                  aria-label={`Comprar boleta: Zipaquirá F.C. vs ${match.opponent}`}
+                  className="group flex w-full max-w-sm flex-col items-center gap-3 text-center"
+                >
+                  <span className="relative block w-full overflow-hidden rounded-2xl border border-primary/25 shadow-lg transition group-hover:border-primary/60 group-hover:shadow-primary/20">
+                    <Image
+                      src={poster}
+                      alt={`Zipaquirá F.C. vs ${match.opponent}`}
+                      width={1288}
+                      height={1652}
+                      sizes="(min-width: 640px) 384px, 100vw"
+                      className="h-auto w-full transition-transform duration-300 group-hover:scale-[1.02]"
+                      priority
+                    />
+                  </span>
+                  <span className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-primary">
+                    <Ticket className="size-4" />
+                    Comprar boleta
+                  </span>
+                </button>
+              );
+            }
+            return (
             <button
               key={match.id}
               type="button"
               onClick={() => setSelected(match)}
-              className="flex flex-col gap-3 rounded-2xl border border-primary/25 bg-[#18181B]/90 p-5 text-left transition-colors hover:border-primary/50 hover:bg-[#18181B]"
+              className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-primary/25 bg-[#18181B]/90 p-5 text-left transition-colors hover:border-primary/50 hover:bg-[#18181B]"
             >
               <p className="font-heading text-lg uppercase text-white">
                 Zipaquirá F.C. vs {match.opponent}
@@ -92,7 +132,8 @@ export function MatchSelectorSection({ userEmail }: { userEmail: string }) {
                 Comprar boleta
               </span>
             </button>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

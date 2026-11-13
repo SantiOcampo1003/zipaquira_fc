@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { ArrowLeft, Ticket } from "lucide-react";
 import { BoletaCheckoutSection } from "@/components/stadium/BoletaCheckoutSection";
@@ -20,6 +21,12 @@ const HOTSPOTS: Record<StandZone, { left: string; top: string; width: string; he
   catedral: { left: "27%", top: "85%", width: "41%", height: "13.5%", label: "Catedral" },
 };
 
+/** Centro de cada tribuna (en %) y cuánto se acerca la cámara al elegirla. */
+const ZOOM_TARGET: Record<StandZone, { origin: string; scale: number }> = {
+  general: { origin: "48.5% 8%", scale: 3.6 },
+  catedral: { origin: "47.5% 92%", scale: 2.5 },
+};
+
 export function StadiumOverviewSelector({
   matchLabel,
   userEmail,
@@ -28,22 +35,42 @@ export function StadiumOverviewSelector({
   userEmail: string;
 }) {
   const [zone, setZone] = useState<StandZone | null>(null);
+  const [zooming, setZooming] = useState<StandZone | null>(null);
+  const reduceMotion = useReducedMotion();
+
+  const pickZone = (id: StandZone) => {
+    if (reduceMotion) {
+      setZone(id);
+      return;
+    }
+    setZooming(id);
+  };
 
   if (zone === "catedral") {
     return (
-      <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8"
+      >
         <BackButton onClick={() => setZone(null)} />
         <BoletaCheckoutSection matchLabel={matchLabel} userEmail={userEmail} />
-      </div>
+      </motion.div>
     );
   }
 
   if (zone === "general") {
     return (
-      <div className="mx-auto max-w-2xl px-4 pt-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="mx-auto max-w-2xl px-4 pt-4 sm:px-6 lg:px-8"
+      >
         <BackButton onClick={() => setZone(null)} />
         <GeneralTicketCheckoutSection matchLabel={matchLabel} userEmail={userEmail} />
-      </div>
+      </motion.div>
     );
   }
 
@@ -55,6 +82,18 @@ export function StadiumOverviewSelector({
       </p>
 
       <div className="relative mt-6 w-full overflow-hidden rounded-2xl border border-primary/25" style={{ aspectRatio: "2376 / 1678" }}>
+        <motion.div
+          className="absolute inset-0"
+          style={{ transformOrigin: zooming ? ZOOM_TARGET[zooming].origin : "50% 50%" }}
+          animate={zooming ? { scale: ZOOM_TARGET[zooming].scale, opacity: 0 } : { scale: 1, opacity: 1 }}
+          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1], opacity: { duration: 0.8, ease: "easeIn" } }}
+          onAnimationComplete={() => {
+            if (zooming) {
+              setZone(zooming);
+              setZooming(null);
+            }
+          }}
+        >
         <Image
           src="/images/estadio-aereo.png"
           alt="Vista aérea del Estadio Héctor El Zipa González"
@@ -68,7 +107,7 @@ export function StadiumOverviewSelector({
           <button
             key={id}
             type="button"
-            onClick={() => setZone(id)}
+            onClick={() => !zooming && pickZone(id)}
             style={{ left: spot.left, top: spot.top, width: spot.width, height: spot.height }}
             className={cn(
               "group absolute flex items-center justify-center rounded-xl border-2 border-primary/0 bg-primary/0 transition-colors",
@@ -85,6 +124,7 @@ export function StadiumOverviewSelector({
             </span>
           </button>
         ))}
+        </motion.div>
       </div>
 
       <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">

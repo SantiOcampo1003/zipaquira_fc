@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { Fragment, useCallback, useMemo, useState } from "react";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 import type { Seat, StadiumZoneId } from "@/lib/stadium-seating";
 import {
@@ -35,8 +35,21 @@ function scaledSeatGap(zoom: number) {
   return Math.max(2, Math.round(BASE_SEAT_GAP * zoom));
 }
 
+/**
+ * Pasillos verticales de la tribuna real (franjas amarillas). Cada zona tiene
+ * un pasillo en medio de cada fila: cuántas sillas quedan a la izquierda
+ * (ej. Verde fila 4: 427–452 | 453–478). Blanca queda 26 | 22 (479–504 | 505–526).
+ */
+const AISLE_AFTER: Record<StadiumZoneId, number> = { verde: 26, blanca: 26, roja: 21 };
+const AISLE_COLOR = "#E0B53A";
+
+function aisleWidth(seatSize: number): number {
+  return Math.max(10, Math.round(seatSize * 0.9));
+}
+
+/** Ancho de una zona: sillas + pasillo interno (el pasillo ocupa un lugar más en el flex con gap). */
 function zoneRowWidth(seatCount: number, seatSize: number, seatGap: number): number {
-  return seatCount * seatSize + (seatCount - 1) * seatGap + ZONE_PADDING;
+  return seatCount * seatSize + seatCount * seatGap + aisleWidth(seatSize) + ZONE_PADDING;
 }
 
 type StadiumGrandstandMapProps = {
@@ -115,7 +128,7 @@ export function StadiumGrandstandMap({
     zoneRowWidth(52, seatSize, seatGap) +
     zoneRowWidth(48, seatSize, seatGap) +
     zoneRowWidth(42, seatSize, seatGap) +
-    24 +
+    aisleWidth(seatSize) * 4 +
     40;
 
   return (
@@ -213,7 +226,7 @@ export function StadiumGrandstandMap({
       >
         <div className="mx-auto w-max pb-2">
           {/* Encabezados de zona alineados con columnas de sillas */}
-          <div className="mb-3 flex items-end justify-center gap-3 pl-10">
+          <div className="mb-3 flex items-end justify-center pl-10">
             {(
               [
                 { zoneId: "verde" as const, seats: 52 },
@@ -224,8 +237,8 @@ export function StadiumGrandstandMap({
               const z = STADIUM_ZONES[zoneId];
               const width = zoneRowWidth(seatCount, seatSize, seatGap);
               return (
+                <Fragment key={zoneId}>
                 <div
-                  key={zoneId}
                   style={{ width }}
                   className={cn(
                     "shrink-0 rounded-t-lg border-x border-t px-2 py-2 text-center",
@@ -240,6 +253,8 @@ export function StadiumGrandstandMap({
                     {seatCount} sillas por fila
                   </p>
                 </div>
+                <div style={{ width: aisleWidth(seatSize) }} className="shrink-0" />
+                </Fragment>
               );
             })}
           </div>
@@ -286,6 +301,7 @@ export function StadiumGrandstandMap({
         <LegendItem color="#A99259" label="Tu silla" border />
         <LegendItem color="#3f3f46" label="Ocupada" />
         <LegendItem color="#6b5b45" label="Cortesía" striped />
+        <LegendItem color={AISLE_COLOR} label="Pasillo" />
         <span className="text-[10px] text-white/40">Cada cuadrito = 1 silla numerada</span>
       </div>
     </div>
@@ -451,10 +467,11 @@ function GrandstandRow({
       <div className="flex w-10 shrink-0 flex-col items-center justify-center">
         <span className="font-mono text-sm font-bold text-primary">F{spec.row}</span>
       </div>
-      <div className="flex shrink-0 items-center gap-3">
+      <div className="flex shrink-0 items-stretch">
+        <Aisle width={aisleWidth(seatSize)} />
         {segments.map(({ zoneId, range }) => (
+          <Fragment key={zoneId}>
           <ZoneSegment
-            key={zoneId}
             zoneId={zoneId}
             range={range}
             seatMap={seatMap}
@@ -470,6 +487,8 @@ function GrandstandRow({
             onSelectSeat={onSelectSeat}
             setHoveredSeat={setHoveredSeat}
           />
+          <Aisle width={aisleWidth(seatSize)} />
+          </Fragment>
         ))}
       </div>
       <p className="shrink-0 font-mono text-[10px] text-white/30">
@@ -532,7 +551,7 @@ function ZoneSegment({
         {formatSeatId(start)} – {formatSeatId(end)}
       </p>
       <div className="flex flex-nowrap" style={{ gap: seatGap }}>
-        {seatNumbers.map((num) => {
+        {seatNumbers.map((num, seatIndex) => {
           const id = formatSeatId(num);
           const seat = seatMap.get(id);
           if (!seat) return null;
@@ -545,8 +564,16 @@ function ZoneSegment({
           const showLabel = isSelected || isHovered;
 
           return (
+            <Fragment key={id}>
+            {seatIndex === AISLE_AFTER[zoneId] ? (
+              <div
+                aria-hidden
+                title="Pasillo"
+                className="shrink-0 self-stretch rounded-[2px]"
+                style={{ width: aisleWidth(seatSize), backgroundColor: AISLE_COLOR, opacity: 0.85 }}
+              />
+            ) : null}
             <div
-              key={id}
               className="relative shrink-0"
               style={{ width: seatSize, height: seatSize }}
             >
@@ -624,10 +651,22 @@ function ZoneSegment({
                 )}
               />
             </div>
+            </Fragment>
           );
         })}
       </div>
     </div>
+  );
+}
+
+function Aisle({ width }: { width: number }) {
+  return (
+    <div
+      aria-hidden
+      title="Pasillo"
+      className="shrink-0 self-stretch rounded-[2px]"
+      style={{ width, backgroundColor: AISLE_COLOR, opacity: 0.85 }}
+    />
   );
 }
 

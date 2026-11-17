@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { CalendarDays, Loader2, MapPin, Ticket } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { ArrowLeft, CalendarDays, Loader2, MapPin, Ticket } from "lucide-react";
+import { useFanAuth } from "@/components/auth/FanAuthProvider";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { StadiumOverviewSelector } from "@/components/stadium/StadiumOverviewSelector";
 
 type MatchOption = {
@@ -39,7 +42,9 @@ function posterFor(opponent: string): string | null {
   return null;
 }
 
-export function MatchSelectorSection({ userEmail }: { userEmail: string }) {
+export function MatchSelectorSection() {
+  const { user, loading: authLoading } = useFanAuth();
+  const searchParams = useSearchParams();
   const [matches, setMatches] = useState<MatchOption[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<MatchOption | null>(null);
@@ -57,8 +62,56 @@ export function MatchSelectorSection({ userEmail }: { userEmail: string }) {
       .catch(() => setError("Error de conexión. Recarga la página."));
   }, []);
 
+  // Al volver de Google, ?partido=<id> restaura el partido que eligió.
+  const restoreId = searchParams.get("partido");
+  useEffect(() => {
+    if (selected || !restoreId || !matches) return;
+    const found = matches.find((m) => m.id === restoreId);
+    if (found) setSelected(found);
+  }, [matches, restoreId, selected]);
+
   if (selected) {
-    return <StadiumOverviewSelector matchLabel={selected.ticket_label} userEmail={userEmail} />;
+    if (authLoading) {
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <Loader2 className="size-8 animate-spin text-primary" />
+        </div>
+      );
+    }
+
+    if (!user) {
+      return (
+        <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-4 text-center text-white">
+          <Ticket className="mb-4 size-12 text-primary" />
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+            Zipaquirá F.C. vs {selected.opponent}
+          </p>
+          <h1 className="mt-2 font-heading text-2xl uppercase">Inicia sesión para continuar</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Usa tu cuenta de Google para elegir tu silla en el mapa del estadio y pagar en línea.
+          </p>
+          <GoogleSignInButton
+            nextPath={`/boletas?partido=${selected.id}`}
+            label="Continuar con Google"
+            fullWidth
+            className="mt-6 max-w-xs"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              window.history.replaceState(null, "", "/boletas");
+              setSelected(null);
+            }}
+            className="mt-5 inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-white"
+          >
+            <ArrowLeft className="size-4" />
+            Elegir otro partido
+          </button>
+        </div>
+      );
+    }
+
+    return <StadiumOverviewSelector matchLabel={selected.ticket_label} userEmail={user.email ?? ""} />;
   }
 
   return (

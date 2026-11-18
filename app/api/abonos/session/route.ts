@@ -70,7 +70,7 @@ export async function GET(req: Request) {
       let conflictQuery = supabase
         .from("abono_registrations")
         .select(
-          "seat_number, holder_full_name, holder_document_id, holder_phone, match_id, purchase_id, abono_purchases!inner(status, expires_at)"
+          "seat_number, holder_full_name, holder_document_id, holder_phone, match_id, purchase_id, abono_purchases!inner(status, expires_at, completed_at, created_at)"
         )
         .or(
           `status.eq.completed,and(status.eq.awaiting_payment,expires_at.gt.${new Date().toISOString()})`,
@@ -92,22 +92,29 @@ export async function GET(req: Request) {
       }
 
       const occupantBySeat = new Map(
-        (conflictRows ?? []).map((r) => [
+        (conflictRows ?? []).map((r) => {
+          const purchase = (Array.isArray(r.abono_purchases) ? r.abono_purchases[0] : r.abono_purchases) as
+            | { completed_at: string | null; created_at: string | null }
+            | null;
+          return [
           r.seat_number as number,
           {
+            purchasedAt: purchase?.completed_at ?? purchase?.created_at ?? null,
             name: r.holder_full_name as string | null,
             isMatchSpecific: !!r.match_id,
             documentId: r.holder_document_id as string | null,
             phone: r.holder_phone as string | null,
             purchaseId: r.purchase_id as string,
           },
-        ])
+        ];
+        })
       );
       for (const seat of seats) {
         const occupant = occupantBySeat.get(seat.seatNumber);
         if (occupant) {
           if (seat.status === "available") seat.status = "occupied";
           seat.occupantName = occupant.name;
+          seat.occupantPurchasedAt = occupant.purchasedAt;
           seat.occupantType =
             seat.status === "courtesy" ? "cortesia" : occupant.isMatchSpecific ? "boleta" : "abono";
           if (isAdminCaller) {
@@ -118,10 +125,34 @@ export async function GET(req: Request) {
         }
       }
 
+      // Boletas General (sin silla) del partido: solo para el admin.
+      let generalTickets: { name: string | null; purchasedAt: string | null; checkedIn: boolean }[] = [];
+      if (isAdminCaller && matchIdResolved) {
+        const { data: generalRows } = await supabase
+          .from("abono_registrations")
+          .select("holder_full_name, checked_in_at, abono_purchases!inner(status, zone_id, match_id, completed_at, created_at)")
+          .eq("abono_purchases.status", "completed")
+          .eq("abono_purchases.zone_id", "general")
+          .eq("abono_purchases.match_id", matchIdResolved);
+        generalTickets = (generalRows ?? [])
+          .map((r) => {
+            const pur = (Array.isArray(r.abono_purchases) ? r.abono_purchases[0] : r.abono_purchases) as
+              | { completed_at: string | null; created_at: string | null }
+              | null;
+            return {
+              name: r.holder_full_name as string | null,
+              purchasedAt: pur?.completed_at ?? pur?.created_at ?? null,
+              checkedIn: !!r.checked_in_at,
+            };
+          })
+          .sort((a, b) => (a.purchasedAt ?? "").localeCompare(b.purchasedAt ?? ""));
+      }
+
       return NextResponse.json({
         purchase: null,
         registrations: [],
         seats,
+        generalTickets,
         previewMatchLabel: matchLabelResolved,
         previewMatchId: matchIdResolved,
       });

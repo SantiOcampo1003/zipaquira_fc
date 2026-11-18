@@ -81,6 +81,8 @@ export type Seat = {
   occupantPurchaseId?: string | null;
   occupantDocumentId?: string | null;
   occupantPhone?: string | null;
+  /** Fecha en que se completó la compra (ISO). Solo en vista preview/admin. */
+  occupantPurchasedAt?: string | null;
 };
 
 export type ZoneConfig = {

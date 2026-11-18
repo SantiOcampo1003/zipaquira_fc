@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { StadiumGrandstandMap } from "@/components/stadium/StadiumGrandstandMap";
-import { PreviewSummaryPanel } from "@/components/stadium/PreviewSummaryPanel";
+import { PreviewSummaryPanel, type GeneralTicketRow } from "@/components/stadium/PreviewSummaryPanel";
 import { Button } from "@/components/ui/button";
 import {
   generateInitialStadiumSeats,
@@ -39,6 +39,7 @@ export function AdminSeatManager() {
 
   const [matches, setMatches] = useState<MatchOption[]>([]);
   const [seats, setSeats] = useState<Seat[]>(() => generateInitialStadiumSeats());
+  const [generalTickets, setGeneralTickets] = useState<GeneralTicketRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [unauthorized, setUnauthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,6 +86,7 @@ export function AdminSeatManager() {
         return;
       }
       setSeats(data.seats);
+      setGeneralTickets(data.generalTickets ?? []);
     } catch {
       setError("Error de conexión. Recarga la página.");
     } finally {
@@ -309,7 +311,7 @@ export function AdminSeatManager() {
             readOnlyHover={true}
             abonoCount={1}
           />
-          <PreviewSummaryPanel seats={seats} matchLabel={matchParam || null} />
+          <PreviewSummaryPanel seats={seats} matchLabel={matchParam || null} generalTickets={generalTickets} />
         </div>
       )}
 

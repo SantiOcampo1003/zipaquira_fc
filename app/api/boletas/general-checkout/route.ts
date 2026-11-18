@@ -11,7 +11,10 @@ import { getSupabaseAdmin } from "@/lib/supabase-server";
  */
 const holderSchema = z.object({
   holderFullName: z.string().trim().min(2),
-  holderDocumentId: z.string().trim().min(5),
+  holderDocumentId: z
+    .string()
+    .trim()
+    .regex(/^\d{5,12}$/, { message: "La cédula debe tener solo números." }),
   holderPhone: z.string().trim().min(7),
 });
 

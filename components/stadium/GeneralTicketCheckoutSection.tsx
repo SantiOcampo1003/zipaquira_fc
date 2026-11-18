@@ -281,9 +281,12 @@ export function GeneralTicketCheckoutSection({
                         <FieldIcon Icon={IdCard} />
                         <input
                           type="text"
+                          inputMode="numeric"
+                          autoComplete="off"
+                          maxLength={12}
                           placeholder="Cédula"
                           value={holder.documentId}
-                          onChange={(e) => updateHolder(index, { documentId: e.target.value })}
+                          onChange={(e) => updateHolder(index, { documentId: e.target.value.replace(/\D/g, "") })}
                           className={fieldClassName}
                         />
                       </div>

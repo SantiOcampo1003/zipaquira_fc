@@ -27,6 +27,9 @@ export const CATEDRAL_TICKET_PRICE_COP = Math.round(
   (CATEDRAL_BASE_PRICE_COP * (100 - CATEDRAL_DISCOUNT_PCT)) / 100
 );
 
+/** Precio por silla en Catedral con el código de jugadores (reemplaza el descuento del 30%, no se suma). */
+export const CATEDRAL_PLAYER_PRICE_COP = 20000;
+
 /** Precio de boleta de tribuna General — sin silla, tribuna aparte de la Catedral. */
 export const GENERAL_TICKET_PRICE_COP = 15000;
 

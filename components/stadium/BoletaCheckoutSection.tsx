@@ -6,6 +6,7 @@ import {
   Check,
   CheckCircle2,
   IdCard,
+  Tag,
   Loader2,
   Mail,
   Phone,
@@ -18,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import {
   CATEDRAL_BASE_PRICE_COP,
   CATEDRAL_DISCOUNT_PCT,
+  CATEDRAL_PLAYER_PRICE_COP,
   CATEDRAL_TICKET_PRICE_COP,
   formatCop,
   formatSeatLabel,
@@ -97,9 +99,14 @@ export function BoletaCheckoutSection({
   const [purchaserPhone, setPurchaserPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [codeInput, setCodeInput] = useState("");
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [checkingCode, setCheckingCode] = useState(false);
 
+  const unitPrice = appliedCode ? CATEDRAL_PLAYER_PRICE_COP : CATEDRAL_TICKET_PRICE_COP;
   const allowedZoneId: StadiumZoneId | null = selectedSeats[0]?.zoneId ?? null;
-  const totalPrice = selectedSeats.length * CATEDRAL_TICKET_PRICE_COP;
+  const totalPrice = selectedSeats.length * unitPrice;
   const allHoldersComplete = holderDrafts.every(
     (h) => h.fullName.trim().length > 1 && h.documentId.trim().length > 2 && h.phone.trim().length > 6
   );
@@ -147,6 +154,36 @@ export function BoletaCheckoutSection({
     setHolderDrafts((prev) => prev.map((h, i) => (i === index ? { ...h, ...patch } : h)));
   }
 
+  async function applyCode() {
+    const code = codeInput.trim();
+    if (!code) return;
+    setCheckingCode(true);
+    setCodeError(null);
+    try {
+      const res = await fetch("/api/boletas/discount-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setCodeError(data.error ?? "Código de descuento inválido.");
+        return;
+      }
+      setAppliedCode(code);
+    } catch {
+      setCodeError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setCheckingCode(false);
+    }
+  }
+
+  function removeCode() {
+    setAppliedCode(null);
+    setCodeInput("");
+    setCodeError(null);
+  }
+
   async function handlePay() {
     if (!allowedZoneId || selectedSeats.length === 0) return;
     if (!purchaserEmail.trim() || !purchaserPhone.trim() || !allHoldersComplete) return;
@@ -168,6 +205,7 @@ export function BoletaCheckoutSection({
           })),
           purchaserEmail,
           purchaserPhone,
+          ...(appliedCode ? { discountCode: appliedCode } : {}),
         }),
       });
       const data = await res.json();
@@ -260,7 +298,7 @@ export function BoletaCheckoutSection({
                             <span className="mr-1 text-xs text-white/40 line-through">
                               {formatCop(CATEDRAL_BASE_PRICE_COP)}
                             </span>
-                            {formatCop(CATEDRAL_TICKET_PRICE_COP)}
+                            {formatCop(unitPrice)}
                           </p>
                           <button
                             type="button"
@@ -278,10 +316,71 @@ export function BoletaCheckoutSection({
 
                 {selectedSeats.length > 0 ? (
                   <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3 text-sm">
-                    <span className="text-muted-foreground">Total · {CATEDRAL_DISCOUNT_PCT}% de descuento</span>
+                    <span className="text-muted-foreground">
+                      {appliedCode ? "Total · precio con código" : `Total · ${CATEDRAL_DISCOUNT_PCT}% de descuento`}
+                    </span>
                     <span className="font-heading text-lg text-primary">{formatCop(totalPrice)}</span>
                   </div>
                 ) : null}
+
+                <div className="rounded-xl border border-white/10 bg-black/30 p-3">
+                  {appliedCode ? (
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="flex items-center gap-2 text-primary">
+                        <Check className="size-4" />
+                        Código aplicado: {formatCop(CATEDRAL_PLAYER_PRICE_COP)} por boleta
+                      </span>
+                      <button
+                        type="button"
+                        onClick={removeCode}
+                        className="text-xs text-muted-foreground underline-offset-2 hover:text-white hover:underline"
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <label htmlFor="discount-code" className="mb-1.5 block text-xs text-muted-foreground">
+                        ¿Tienes un código de descuento?
+                      </label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <FieldIcon Icon={Tag} />
+                          <input
+                            id="discount-code"
+                            type="text"
+                            autoComplete="off"
+                            autoCapitalize="off"
+                            spellCheck={false}
+                            placeholder="Código"
+                            value={codeInput}
+                            onChange={(e) => {
+                              setCodeInput(e.target.value);
+                              setCodeError(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                applyCode();
+                              }
+                            }}
+                            className={fieldClassName}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={!codeInput.trim() || checkingCode}
+                          onClick={applyCode}
+                          className="h-11 shrink-0"
+                        >
+                          {checkingCode ? <Loader2 className="size-4 animate-spin" /> : "Aplicar"}
+                        </Button>
+                      </div>
+                      {codeError ? <p className="mt-1.5 text-xs text-rose-300">{codeError}</p> : null}
+                    </>
+                  )}
+                </div>
 
                 <Button
                   type="button"

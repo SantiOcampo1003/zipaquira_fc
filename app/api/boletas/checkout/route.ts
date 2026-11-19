@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { CATEDRAL_TICKET_PRICE_COP } from "@/lib/stadium-seating";
+import { CATEDRAL_PLAYER_PRICE_COP, CATEDRAL_TICKET_PRICE_COP } from "@/lib/stadium-seating";
+import { isPlayerDiscountCode } from "@/lib/discount-code";
 import { buildCheckoutRedirectUrl } from "@/lib/wompi";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 
@@ -24,6 +25,7 @@ const checkoutSchema = z.object({
   seats: z.array(seatSchema).min(1).max(10),
   purchaserEmail: z.string().trim().email(),
   purchaserPhone: z.string().trim().min(7),
+  discountCode: z.string().trim().max(60).optional(),
 });
 
 function getSiteUrl(): string {
@@ -38,7 +40,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Datos incompletos o inválidos." }, { status: 400 });
     }
 
-    const { matchLabel, zoneId, seats, purchaserEmail, purchaserPhone } = parsed.data;
+    const { matchLabel, zoneId, seats, purchaserEmail, purchaserPhone, discountCode } = parsed.data;
+
+    // Si mandan un código y no sirve, se rechaza (no se cobra el precio completo en silencio).
+    const hasPlayerCode = !!discountCode && isPlayerDiscountCode(discountCode);
+    if (discountCode && !hasPlayerCode) {
+      return NextResponse.json({ error: "Código de descuento inválido." }, { status: 400 });
+    }
+    const unitPrice = hasPlayerCode ? CATEDRAL_PLAYER_PRICE_COP : CATEDRAL_TICKET_PRICE_COP;
+
     const supabase = getSupabaseAdmin();
 
     const { data: matchRow, error: matchError } = await supabase
@@ -85,7 +95,7 @@ export async function POST(req: Request) {
     const accessToken: string = row.access_token;
 
     try {
-      const amountInCents = seats.length * CATEDRAL_TICKET_PRICE_COP * 100;
+      const amountInCents = seats.length * unitPrice * 100;
       const redirectUrl = buildCheckoutRedirectUrl({
         reference: purchaseId,
         amountInCents,

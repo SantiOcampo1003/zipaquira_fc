@@ -16,6 +16,8 @@ import {
 import { StadiumGrandstandMap } from "@/components/stadium/StadiumGrandstandMap";
 import { Button } from "@/components/ui/button";
 import {
+  CATEDRAL_BASE_PRICE_COP,
+  CATEDRAL_DISCOUNT_PCT,
   CATEDRAL_TICKET_PRICE_COP,
   formatCop,
   formatSeatLabel,
@@ -254,7 +256,12 @@ export function BoletaCheckoutSection({
                           <p className="truncate text-xs text-white/80">{formatSeatLabel(seat)}</p>
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
-                          <p className="text-sm text-white">{formatCop(CATEDRAL_TICKET_PRICE_COP)}</p>
+                          <p className="text-sm text-white">
+                            <span className="mr-1 text-xs text-white/40 line-through">
+                              {formatCop(CATEDRAL_BASE_PRICE_COP)}
+                            </span>
+                            {formatCop(CATEDRAL_TICKET_PRICE_COP)}
+                          </p>
                           <button
                             type="button"
                             onClick={() => removeSeat(i)}
@@ -271,7 +278,7 @@ export function BoletaCheckoutSection({
 
                 {selectedSeats.length > 0 ? (
                   <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3 text-sm">
-                    <span className="text-muted-foreground">Total</span>
+                    <span className="text-muted-foreground">Total · {CATEDRAL_DISCOUNT_PCT}% de descuento</span>
                     <span className="font-heading text-lg text-primary">{formatCop(totalPrice)}</span>
                   </div>
                 ) : null}

@@ -6,7 +6,13 @@ import Image from "next/image";
 import { ArrowLeft, Ticket } from "lucide-react";
 import { BoletaCheckoutSection } from "@/components/stadium/BoletaCheckoutSection";
 import { GeneralTicketCheckoutSection } from "@/components/stadium/GeneralTicketCheckoutSection";
-import { CATEDRAL_TICKET_PRICE_COP, GENERAL_TICKET_PRICE_COP, formatCop } from "@/lib/stadium-seating";
+import {
+  CATEDRAL_BASE_PRICE_COP,
+  CATEDRAL_DISCOUNT_PCT,
+  CATEDRAL_TICKET_PRICE_COP,
+  GENERAL_TICKET_PRICE_COP,
+  formatCop,
+} from "@/lib/stadium-seating";
 import { cn } from "@/lib/utils";
 
 type StandZone = "catedral" | "general";
@@ -119,7 +125,17 @@ export function StadiumOverviewSelector({
                 {spot.label}
               </span>
               <span className="text-[10px] text-primary sm:text-xs">
-                {formatCop(id === "catedral" ? CATEDRAL_TICKET_PRICE_COP : GENERAL_TICKET_PRICE_COP)}
+                {id === "catedral" ? (
+                  <>
+                    <span className="mr-1 text-white/50 line-through">{formatCop(CATEDRAL_BASE_PRICE_COP)}</span>
+                    {formatCop(CATEDRAL_TICKET_PRICE_COP)}
+                    <span className="ml-1 rounded bg-primary px-1 py-0.5 text-[9px] font-bold text-black sm:text-[10px]">
+                      -{CATEDRAL_DISCOUNT_PCT}%
+                    </span>
+                  </>
+                ) : (
+                  formatCop(GENERAL_TICKET_PRICE_COP)
+                )}
               </span>
             </span>
           </button>

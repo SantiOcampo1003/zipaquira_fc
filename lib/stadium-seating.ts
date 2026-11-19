@@ -14,7 +14,18 @@ export type StadiumZoneId = "verde" | "blanca" | "roja";
  * otra tribuna aparte que no existe en este mapa. Distinto de los precios
  * cosméticos por zona en STADIUM_ZONES (esos no se usan para cobrar).
  */
-export const CATEDRAL_TICKET_PRICE_COP = 35100;
+export const CATEDRAL_BASE_PRICE_COP = 35100;
+
+/** Descuento vigente en la tribuna Catedral de Sal (porcentaje). */
+export const CATEDRAL_DISCOUNT_PCT = 30;
+
+/**
+ * Precio final que se cobra por silla en Catedral (ya con descuento). Es el
+ * que se envía a Wompi y el que muestra la interfaz.
+ */
+export const CATEDRAL_TICKET_PRICE_COP = Math.round(
+  (CATEDRAL_BASE_PRICE_COP * (100 - CATEDRAL_DISCOUNT_PCT)) / 100
+);
 
 /** Precio de boleta de tribuna General — sin silla, tribuna aparte de la Catedral. */
 export const GENERAL_TICKET_PRICE_COP = 15000;

@@ -30,6 +30,9 @@ export const CATEDRAL_TICKET_PRICE_COP = Math.round(
 /** Precio de boleta de tribuna General — sin silla, tribuna aparte de la Catedral. */
 export const GENERAL_TICKET_PRICE_COP = 15000;
 
+/** Venta en línea de la tribuna General. false = cerrada (solo se vende Catedral). */
+export const GENERAL_SALES_ENABLED = false;
+
 export type SeatStatus = "available" | "occupied" | "courtesy" | "selected";
 
 /** Sillas reservadas para cortesías (no seleccionables por abonados). */

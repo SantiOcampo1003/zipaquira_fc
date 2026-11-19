@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { GENERAL_TICKET_PRICE_COP } from "@/lib/stadium-seating";
+import { GENERAL_SALES_ENABLED, GENERAL_TICKET_PRICE_COP } from "@/lib/stadium-seating";
 import { buildCheckoutRedirectUrl } from "@/lib/wompi";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 
@@ -30,6 +30,12 @@ function getSiteUrl(): string {
 }
 
 export async function POST(req: Request) {
+  if (!GENERAL_SALES_ENABLED) {
+    return NextResponse.json(
+      { error: "La venta de boletas General está cerrada." },
+      { status: 403 }
+    );
+  }
   try {
     const body = await req.json();
     const parsed = checkoutSchema.safeParse(body);

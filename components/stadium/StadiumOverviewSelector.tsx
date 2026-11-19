@@ -10,6 +10,7 @@ import {
   CATEDRAL_BASE_PRICE_COP,
   CATEDRAL_DISCOUNT_PCT,
   CATEDRAL_TICKET_PRICE_COP,
+  GENERAL_SALES_ENABLED,
   GENERAL_TICKET_PRICE_COP,
   formatCop,
 } from "@/lib/stadium-seating";
@@ -109,15 +110,21 @@ export function StadiumOverviewSelector({
           priority
         />
 
-        {(Object.entries(HOTSPOTS) as [StandZone, (typeof HOTSPOTS)[StandZone]][]).map(([id, spot]) => (
+        {(Object.entries(HOTSPOTS) as [StandZone, (typeof HOTSPOTS)[StandZone]][]).map(([id, spot]) => {
+          const closed = id === "general" && !GENERAL_SALES_ENABLED;
+          return (
           <button
             key={id}
             type="button"
-            onClick={() => !zooming && pickZone(id)}
+            disabled={closed}
+            aria-disabled={closed}
+            onClick={() => !closed && !zooming && pickZone(id)}
             style={{ left: spot.left, top: spot.top, width: spot.width, height: spot.height }}
             className={cn(
               "group absolute flex items-center justify-center rounded-xl border-2 border-primary/0 bg-primary/0 transition-colors",
-              "hover:border-primary/70 hover:bg-primary/20 focus:border-primary/70 focus:bg-primary/20 focus:outline-none"
+              closed
+                ? "cursor-not-allowed opacity-60"
+                : "hover:border-primary/70 hover:bg-primary/20 focus:border-primary/70 focus:bg-primary/20 focus:outline-none"
             )}
           >
             <span className="flex flex-col items-center gap-0.5 whitespace-nowrap rounded-lg bg-black/70 px-2 py-1 sm:gap-1 sm:px-4 sm:py-2 opacity-90 backdrop-blur-sm transition-opacity group-hover:opacity-100">
@@ -133,19 +140,22 @@ export function StadiumOverviewSelector({
                       -{CATEDRAL_DISCOUNT_PCT}%
                     </span>
                   </>
+                ) : closed ? (
+                  "No disponible"
                 ) : (
                   formatCop(GENERAL_TICKET_PRICE_COP)
                 )}
               </span>
             </span>
           </button>
-        ))}
+          );
+        })}
         </motion.div>
       </div>
 
       <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
         <Ticket className="size-3.5 shrink-0 text-primary" />
-        Catedral: silla numerada en el mapa. General: sin silla asignada, el espacio se escoge al llegar.
+        Catedral: silla numerada en el mapa. La venta en línea de General está cerrada.
       </p>
     </div>
   );

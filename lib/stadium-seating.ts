@@ -30,6 +30,14 @@ export const CATEDRAL_TICKET_PRICE_COP = Math.round(
 /** Precio por silla en Catedral con el código de jugadores (reemplaza el descuento del 30%, no se suma). */
 export const CATEDRAL_PLAYER_PRICE_COP = 20000;
 
+/**
+ * Promo 2x1 (solo la vende un admin): por cada 2 sillas se cobra 1, sobre el
+ * precio SIN el 30% de descuento. No se suma con el código de jugadores.
+ */
+export function twoForOneTotalCop(seatCount: number): number {
+  return (seatCount / 2) * CATEDRAL_BASE_PRICE_COP;
+}
+
 /** Precio de boleta de tribuna General — sin silla, tribuna aparte de la Catedral. */
 export const GENERAL_TICKET_PRICE_COP = 15000;
 

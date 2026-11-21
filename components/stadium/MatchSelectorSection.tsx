@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, CalendarDays, Loader2, MapPin, Ticket } from "lucide-react";
+import { ArrowLeft, CalendarDays, Loader2, MapPin, ShieldAlert, Ticket } from "lucide-react";
 import { useFanAuth } from "@/components/auth/FanAuthProvider";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { BoletaCheckoutSection } from "@/components/stadium/BoletaCheckoutSection";
+import { adminFetch } from "@/lib/supabase-browser";
 import { StadiumOverviewSelector } from "@/components/stadium/StadiumOverviewSelector";
 
 type MatchOption = {
@@ -43,13 +44,39 @@ function posterFor(opponent: string): string | null {
   return null;
 }
 
-export function MatchSelectorSection({ courtesy = false }: { courtesy?: boolean }) {
-  const basePath = courtesy ? "/cortesias" : "/boletas";
+type SaleMode = "venta" | "cortesia" | "2x1";
+
+const MODE_PATH: Record<SaleMode, string> = { venta: "/boletas", cortesia: "/cortesias", "2x1": "/2x1" };
+
+/**
+ * `forcedMode`: páginas exclusivas de admin (/cortesias, /2x1). Sin él (/boletas)
+ * el público compra normal, y un admin ve primero 3 botones para elegir cómo vender.
+ */
+export function MatchSelectorSection({ forcedMode }: { forcedMode?: "cortesia" | "2x1" }) {
+  const basePath = MODE_PATH[forcedMode ?? "venta"];
+  const courtesy = forcedMode === "cortesia";
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [pickedMode, setPickedMode] = useState<SaleMode | null>(null);
   const { user, loading: authLoading } = useFanAuth();
   const searchParams = useSearchParams();
   const [matches, setMatches] = useState<MatchOption[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<MatchOption | null>(null);
+
+  const userId = user?.id ?? null;
+  useEffect(() => {
+    if (!userId) {
+      setIsAdmin(null);
+      return;
+    }
+    let cancelled = false;
+    adminFetch("/api/admin/me")
+      .then((res) => !cancelled && setIsAdmin(res.ok))
+      .catch(() => !cancelled && setIsAdmin(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   useEffect(() => {
     fetch("/api/matches/upcoming")
@@ -90,7 +117,7 @@ export function MatchSelectorSection({ courtesy = false }: { courtesy?: boolean 
           </p>
           <h1 className="mt-2 font-heading text-2xl uppercase">Inicia sesión para continuar</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            {courtesy ? "Inicia sesión con tu cuenta de administrador para emitir cortesías." : "Usa tu cuenta de Google para elegir tu silla en el mapa del estadio y pagar en línea."}
+            {forcedMode ? "Inicia sesión con tu cuenta de administrador para continuar." : "Usa tu cuenta de Google para elegir tu silla en el mapa del estadio y pagar en línea."}
           </p>
           <GoogleSignInButton
             nextPath={`${basePath}?partido=${selected.id}`}
@@ -113,8 +140,78 @@ export function MatchSelectorSection({ courtesy = false }: { courtesy?: boolean 
       );
     }
 
-    if (courtesy) {
-      return <BoletaCheckoutSection matchLabel={selected.ticket_label} courtesy />;
+    const goBack = () => {
+      window.history.replaceState(null, "", basePath);
+      setPickedMode(null);
+      setSelected(null);
+    };
+
+    // Esperando saber si es admin (o páginas/botones de admin).
+    if (isAdmin === null && (forcedMode || userId)) {
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <Loader2 className="size-8 animate-spin text-primary" />
+        </div>
+      );
+    }
+
+    if (forcedMode) {
+      if (!isAdmin) {
+        return (
+          <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-4 text-center text-white">
+            <ShieldAlert className="mb-4 size-12 text-rose-400" />
+            <h1 className="font-heading text-2xl uppercase">Sin permisos</h1>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Esta página es solo para administradores. Tu cuenta ({user.email}) no tiene acceso.
+            </p>
+            <button type="button" onClick={goBack} className="mt-5 text-sm text-muted-foreground underline hover:text-white">
+              Volver
+            </button>
+          </div>
+        );
+      }
+      return <BoletaCheckoutSection matchLabel={selected.ticket_label} mode={forcedMode} />;
+    }
+
+    if (isAdmin && !pickedMode) {
+      const options: { mode: SaleMode; title: string; desc: string }[] = [
+        { mode: "venta", title: "Venta normal", desc: "Catedral con 30% de descuento, pago por Wompi." },
+        { mode: "2x1", title: "Venta 2x1", desc: "Pagas 1 de cada 2 sillas ($35.100), pago por Wompi." },
+        { mode: "cortesia", title: "Cortesía", desc: "Sin cobro: la boleta llega directo al correo." },
+      ];
+      return (
+        <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10 text-white">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+            Zipaquirá F.C. vs {selected.opponent}
+          </p>
+          <h1 className="mt-2 font-heading text-2xl uppercase">¿Cómo quieres vender?</h1>
+          <div className="mt-6 flex flex-col gap-3">
+            {options.map((o) => (
+              <button
+                key={o.mode}
+                type="button"
+                onClick={() => setPickedMode(o.mode)}
+                className="rounded-2xl border border-primary/25 bg-[#18181B]/90 p-5 text-left transition-colors hover:border-primary/60"
+              >
+                <p className="font-heading text-lg uppercase text-primary">{o.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{o.desc}</p>
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={goBack}
+            className="mt-5 inline-flex items-center gap-2 self-start text-sm text-muted-foreground transition hover:text-white"
+          >
+            <ArrowLeft className="size-4" />
+            Elegir otro partido
+          </button>
+        </div>
+      );
+    }
+
+    if (pickedMode === "cortesia" || pickedMode === "2x1") {
+      return <BoletaCheckoutSection matchLabel={selected.ticket_label} mode={pickedMode} />;
     }
 
     return <StadiumOverviewSelector matchLabel={selected.ticket_label} userEmail={user.email ?? ""} />;
@@ -122,7 +219,7 @@ export function MatchSelectorSection({ courtesy = false }: { courtesy?: boolean 
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="font-heading text-2xl uppercase text-white sm:text-3xl">{courtesy ? "Cortesías — elige el partido" : "Elige tu partido"}</h1>
+      <h1 className="font-heading text-2xl uppercase text-white sm:text-3xl">{courtesy ? "Cortesías — elige el partido" : forcedMode === "2x1" ? "Venta 2x1 — elige el partido" : "Elige tu partido"}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Estos son los próximos partidos con venta de boletas en línea.
       </p>
@@ -163,7 +260,7 @@ export function MatchSelectorSection({ courtesy = false }: { courtesy?: boolean 
                   </span>
                   <span className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-primary">
                     <Ticket className="size-4" />
-                    {courtesy ? "Emitir cortesía" : "Comprar boleta"}
+                    {courtesy ? "Emitir cortesía" : forcedMode === "2x1" ? "Vender 2x1" : "Comprar boleta"}
                   </span>
                 </button>
               );
@@ -188,7 +285,7 @@ export function MatchSelectorSection({ courtesy = false }: { courtesy?: boolean 
               </p>
               <span className="mt-2 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-primary">
                 <Ticket className="size-4" />
-                {courtesy ? "Emitir cortesía" : "Comprar boleta"}
+                {courtesy ? "Emitir cortesía" : forcedMode === "2x1" ? "Vender 2x1" : "Comprar boleta"}
               </span>
             </button>
             );

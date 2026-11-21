@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { CATEDRAL_PLAYER_PRICE_COP, CATEDRAL_TICKET_PRICE_COP } from "@/lib/stadium-seating";
+import { CATEDRAL_PLAYER_PRICE_COP, CATEDRAL_TICKET_PRICE_COP, twoForOneTotalCop } from "@/lib/stadium-seating";
+import { requireAdmin } from "@/lib/admin-auth";
 import { isPlayerDiscountCode } from "@/lib/discount-code";
 import { buildCheckoutRedirectUrl } from "@/lib/wompi";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
@@ -26,6 +27,7 @@ const checkoutSchema = z.object({
   purchaserEmail: z.string().trim().email(),
   purchaserPhone: z.string().trim().min(7),
   discountCode: z.string().trim().max(60).optional(),
+  promo: z.literal("2x1").optional(),
 });
 
 function getSiteUrl(): string {
@@ -40,7 +42,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Datos incompletos o inválidos." }, { status: 400 });
     }
 
-    const { matchLabel, zoneId, seats, purchaserEmail, purchaserPhone, discountCode } = parsed.data;
+    const { matchLabel, zoneId, seats, purchaserEmail, purchaserPhone, discountCode, promo } = parsed.data;
+
+    // 2x1: solo un admin puede venderlo; cantidad par y sin código de jugadores.
+    if (promo === "2x1") {
+      const auth = await requireAdmin(req);
+      if (auth.error) return auth.error;
+      if (seats.length % 2 !== 0) {
+        return NextResponse.json({ error: "El 2x1 requiere un número par de sillas." }, { status: 400 });
+      }
+      if (discountCode) {
+        return NextResponse.json({ error: "El 2x1 no se combina con códigos de descuento." }, { status: 400 });
+      }
+    }
 
     // Si mandan un código y no sirve, se rechaza (no se cobra el precio completo en silencio).
     const hasPlayerCode = !!discountCode && isPlayerDiscountCode(discountCode);
@@ -95,7 +109,7 @@ export async function POST(req: Request) {
     const accessToken: string = row.access_token;
 
     try {
-      const amountInCents = seats.length * unitPrice * 100;
+      const amountInCents = (promo === "2x1" ? twoForOneTotalCop(seats.length) : seats.length * unitPrice) * 100;
       const redirectUrl = buildCheckoutRedirectUrl({
         reference: purchaseId,
         amountInCents,

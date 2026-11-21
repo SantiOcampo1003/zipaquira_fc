@@ -14,6 +14,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import { adminFetch } from "@/lib/supabase-browser";
 import { StadiumGrandstandMap } from "@/components/stadium/StadiumGrandstandMap";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +25,7 @@ import {
   formatCop,
   formatSeatLabel,
   generateInitialStadiumSeats,
+  twoForOneTotalCop,
   type Seat,
   type StadiumZoneId,
 } from "@/lib/stadium-seating";
@@ -82,14 +84,19 @@ function StepDots({ step }: { step: "seats" | "details" }) {
 export function BoletaCheckoutSection({
   matchLabel,
   userEmail = "",
-  courtesy = false,
+  mode = "venta",
 }: {
   matchLabel: string;
   /** Correo de la cuenta de Google ya autenticada — si viene, el campo queda bloqueado. */
   userEmail?: string;
-  /** Cortesía (solo admin): sin cobro ni Wompi, la boleta se envía directo al correo. */
-  courtesy?: boolean;
+  /**
+   * venta: compra normal · cortesia (solo admin): sin cobro ni Wompi, la boleta
+   * se envía directo al correo · 2x1 (solo admin): paga 1 de cada 2 por Wompi.
+   */
+  mode?: "venta" | "cortesia" | "2x1";
 }) {
+  const courtesy = mode === "cortesia";
+  const twoForOne = mode === "2x1";
   const [courtesyDone, setCourtesyDone] = useState<{ seats: number; email: string; emailSent: boolean } | null>(null);
   const [seats, setSeats] = useState<Seat[]>(() => generateInitialStadiumSeats());
   const [loading, setLoading] = useState(true);
@@ -108,9 +115,10 @@ export function BoletaCheckoutSection({
   const [codeError, setCodeError] = useState<string | null>(null);
   const [checkingCode, setCheckingCode] = useState(false);
 
-  const unitPrice = courtesy ? 0 : appliedCode ? CATEDRAL_PLAYER_PRICE_COP : CATEDRAL_TICKET_PRICE_COP;
+  const unitPrice = courtesy ? 0 : twoForOne ? CATEDRAL_BASE_PRICE_COP / 2 : appliedCode ? CATEDRAL_PLAYER_PRICE_COP : CATEDRAL_TICKET_PRICE_COP;
   const allowedZoneId: StadiumZoneId | null = selectedSeats[0]?.zoneId ?? null;
-  const totalPrice = selectedSeats.length * unitPrice;
+  const totalPrice = twoForOne ? twoForOneTotalCop(selectedSeats.length) : selectedSeats.length * unitPrice;
+  const oddForTwoForOne = twoForOne && selectedSeats.length % 2 !== 0;
   const allHoldersComplete = holderDrafts.every(
     (h) => h.fullName.trim().length > 1 && h.documentId.trim().length > 2 && h.phone.trim().length > 6
   );
@@ -195,7 +203,8 @@ export function BoletaCheckoutSection({
     setSubmitting(true);
     setCheckoutError(null);
     try {
-      const res = await fetch(courtesy ? "/api/cortesias/checkout" : "/api/boletas/checkout", {
+      const doFetch = courtesy || twoForOne ? adminFetch : fetch;
+      const res = await doFetch(courtesy ? "/api/cortesias/checkout" : "/api/boletas/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -209,7 +218,8 @@ export function BoletaCheckoutSection({
           })),
           purchaserEmail,
           purchaserPhone,
-          ...(!courtesy && appliedCode ? { discountCode: appliedCode } : {}),
+          ...(!courtesy && !twoForOne && appliedCode ? { discountCode: appliedCode } : {}),
+          ...(twoForOne ? { promo: "2x1" } : {}),
         }),
       });
       const data = await res.json();
@@ -262,11 +272,13 @@ export function BoletaCheckoutSection({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <h1 className="font-heading text-2xl uppercase text-white sm:text-3xl">
-        {courtesy ? "Emitir cortesía" : "Comprar boleta"}
+        {courtesy ? "Emitir cortesía" : twoForOne ? "Venta 2x1" : "Comprar boleta"}
       </h1>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         {courtesy
           ? "Elige las sillas y los datos de cada titular. No se cobra: la boleta en PDF con código QR se envía al correo que indiques."
+          : twoForOne
+          ? "Promo 2x1: elige las sillas de a pares y se cobra una por cada dos (a $35.100, sin el 30%). Se paga con Wompi y las boletas llegan al correo que indiques."
           : "Elige tu silla en el mapa y paga en línea con Wompi — recibirás tu boleta en PDF con código QR por correo."}
       </p>
 
@@ -327,6 +339,8 @@ export function BoletaCheckoutSection({
                           <p className="text-sm text-white">
                             {courtesy ? (
                               "Cortesía"
+                            ) : twoForOne ? (
+                              "2x1"
                             ) : (
                               <>
                                 <span className="mr-1 text-xs text-white/40 line-through">
@@ -353,13 +367,13 @@ export function BoletaCheckoutSection({
                 {selectedSeats.length > 0 && !courtesy ? (
                   <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3 text-sm">
                     <span className="text-muted-foreground">
-                      {appliedCode ? "Total · precio con código" : `Total · ${CATEDRAL_DISCOUNT_PCT}% de descuento`}
+                      {twoForOne ? "Total · 2x1 (pagas 1 de cada 2)" : appliedCode ? "Total · precio con código" : `Total · ${CATEDRAL_DISCOUNT_PCT}% de descuento`}
                     </span>
                     <span className="font-heading text-lg text-primary">{formatCop(totalPrice)}</span>
                   </div>
                 ) : null}
 
-                {courtesy ? null : (
+                {courtesy || twoForOne ? null : (
                 <div className="rounded-xl border border-white/10 bg-black/30 p-3">
                   {appliedCode ? (
                     <div className="flex items-center justify-between gap-2 text-sm">
@@ -420,13 +434,19 @@ export function BoletaCheckoutSection({
                 </div>
                 )}
 
+                {oddForTwoForOne ? (
+                  <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+                    El 2x1 es por parejas: elige una silla más (o quita una) para continuar.
+                  </p>
+                ) : null}
+
                 <Button
                   type="button"
-                  disabled={selectedSeats.length === 0}
+                  disabled={selectedSeats.length === 0 || oddForTwoForOne}
                   onClick={() => setStep("details")}
                   className={cn(
                     "h-12 font-heading uppercase tracking-wider",
-                    selectedSeats.length > 0
+                    selectedSeats.length > 0 && !oddForTwoForOne
                       ? "bg-primary text-primary-foreground hover:bg-primary/90"
                       : "bg-white/10 text-muted-foreground"
                   )}
@@ -445,7 +465,7 @@ export function BoletaCheckoutSection({
               >
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-white">
-                    {courtesy ? "Correo donde se envía la boleta" : "Correo de contacto"}
+                    {courtesy || twoForOne ? "Correo donde se envía la boleta" : "Correo de contacto"}
                   </label>
                   <div className="relative">
                     <FieldIcon Icon={Mail} />

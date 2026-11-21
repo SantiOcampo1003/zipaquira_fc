@@ -11,7 +11,7 @@ export default function CortesiasPage() {
       <Header />
       <main className="overflow-x-clip bg-[#0b0b0d]">
         <Suspense fallback={null}>
-          <MatchSelectorSection courtesy />
+          <MatchSelectorSection forcedMode="cortesia" />
         </Suspense>
       </main>
       <Footer />

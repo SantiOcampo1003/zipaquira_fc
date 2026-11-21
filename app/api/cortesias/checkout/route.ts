@@ -81,7 +81,8 @@ export async function POST(req: Request) {
     // Sin pago: se confirma de inmediato. El "id de transacción" deja rastro de quién la emitió.
     const { error: confirmError } = await supabase.rpc("confirm_boleta_payment", {
       p_purchase_id: purchaseId,
-      p_wompi_transaction_id: `cortesia:${auth.user.email}`,
+      // external_order_id es único: se agrega el id de la compra para que cada cortesía tenga el suyo.
+      p_wompi_transaction_id: `cortesia:${auth.user.email}:${purchaseId}`,
     });
     if (confirmError) {
       console.error("[cortesias/checkout] confirm:", confirmError.message);

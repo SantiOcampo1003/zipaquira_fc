@@ -113,10 +113,9 @@ export function TicketScanner() {
           } catch {
             setLastResult({ result: "INVALID", message: "Error de conexión." });
           } finally {
+            // Se queda bloqueado hasta que el staff toque "Siguiente": así no se
+            // escanea otra boleta sin haber visto el resultado.
             setChecking(false);
-            setTimeout(() => {
-              busyRef.current = false;
-            }, 2000);
           }
         },
         () => {}
@@ -192,28 +191,30 @@ export function TicketScanner() {
 
       <div id={SCANNER_ELEMENT_ID} className="mt-6 overflow-hidden rounded-2xl border border-primary/25" />
 
-      {checking ? <p className="mt-4 text-center text-sm text-muted-foreground">Verificando…</p> : null}
+      {checking ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <p className="font-heading text-xl uppercase text-white">Verificando…</p>
+        </div>
+      ) : null}
 
       {lastResult ? (
         <div
+          role="alertdialog"
           className={cn(
-            "mt-4 rounded-2xl border p-5 text-center",
-            lastResult.result === "OK" && "border-emerald-500/40 bg-emerald-500/10",
-            lastResult.result === "ALREADY_USED" && "border-amber-500/40 bg-amber-500/10",
-            lastResult.result === "INVALID" && "border-rose-500/40 bg-rose-500/10"
+            "fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 px-6 text-center",
+            lastResult.result === "OK" && "bg-emerald-950/95",
+            lastResult.result === "ALREADY_USED" && "bg-amber-950/95",
+            lastResult.result === "INVALID" && "bg-rose-950/95"
           )}
         >
           {lastResult.result === "OK" ? (
-            <CheckCircle2 className="mx-auto mb-2 size-10 text-emerald-400" />
+            <CheckCircle2 className="size-24 text-emerald-400" />
           ) : (
             <XCircle
-              className={cn(
-                "mx-auto mb-2 size-10",
-                lastResult.result === "ALREADY_USED" ? "text-amber-400" : "text-rose-400"
-              )}
+              className={cn("size-24", lastResult.result === "ALREADY_USED" ? "text-amber-400" : "text-rose-400")}
             />
           )}
-          <p className="font-heading text-lg uppercase">
+          <p className="font-heading text-3xl uppercase">
             {lastResult.result === "OK"
               ? "Ingreso válido"
               : lastResult.result === "ALREADY_USED"
@@ -221,13 +222,23 @@ export function TicketScanner() {
               : "Boleta no válida"}
           </p>
           {lastResult.holderFullName ? (
-            <p className="mt-1 text-sm text-white">
+            <p className="text-xl text-white">
               {lastResult.holderFullName}
               {lastResult.seatNumber ? ` · Silla #${lastResult.seatNumber}` : " · General"}
             </p>
           ) : lastResult.message ? (
-            <p className="mt-1 text-sm text-muted-foreground">{lastResult.message}</p>
+            <p className="text-base text-white/70">{lastResult.message}</p>
           ) : null}
+          <Button
+            type="button"
+            onClick={() => {
+              setLastResult(null);
+              busyRef.current = false;
+            }}
+            className="mt-2 h-14 w-full max-w-xs bg-primary font-heading text-lg uppercase tracking-wider text-primary-foreground hover:bg-primary/90"
+          >
+            Siguiente
+          </Button>
         </div>
       ) : null}
     </div>

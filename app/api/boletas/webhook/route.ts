@@ -42,6 +42,14 @@ export async function POST(req: Request) {
         console.error("[boletas/webhook] confirm_boleta_payment:", error.message);
         return NextResponse.json({ error: "No pudimos confirmar el pago." }, { status: 500 });
       }
+      // Guardar lo realmente cobrado (para el reporte de /admin). No bloquea el envío de la boleta.
+      const { error: amountError } = await supabase
+        .from("abono_purchases")
+        .update({ amount_cop: Math.round(payload.data.transaction.amount_in_cents / 100) })
+        .eq("id", purchaseId);
+      if (amountError) {
+        console.error("[boletas/webhook] guardar monto:", amountError.message);
+      }
       await sendTicketEmailForPurchase(purchaseId);
     } else if (status === "DECLINED" || status === "VOIDED" || status === "ERROR") {
       const { error } = await supabase.rpc("cancel_boleta_payment", { p_purchase_id: purchaseId });

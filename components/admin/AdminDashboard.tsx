@@ -69,9 +69,17 @@ type CheckinTicket = {
   holderFullName: string;
   seatNumber: number | null;
   zoneId: string;
+  kind: string;
+  amountCop: number | null;
   checkedInAt: string | null;
   checkedInBy: string | null;
 };
+
+/** Valor para mostrar/exportar: lo cobrado, $0 en cortesías, "Abono" si es de temporada. */
+function checkinValueLabel(t: CheckinTicket): string {
+  if (t.amountCop != null) return t.amountCop === 0 ? "$0" : `$${t.amountCop.toLocaleString("es-CO")}`;
+  return t.kind === "Abonado" || t.kind === "Cortesía abonado" ? "Abono" : "Sin registrar";
+}
 
 type Tab = "jugadores" | "partidos" | "convocatoria";
 
@@ -176,11 +184,13 @@ export function AdminDashboard() {
     if (!checkinsMatch || !checkinsTickets) return;
 
     const csvEscape = (value: string) => `"${value.replace(/"/g, '""')}"`;
-    const header = ["Titular", "Tribuna/Silla", "Código", "Estado", "Hora de ingreso", "Escaneado por"];
+    const header = ["Titular", "Tribuna/Silla", "Código", "Tipo", "Valor pagado", "Estado", "Hora de ingreso", "Escaneado por"];
     const rows = checkinsTickets.map((t) => [
       t.holderFullName,
       t.zoneId === "general" ? "General" : `Silla #${t.seatNumber}`,
       t.ticketCode,
+      t.kind,
+      checkinValueLabel(t),
       t.checkedInAt ? "Ingresó" : "Sin ingresar",
       t.checkedInAt ? new Date(t.checkedInAt).toLocaleString("es-CO") : "",
       t.checkedInBy ?? "",
@@ -1206,6 +1216,9 @@ export function AdminDashboard() {
                       <p className="truncate text-sm font-semibold text-white">{t.holderFullName}</p>
                       <p className="text-xs text-muted-foreground">
                         {t.zoneId === "general" ? "General" : `Silla #${t.seatNumber}`} · {t.ticketCode}
+                      </p>
+                      <p className="text-xs text-primary">
+                        {t.kind} · {checkinValueLabel(t)}
                       </p>
                     </div>
                     <div className="shrink-0 text-right text-xs">

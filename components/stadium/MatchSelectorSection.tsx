@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { ArrowLeft, CalendarDays, Loader2, MapPin, Ticket } from "lucide-react";
 import { useFanAuth } from "@/components/auth/FanAuthProvider";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { BoletaCheckoutSection } from "@/components/stadium/BoletaCheckoutSection";
 import { StadiumOverviewSelector } from "@/components/stadium/StadiumOverviewSelector";
 
 type MatchOption = {
@@ -42,7 +43,8 @@ function posterFor(opponent: string): string | null {
   return null;
 }
 
-export function MatchSelectorSection() {
+export function MatchSelectorSection({ courtesy = false }: { courtesy?: boolean }) {
+  const basePath = courtesy ? "/cortesias" : "/boletas";
   const { user, loading: authLoading } = useFanAuth();
   const searchParams = useSearchParams();
   const [matches, setMatches] = useState<MatchOption[] | null>(null);
@@ -88,10 +90,10 @@ export function MatchSelectorSection() {
           </p>
           <h1 className="mt-2 font-heading text-2xl uppercase">Inicia sesión para continuar</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            Usa tu cuenta de Google para elegir tu silla en el mapa del estadio y pagar en línea.
+            {courtesy ? "Inicia sesión con tu cuenta de administrador para emitir cortesías." : "Usa tu cuenta de Google para elegir tu silla en el mapa del estadio y pagar en línea."}
           </p>
           <GoogleSignInButton
-            nextPath={`/boletas?partido=${selected.id}`}
+            nextPath={`${basePath}?partido=${selected.id}`}
             label="Continuar con Google"
             fullWidth
             className="mt-6 max-w-xs"
@@ -99,7 +101,7 @@ export function MatchSelectorSection() {
           <button
             type="button"
             onClick={() => {
-              window.history.replaceState(null, "", "/boletas");
+              window.history.replaceState(null, "", basePath);
               setSelected(null);
             }}
             className="mt-5 inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-white"
@@ -111,12 +113,16 @@ export function MatchSelectorSection() {
       );
     }
 
+    if (courtesy) {
+      return <BoletaCheckoutSection matchLabel={selected.ticket_label} courtesy />;
+    }
+
     return <StadiumOverviewSelector matchLabel={selected.ticket_label} userEmail={user.email ?? ""} />;
   }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="font-heading text-2xl uppercase text-white sm:text-3xl">Elige tu partido</h1>
+      <h1 className="font-heading text-2xl uppercase text-white sm:text-3xl">{courtesy ? "Cortesías — elige el partido" : "Elige tu partido"}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Estos son los próximos partidos con venta de boletas en línea.
       </p>
@@ -157,7 +163,7 @@ export function MatchSelectorSection() {
                   </span>
                   <span className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-primary">
                     <Ticket className="size-4" />
-                    Comprar boleta
+                    {courtesy ? "Emitir cortesía" : "Comprar boleta"}
                   </span>
                 </button>
               );
@@ -182,7 +188,7 @@ export function MatchSelectorSection() {
               </p>
               <span className="mt-2 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-primary">
                 <Ticket className="size-4" />
-                Comprar boleta
+                {courtesy ? "Emitir cortesía" : "Comprar boleta"}
               </span>
             </button>
             );

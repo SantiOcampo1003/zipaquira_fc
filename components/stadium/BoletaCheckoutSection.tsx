@@ -82,11 +82,15 @@ function StepDots({ step }: { step: "seats" | "details" }) {
 export function BoletaCheckoutSection({
   matchLabel,
   userEmail = "",
+  courtesy = false,
 }: {
   matchLabel: string;
   /** Correo de la cuenta de Google ya autenticada — si viene, el campo queda bloqueado. */
   userEmail?: string;
+  /** Cortesía (solo admin): sin cobro ni Wompi, la boleta se envía directo al correo. */
+  courtesy?: boolean;
 }) {
+  const [courtesyDone, setCourtesyDone] = useState<{ seats: number; email: string; emailSent: boolean } | null>(null);
   const [seats, setSeats] = useState<Seat[]>(() => generateInitialStadiumSeats());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +108,7 @@ export function BoletaCheckoutSection({
   const [codeError, setCodeError] = useState<string | null>(null);
   const [checkingCode, setCheckingCode] = useState(false);
 
-  const unitPrice = appliedCode ? CATEDRAL_PLAYER_PRICE_COP : CATEDRAL_TICKET_PRICE_COP;
+  const unitPrice = courtesy ? 0 : appliedCode ? CATEDRAL_PLAYER_PRICE_COP : CATEDRAL_TICKET_PRICE_COP;
   const allowedZoneId: StadiumZoneId | null = selectedSeats[0]?.zoneId ?? null;
   const totalPrice = selectedSeats.length * unitPrice;
   const allHoldersComplete = holderDrafts.every(
@@ -191,7 +195,7 @@ export function BoletaCheckoutSection({
     setSubmitting(true);
     setCheckoutError(null);
     try {
-      const res = await fetch("/api/boletas/checkout", {
+      const res = await fetch(courtesy ? "/api/cortesias/checkout" : "/api/boletas/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -205,12 +209,16 @@ export function BoletaCheckoutSection({
           })),
           purchaserEmail,
           purchaserPhone,
-          ...(appliedCode ? { discountCode: appliedCode } : {}),
+          ...(!courtesy && appliedCode ? { discountCode: appliedCode } : {}),
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setCheckoutError(data.error ?? "No pudimos iniciar el pago.");
+        setCheckoutError(data.error ?? (courtesy ? "No pudimos emitir la cortesía." : "No pudimos iniciar el pago."));
+        return;
+      }
+      if (courtesy) {
+        setCourtesyDone({ seats: data.seats, email: purchaserEmail, emailSent: data.emailSent });
         return;
       }
       window.location.href = data.redirectUrl;
@@ -219,6 +227,25 @@ export function BoletaCheckoutSection({
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (courtesyDone) {
+    return (
+      <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 text-center text-white">
+        <CheckCircle2 className="mb-4 size-12 text-primary" />
+        <h1 className="font-heading text-2xl uppercase">
+          {courtesyDone.seats === 1 ? "Cortesía emitida" : `${courtesyDone.seats} cortesías emitidas`}
+        </h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          {courtesyDone.emailSent
+            ? `Enviamos la boleta con su código QR a ${courtesyDone.email}.`
+            : `Las sillas quedaron reservadas, pero NO se pudo enviar el correo a ${courtesyDone.email}. Avísale al desarrollador para reenviarla.`}
+        </p>
+        <Button type="button" onClick={() => window.location.reload()} className="mt-6 bg-primary text-primary-foreground">
+          Emitir otra cortesía
+        </Button>
+      </div>
+    );
   }
 
   if (loading) {
@@ -234,10 +261,13 @@ export function BoletaCheckoutSection({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-      <h1 className="font-heading text-2xl uppercase text-white sm:text-3xl">Comprar boleta</h1>
+      <h1 className="font-heading text-2xl uppercase text-white sm:text-3xl">
+        {courtesy ? "Emitir cortesía" : "Comprar boleta"}
+      </h1>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-        Elige tu silla en el mapa y paga en línea con Wompi — recibirás tu boleta en PDF con código QR
-        por correo.
+        {courtesy
+          ? "Elige las sillas y los datos de cada titular. No se cobra: la boleta en PDF con código QR se envía al correo que indiques."
+          : "Elige tu silla en el mapa y paga en línea con Wompi — recibirás tu boleta en PDF con código QR por correo."}
       </p>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(380px,100%)] lg:items-start">
@@ -295,10 +325,16 @@ export function BoletaCheckoutSection({
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
                           <p className="text-sm text-white">
-                            <span className="mr-1 text-xs text-white/40 line-through">
-                              {formatCop(CATEDRAL_BASE_PRICE_COP)}
-                            </span>
-                            {formatCop(unitPrice)}
+                            {courtesy ? (
+                              "Cortesía"
+                            ) : (
+                              <>
+                                <span className="mr-1 text-xs text-white/40 line-through">
+                                  {formatCop(CATEDRAL_BASE_PRICE_COP)}
+                                </span>
+                                {formatCop(unitPrice)}
+                              </>
+                            )}
                           </p>
                           <button
                             type="button"
@@ -314,7 +350,7 @@ export function BoletaCheckoutSection({
                   </div>
                 )}
 
-                {selectedSeats.length > 0 ? (
+                {selectedSeats.length > 0 && !courtesy ? (
                   <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3 text-sm">
                     <span className="text-muted-foreground">
                       {appliedCode ? "Total · precio con código" : `Total · ${CATEDRAL_DISCOUNT_PCT}% de descuento`}
@@ -323,6 +359,7 @@ export function BoletaCheckoutSection({
                   </div>
                 ) : null}
 
+                {courtesy ? null : (
                 <div className="rounded-xl border border-white/10 bg-black/30 p-3">
                   {appliedCode ? (
                     <div className="flex items-center justify-between gap-2 text-sm">
@@ -381,6 +418,7 @@ export function BoletaCheckoutSection({
                     </>
                   )}
                 </div>
+                )}
 
                 <Button
                   type="button"
@@ -407,7 +445,7 @@ export function BoletaCheckoutSection({
               >
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-white">
-                    Correo de contacto
+                    {courtesy ? "Correo donde se envía la boleta" : "Correo de contacto"}
                   </label>
                   <div className="relative">
                     <FieldIcon Icon={Mail} />
@@ -497,8 +535,8 @@ export function BoletaCheckoutSection({
                 </div>
 
                 <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3 text-sm">
-                  <span className="text-muted-foreground">Total a pagar</span>
-                  <span className="font-heading text-lg text-primary">{formatCop(totalPrice)}</span>
+                  <span className="text-muted-foreground">{courtesy ? "Valor" : "Total a pagar"}</span>
+                  <span className="font-heading text-lg text-primary">{courtesy ? "Cortesía — $0" : formatCop(totalPrice)}</span>
                 </div>
 
                 {checkoutError ? (
@@ -525,11 +563,11 @@ export function BoletaCheckoutSection({
                   >
                     {submitting ? (
                       <>
-                        <Loader2 className="mr-2 size-4 animate-spin" /> Conectando con Wompi…
+                        <Loader2 className="mr-2 size-4 animate-spin" /> {courtesy ? "Emitiendo…" : "Conectando con Wompi…"}
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 className="mr-2 size-4" /> Pagar con Wompi
+                        <CheckCircle2 className="mr-2 size-4" /> {courtesy ? "Emitir cortesía y enviar boleta" : "Pagar con Wompi"}
                       </>
                     )}
                   </Button>

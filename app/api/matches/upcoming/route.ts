@@ -4,6 +4,10 @@ import { getSupabaseAdmin } from "@/lib/supabase-server";
 // Sin esto, Next.js la trata como ruta estática (sin request.url/cookies) y la
 // congela en el build: los cambios de /admin no se reflejarían en /boletas.
 export const dynamic = "force-dynamic";
+// Supabase usa fetch por dentro: sin esto Next puede guardar la consulta en su caché de datos
+// y seguir mostrando la lista vieja (partidos nuevos no aparecían en /boletas).
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 /** Partidos públicos disponibles para comprar boleta: con ticket_label, agendados y no jugados. */
 export async function GET() {

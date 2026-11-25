@@ -17,7 +17,7 @@ export type StadiumZoneId = "verde" | "blanca" | "roja";
 export const CATEDRAL_BASE_PRICE_COP = 35100;
 
 /** Descuento vigente en la tribuna Catedral de Sal (porcentaje). */
-export const CATEDRAL_DISCOUNT_PCT = 30;
+export const CATEDRAL_DISCOUNT_PCT = 0;
 
 /**
  * Precio final que se cobra por silla en Catedral (ya con descuento). Es el
@@ -32,7 +32,7 @@ export const CATEDRAL_PLAYER_PRICE_COP = 20000;
 
 /**
  * Promo 2x1 (solo la vende un admin): por cada 2 sillas se cobra 1, sobre el
- * precio SIN el 30% de descuento. No se suma con el código de jugadores.
+ * precio base. No se suma con el código de jugadores.
  */
 export function twoForOneTotalCop(seatCount: number): number {
   return (seatCount / 2) * CATEDRAL_BASE_PRICE_COP;
@@ -42,7 +42,7 @@ export function twoForOneTotalCop(seatCount: number): number {
 export const GENERAL_TICKET_PRICE_COP = 15000;
 
 /** Venta en línea de la tribuna General. false = cerrada (solo se vende Catedral). */
-export const GENERAL_SALES_ENABLED = false;
+export const GENERAL_SALES_ENABLED = true;
 
 export type SeatStatus = "available" | "occupied" | "courtesy" | "selected";
 

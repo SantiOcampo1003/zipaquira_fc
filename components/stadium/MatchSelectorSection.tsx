@@ -176,7 +176,7 @@ export function MatchSelectorSection({ forcedMode }: { forcedMode?: "cortesia" |
 
     if (isAdmin && !pickedMode) {
       const options: { mode: SaleMode; title: string; desc: string }[] = [
-        { mode: "venta", title: "Venta normal", desc: "Catedral con 30% de descuento, pago por Wompi." },
+        { mode: "venta", title: "Venta normal", desc: "Precio normal ($35.100 por silla), pago por Wompi." },
         { mode: "2x1", title: "Venta 2x1", desc: "Pagas 1 de cada 2 sillas ($35.100), pago por Wompi." },
         { mode: "cortesia", title: "Cortesía", desc: "Sin cobro: la boleta llega directo al correo." },
       ];

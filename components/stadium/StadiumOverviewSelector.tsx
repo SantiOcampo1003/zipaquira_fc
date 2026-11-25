@@ -134,11 +134,15 @@ export function StadiumOverviewSelector({
               <span className="text-[10px] text-primary sm:text-xs">
                 {id === "catedral" ? (
                   <>
-                    <span className="mr-1 text-white/50 line-through">{formatCop(CATEDRAL_BASE_PRICE_COP)}</span>
+                    {CATEDRAL_DISCOUNT_PCT > 0 && (
+                      <span className="mr-1 text-white/50 line-through">{formatCop(CATEDRAL_BASE_PRICE_COP)}</span>
+                    )}
                     {formatCop(CATEDRAL_TICKET_PRICE_COP)}
-                    <span className="ml-1 rounded bg-primary px-1 py-0.5 text-[9px] font-bold text-black sm:text-[10px]">
-                      -{CATEDRAL_DISCOUNT_PCT}%
-                    </span>
+                    {CATEDRAL_DISCOUNT_PCT > 0 && (
+                      <span className="ml-1 rounded bg-primary px-1 py-0.5 text-[9px] font-bold text-black sm:text-[10px]">
+                        -{CATEDRAL_DISCOUNT_PCT}%
+                      </span>
+                    )}
                   </>
                 ) : closed ? (
                   "No disponible"

@@ -278,7 +278,7 @@ export function BoletaCheckoutSection({
         {courtesy
           ? "Elige las sillas y los datos de cada titular. No se cobra: la boleta en PDF con código QR se envía al correo que indiques."
           : twoForOne
-          ? "Promo 2x1: elige las sillas de a pares y se cobra una por cada dos (a $35.100, sin el 30%). Se paga con Wompi y las boletas llegan al correo que indiques."
+          ? "Promo 2x1: elige las sillas de a pares y se cobra una por cada dos (a $35.100 c/u). Se paga con Wompi y las boletas llegan al correo que indiques."
           : "Elige tu silla en el mapa y paga en línea con Wompi — recibirás tu boleta en PDF con código QR por correo."}
       </p>
 
@@ -343,9 +343,11 @@ export function BoletaCheckoutSection({
                               "2x1"
                             ) : (
                               <>
-                                <span className="mr-1 text-xs text-white/40 line-through">
-                                  {formatCop(CATEDRAL_BASE_PRICE_COP)}
-                                </span>
+                                {CATEDRAL_DISCOUNT_PCT > 0 && (
+                                  <span className="mr-1 text-xs text-white/40 line-through">
+                                    {formatCop(CATEDRAL_BASE_PRICE_COP)}
+                                  </span>
+                                )}
                                 {formatCop(unitPrice)}
                               </>
                             )}
@@ -367,7 +369,7 @@ export function BoletaCheckoutSection({
                 {selectedSeats.length > 0 && !courtesy ? (
                   <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3 text-sm">
                     <span className="text-muted-foreground">
-                      {twoForOne ? "Total · 2x1 (pagas 1 de cada 2)" : appliedCode ? "Total · precio con código" : `Total · ${CATEDRAL_DISCOUNT_PCT}% de descuento`}
+                      {twoForOne ? "Total · 2x1 (pagas 1 de cada 2)" : appliedCode ? "Total · precio con código" : CATEDRAL_DISCOUNT_PCT > 0 ? `Total · ${CATEDRAL_DISCOUNT_PCT}% de descuento` : "Total"}
                     </span>
                     <span className="font-heading text-lg text-primary">{formatCop(totalPrice)}</span>
                   </div>

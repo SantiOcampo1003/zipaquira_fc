@@ -41,7 +41,7 @@ function posterFor(opponent: string): string | null {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
   if (o.includes("caqueta")) return "/images/partidos/zipa-vs-caqueta.jpg";
-  if (o.includes("huila")) return "/images/partidos/zipa-vs-huila.jpg";
+  if (o.includes("guajira")) return "/images/partidos/zipa-vs-guajira.jpg";
   return null;
 }
 

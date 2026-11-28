@@ -22,6 +22,9 @@ function classify(p: PurchaseInfo): { kind: string; amountCop: number | null } {
   let free = false;
   if (p.purchase_type === "abono") {
     kind = p.purchaser_email.endsWith(".local") ? "Cortesía abonado" : "Abonado";
+  } else if (p.external_order_id?.startsWith("betsson:")) {
+    kind = "Betsson";
+    free = true;
   } else if (p.external_order_id?.startsWith("cortesia:invitados")) {
     kind = "Invitado";
     free = true;

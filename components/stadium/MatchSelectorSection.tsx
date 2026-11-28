@@ -1,5 +1,6 @@
 "use client";
 
+import { isBetssonMatch } from "@/lib/betsson";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -45,9 +46,9 @@ function posterFor(opponent: string): string | null {
   return null;
 }
 
-type SaleMode = "venta" | "cortesia" | "2x1";
+type SaleMode = "venta" | "cortesia" | "2x1" | "betsson";
 
-const MODE_PATH: Record<SaleMode, string> = { venta: "/boletas", cortesia: "/cortesias", "2x1": "/2x1" };
+const MODE_PATH: Record<SaleMode, string> = { venta: "/boletas", cortesia: "/cortesias", "2x1": "/2x1", betsson: "/boletas" };
 
 /**
  * `forcedMode`: páginas exclusivas de admin (/cortesias, /2x1). Sin él (/boletas)
@@ -176,6 +177,9 @@ export function MatchSelectorSection({ forcedMode }: { forcedMode?: "cortesia" |
 
     if (isAdmin && !pickedMode) {
       const options: { mode: SaleMode; title: string; desc: string }[] = [
+        ...(isBetssonMatch(selected.ticket_label)
+          ? [{ mode: "betsson" as SaleMode, title: "Betsson", desc: "Entrada gratis con el registro de Betsson (así lo ve el público)." }]
+          : []),
         { mode: "venta", title: "Venta normal", desc: "Precio normal ($35.100 por silla), pago por Wompi." },
         { mode: "2x1", title: "Venta 2x1", desc: "Pagas 1 de cada 2 sillas ($35.100), pago por Wompi." },
         { mode: "cortesia", title: "Cortesía", desc: "Sin cobro: la boleta llega directo al correo." },
@@ -213,6 +217,11 @@ export function MatchSelectorSection({ forcedMode }: { forcedMode?: "cortesia" |
 
     if (pickedMode === "cortesia" || pickedMode === "2x1") {
       return <BoletaCheckoutSection matchLabel={selected.ticket_label} mode={pickedMode} />;
+    }
+
+    // Partido patrocinado por Betsson: el público entra con el registro de Betsson (sin Wompi).
+    if (pickedMode === "betsson" || (!isAdmin && isBetssonMatch(selected.ticket_label))) {
+      return <BoletaCheckoutSection matchLabel={selected.ticket_label} mode="betsson" userEmail={user.email ?? ""} />;
     }
 
     return <StadiumOverviewSelector matchLabel={selected.ticket_label} userEmail={user.email ?? ""} />;

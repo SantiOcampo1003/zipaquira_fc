@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { CATEDRAL_PLAYER_PRICE_COP, CATEDRAL_TICKET_PRICE_COP, twoForOneTotalCop } from "@/lib/stadium-seating";
 import { requireAdmin } from "@/lib/admin-auth";
+import { isBetssonMatch } from "@/lib/betsson";
 import { isPlayerDiscountCode } from "@/lib/discount-code";
 import { buildCheckoutRedirectUrl } from "@/lib/wompi";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
@@ -43,6 +44,18 @@ export async function POST(req: Request) {
     }
 
     const { matchLabel, zoneId, seats, purchaserEmail, purchaserPhone, discountCode, promo } = parsed.data;
+
+    // Partido con patrocinio Betsson: el pago por Wompi está apagado para el público
+    // (la entrada se gestiona en /boletas con el registro de Betsson). Un admin sí puede.
+    if (isBetssonMatch(matchLabel)) {
+      const auth = await requireAdmin(req);
+      if (auth.error) {
+        return NextResponse.json(
+          { error: "Para este partido la entrada es con el registro de Betsson, no se paga en línea." },
+          { status: 403 }
+        );
+      }
+    }
 
     // 2x1: solo un admin puede venderlo; cantidad par y sin código de jugadores.
     if (promo === "2x1") {

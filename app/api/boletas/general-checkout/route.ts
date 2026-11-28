@@ -3,6 +3,8 @@ import { z } from "zod";
 import { GENERAL_SALES_ENABLED, GENERAL_TICKET_PRICE_COP } from "@/lib/stadium-seating";
 import { buildCheckoutRedirectUrl } from "@/lib/wompi";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
+import { requireAdmin } from "@/lib/admin-auth";
+import { isBetssonMatch } from "@/lib/betsson";
 
 /**
  * Crea la compra de boletas de tribuna General (sin silla, 20 min bloqueada)
@@ -44,6 +46,17 @@ export async function POST(req: Request) {
     }
 
     const { matchLabel, holders, purchaserEmail, purchaserPhone } = parsed.data;
+
+    // Partido con patrocinio Betsson: sin pago por Wompi para el público (solo admin).
+    if (isBetssonMatch(matchLabel)) {
+      const auth = await requireAdmin(req);
+      if (auth.error) {
+        return NextResponse.json(
+          { error: "Para este partido la entrada es con el registro de Betsson, no se paga en línea." },
+          { status: 403 }
+        );
+      }
+    }
     const supabase = getSupabaseAdmin();
 
     const { data: matchRow, error: matchError } = await supabase

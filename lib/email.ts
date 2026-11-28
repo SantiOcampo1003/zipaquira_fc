@@ -33,3 +33,11 @@ export async function sendTicketEmail(params: {
     throw new Error(`Resend: ${error.message}`);
   }
 }
+
+/** Correo simple (sin adjuntos), p. ej. avisos de revisión. */
+export async function sendPlainEmail(params: { to: string; subject: string; html: string }): Promise<void> {
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!from) throw new Error("RESEND_FROM_EMAIL no está configurado.");
+  const { error } = await getResend().emails.send({ from, to: params.to, subject: params.subject, html: params.html });
+  if (error) throw new Error(`Resend: ${error.message}`);
+}

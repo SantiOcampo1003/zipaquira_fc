@@ -83,7 +83,9 @@ export function BetssonReview() {
       setMessage(
         action === "approve"
           ? data.emailSent
-            ? "Aprobada: boleta enviada por correo."
+            ? data.reassigned
+              ? `Aprobada con otras sillas (las pedidas ya no estaban): ${data.reassigned.map((n: number) => `#${n}`).join(", ")}. Boleta enviada por correo.`
+              : "Aprobada: boleta enviada por correo."
             : "Aprobada, pero NO se pudo enviar el correo. Avísale al desarrollador."
           : "Rechazada."
       );

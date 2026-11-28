@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { BetssonLogo } from "@/components/stadium/BetssonLogo";
-import { BETSSON_MAX_SEATS, BETSSON_REGISTER_URL } from "@/lib/betsson";
+import { BETSSON_MAX_SEATS, BETSSON_REGISTER_URL, namesOverlap } from "@/lib/betsson";
 import { adminFetch, getSupabaseBrowser } from "@/lib/supabase-browser";
 import { StadiumGrandstandMap } from "@/components/stadium/StadiumGrandstandMap";
 import { Button } from "@/components/ui/button";
@@ -34,8 +34,15 @@ import {
 } from "@/lib/stadium-seating";
 import { cn } from "@/lib/utils";
 
-type HolderDraft = { fullName: string; documentId: string; phone: string };
-const EMPTY_HOLDER: HolderDraft = { fullName: "", documentId: "", phone: "" };
+type HolderDraft = { fullName: string; documentId: string; phone: string; isMinor: boolean };
+const EMPTY_HOLDER: HolderDraft = { fullName: "", documentId: "", phone: "", isMinor: false };
+type BetssonImage = { file: File; preview: string };
+type BetssonCheck = {
+  state: "checking" | "valid" | "review" | "invalid";
+  message: string;
+  email?: string | null;
+  name?: string | null;
+};
 const MAX_SEATS = 10;
 
 /** Reduce el pantallazo (JPEG, máx. 1800px) para que suba rápido y quepa en el límite del servidor. */
@@ -118,12 +125,16 @@ export function BoletaCheckoutSection({
   const twoForOne = mode === "2x1";
   const betsson = mode === "betsson";
   const maxSeats = betsson ? BETSSON_MAX_SEATS : MAX_SEATS;
-  const [betssonImage, setBetssonImage] = useState<File | null>(null);
-  const [betssonPreview, setBetssonPreview] = useState<string | null>(null);
+  // Pantallazo y error por persona registrada (clave = número de silla).
+  const [betssonImages, setBetssonImages] = useState<Record<string, BetssonImage>>({});
+  const [betssonErrors, setBetssonErrors] = useState<Record<string, string>>({});
+  // Resultado de la validación en vivo de cada pantallazo (clave = número de silla).
+  const [betssonChecks, setBetssonChecks] = useState<Record<string, BetssonCheck>>({});
+  const [betssonProgress, setBetssonProgress] = useState({ approved: 0, pending: 0, emailFailed: false });
   const [confirmAdult, setConfirmAdult] = useState(false);
   const [confirmData, setConfirmData] = useState(false);
   const [confirmMinor, setConfirmMinor] = useState(false);
-  const [betssonDone, setBetssonDone] = useState<{ status: "approved" | "pending"; email: string; emailSent: boolean; seats: number } | null>(null);
+  const [betssonDone, setBetssonDone] = useState<{ email: string; approved: number; pending: number; emailFailed: boolean } | null>(null);
   const [courtesyDone, setCourtesyDone] = useState<{ seats: number; email: string; emailSent: boolean } | null>(null);
   const [seats, setSeats] = useState<Seat[]>(() => generateInitialStadiumSeats());
   const [loading, setLoading] = useState(true);
@@ -147,14 +158,39 @@ export function BoletaCheckoutSection({
   const totalPrice = twoForOne ? twoForOneTotalCop(selectedSeats.length) : selectedSeats.length * unitPrice;
   const oddForTwoForOne = twoForOne && selectedSeats.length % 2 !== 0;
   const allHoldersComplete = holderDrafts.every(
-    (h, i) =>
+    (h) =>
       h.fullName.trim().length > 1 &&
       h.documentId.trim().length > 2 &&
       // En Betsson el menor usa el celular del adulto que lo acompaña.
-      (h.phone.trim().length > 6 || (betsson && i === 1))
+      (h.phone.trim().length > 6 || (betsson && h.isMinor))
   );
+  // Betsson: cada adulto es un registro (con su pantallazo); cada menor se asocia, en orden, a un adulto.
+  const adultIndexes = holderDrafts.flatMap((h, i) => (h.isMinor ? [] : [i]));
+  const minorIndexes = holderDrafts.flatMap((h, i) => (h.isMinor ? [i] : []));
+  const registroNumber = (index: number) =>
+    holderDrafts[index]?.isMinor ? minorIndexes.indexOf(index) + 1 : adultIndexes.indexOf(index) + 1;
+  // Un mismo correo de Betsson no puede aparecer en dos registros del mismo formulario.
+  const seenEmails = new Map<string, string>();
+  const duplicateEmailKeys = new Set<string>();
+  adultIndexes.forEach((i) => {
+    const key = String(selectedSeats[i]?.id);
+    const email = betssonChecks[key]?.email;
+    if (!email) return;
+    if (seenEmails.has(email)) duplicateEmailKeys.add(key);
+    else seenEmails.set(email, key);
+  });
   const betssonReady =
-    !betsson || (!!betssonImage && confirmAdult && confirmData && (selectedSeats.length < 2 || confirmMinor));
+    !betsson ||
+    (adultIndexes.length >= 1 &&
+      minorIndexes.length <= adultIndexes.length &&
+      adultIndexes.every((i) => {
+        const key = String(selectedSeats[i]?.id);
+        const check = betssonChecks[key];
+        return !!betssonImages[key] && !!check && check.state !== "checking" && check.state !== "invalid" && !duplicateEmailKeys.has(key);
+      }) &&
+      confirmAdult &&
+      confirmData &&
+      (minorIndexes.length === 0 || confirmMinor));
 
   useEffect(() => {
     async function load() {
@@ -229,44 +265,103 @@ export function BoletaCheckoutSection({
     setCodeError(null);
   }
 
-  async function pickBetssonImage(file: File | null) {
-    if (betssonPreview) URL.revokeObjectURL(betssonPreview);
+  /** Marca/desmarca una boleta como de menor. Cada menor necesita un adulto registrado que lo acompañe (1 por 1). */
+  function canToggleMinor(index: number): boolean {
+    if (holderDrafts[index]?.isMinor) return true;
+    return adultIndexes.length - 1 >= minorIndexes.length + 1;
+  }
+
+  async function pickBetssonImage(seatKey: string, file: File | null) {
+    setBetssonErrors((prev) => {
+      const next = { ...prev };
+      delete next[seatKey];
+      return next;
+    });
+    const previous = betssonImages[seatKey];
+    if (previous) URL.revokeObjectURL(previous.preview);
     if (!file) {
-      setBetssonImage(null);
-      setBetssonPreview(null);
+      setBetssonImages((prev) => {
+        const next = { ...prev };
+        delete next[seatKey];
+        return next;
+      });
+      setBetssonChecks((prev) => {
+        const next = { ...prev };
+        delete next[seatKey];
+        return next;
+      });
       return;
     }
     const compressed = await compressImage(file);
-    setBetssonImage(compressed);
-    setBetssonPreview(URL.createObjectURL(compressed));
-  }
+    setBetssonImages((prev) => ({ ...prev, [seatKey]: { file: compressed, preview: URL.createObjectURL(compressed) } }));
+    setBetssonChecks((prev) => ({ ...prev, [seatKey]: { state: "checking", message: "Validando el pantallazo…" } }));
 
-  async function handleBetsson() {
-    if (!allowedZoneId || !betssonImage || selectedSeats.length === 0) return;
-    setSubmitting(true);
-    setCheckoutError(null);
+    // Validación en vivo: ¿es un perfil de Betsson? ¿esa persona ya se registró?
     try {
       const { data: sessionData } = await getSupabaseBrowser().auth.getSession();
       const token = sessionData.session?.access_token;
+      const seatIndex = selectedSeats.findIndex((s) => String(s.id) === seatKey);
+      const form = new FormData();
+      form.append("image", compressed);
+      form.append("matchLabel", matchLabel);
+      form.append("holderFullName", holderDrafts[seatIndex]?.fullName ?? "");
+      const res = await fetch("/api/betsson/validate", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: form,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setBetssonChecks((prev) => ({
+          ...prev,
+          [seatKey]: { state: "review", message: data.error ?? "No pudimos validarlo ahora. Puedes enviarlo y lo revisamos." },
+        }));
+        return;
+      }
+      setBetssonChecks((prev) => ({
+        ...prev,
+        [seatKey]: { state: data.state, message: data.message, email: data.email, name: data.name },
+      }));
+    } catch {
+      setBetssonChecks((prev) => ({
+        ...prev,
+        [seatKey]: { state: "review", message: "No pudimos validarlo ahora. Puedes enviarlo y lo revisamos." },
+      }));
+    }
+  }
+
+  async function handleBetsson() {
+    if (!allowedZoneId || !betssonReady || selectedSeats.length === 0) return;
+    setSubmitting(true);
+    setCheckoutError(null);
+    setBetssonErrors({});
+    try {
+      const { data: sessionData } = await getSupabaseBrowser().auth.getSession();
+      const token = sessionData.session?.access_token;
+      const person = (i: number) => ({
+        seatNumber: selectedSeats[i].seatNumber,
+        holderFullName: holderDrafts[i].fullName,
+        holderDocumentId: holderDrafts[i].documentId,
+      });
+      const registrations = adultIndexes.map((adultIdx, k) => ({
+        adult: { ...person(adultIdx), holderPhone: holderDrafts[adultIdx].phone },
+        ...(minorIndexes[k] !== undefined ? { minor: person(minorIndexes[k]) } : {}),
+      }));
       const form = new FormData();
       form.append(
         "data",
         JSON.stringify({
           matchLabel,
           zoneId: allowedZoneId,
-          seats: selectedSeats.map((seat, i) => ({
-            seatNumber: seat.seatNumber,
-            holderFullName: holderDrafts[i].fullName,
-            holderDocumentId: holderDrafts[i].documentId,
-            holderPhone: i === 1 ? holderDrafts[0].phone : holderDrafts[i].phone,
-          })),
           purchaserPhone,
           confirmAdult,
           confirmData,
-          confirmMinor: selectedSeats.length === 2 ? confirmMinor : undefined,
+          confirmMinor: minorIndexes.length > 0 ? confirmMinor : undefined,
+          registrations,
         })
       );
-      form.append("image", betssonImage);
+      adultIndexes.forEach((adultIdx, k) => form.append(`image_${k}`, betssonImages[String(selectedSeats[adultIdx].id)].file));
+
       const res = await fetch("/api/betsson/checkout", {
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -277,7 +372,51 @@ export function BoletaCheckoutSection({
         setCheckoutError(data.error ?? "No pudimos procesar tu registro.");
         return;
       }
-      setBetssonDone({ status: data.status, email: data.email ?? purchaserEmail, emailSent: data.emailSent !== false, seats: selectedSeats.length });
+
+      type Result = { index: number; status: "approved" | "pending" | "rejected"; error?: string; emailSent?: boolean };
+      const results: Result[] = data.results ?? [];
+      const progress = {
+        approved: betssonProgress.approved + results.filter((r) => r.status === "approved").length,
+        pending: betssonProgress.pending + results.filter((r) => r.status === "pending").length,
+        emailFailed: betssonProgress.emailFailed || results.some((r) => r.status === "approved" && r.emailSent === false),
+      };
+      const failed = results.filter((r) => r.status === "rejected");
+      if (failed.length === 0) {
+        setBetssonDone({ email: data.email ?? purchaserEmail, ...progress });
+        return;
+      }
+
+      // Parcial: los registros listos salen del formulario; los fallidos quedan para corregir y reenviar.
+      setBetssonProgress(progress);
+      const doneSeatIds = new Set<string>();
+      const doneIdx = new Set<number>();
+      const nextErrors: Record<string, string> = {};
+      results.forEach((r) => {
+        const adultIdx = adultIndexes[r.index];
+        const minorIdx = minorIndexes[r.index];
+        if (r.status === "rejected") {
+          nextErrors[String(selectedSeats[adultIdx].id)] = r.error ?? "No pudimos validar este registro.";
+        } else {
+          doneIdx.add(adultIdx);
+          doneSeatIds.add(String(selectedSeats[adultIdx].id));
+          if (minorIdx !== undefined) {
+            doneIdx.add(minorIdx);
+            doneSeatIds.add(String(selectedSeats[minorIdx].id));
+          }
+        }
+      });
+      setBetssonErrors(nextErrors);
+      setSeats((prev) => prev.map((s) => (doneSeatIds.has(String(s.id)) ? { ...s, status: "occupied" as Seat["status"] } : s)));
+      setSelectedSeats((prev) => prev.filter((_, i) => !doneIdx.has(i)));
+      setHolderDrafts((prev) => prev.filter((_, i) => !doneIdx.has(i)));
+      const ok = results.length - failed.length;
+      setCheckoutError(
+        ok > 0
+          ? `${ok} ${ok === 1 ? "registro quedó listo" : "registros quedaron listos"} (revisa tu correo). Corrige ${failed.length === 1 ? "el que falló" : "los que fallaron"} y vuelve a enviar.`
+          : failed.length === 1
+          ? "No pudimos validar tu registro. Revisa el mensaje y vuelve a intentar."
+          : "No pudimos validar los registros. Revisa los mensajes y vuelve a intentar."
+      );
     } catch {
       setCheckoutError("Error de conexión. Intenta de nuevo.");
     } finally {
@@ -330,19 +469,28 @@ export function BoletaCheckoutSection({
   }
 
   if (betssonDone) {
-    const approved = betssonDone.status === "approved";
+    const total = betssonDone.approved + betssonDone.pending;
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 text-center text-white">
         <BetssonLogo className="mb-4 text-4xl" />
         <CheckCircle2 className="mb-4 size-12 text-primary" />
-        <h1 className="font-heading text-2xl uppercase">{approved ? "¡Tu entrada está lista!" : "Recibimos tu registro"}</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          {approved
-            ? betssonDone.emailSent
-              ? `Verificamos tu registro. Enviamos ${betssonDone.seats === 1 ? "tu boleta" : "tus boletas"} con código QR a ${betssonDone.email}.`
-              : `Verificamos tu registro y tus sillas quedaron reservadas, pero no pudimos enviar el correo a ${betssonDone.email}. Escríbenos para reenviártelas.`
-            : `Estamos revisando tu pantallazo. Cuando lo aprobemos te enviamos la boleta a ${betssonDone.email}. Tus sillas se asignan al aprobar, según disponibilidad.`}
-        </p>
+        <h1 className="font-heading text-2xl uppercase">{betssonDone.pending === 0 ? "¡Tu entrada está lista!" : "Recibimos tu registro"}</h1>
+        <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+          {betssonDone.approved > 0 ? (
+            <p>
+              {betssonDone.emailFailed
+                ? `Verificamos ${betssonDone.approved === 1 ? "1 registro" : `${betssonDone.approved} registros`} y las sillas quedaron reservadas, pero no pudimos enviar algún correo a ${betssonDone.email}. Escríbenos para reenviártelas.`
+                : `Verificamos ${betssonDone.approved === 1 ? "1 registro" : `${betssonDone.approved} registros`}. Enviamos las boletas con código QR a ${betssonDone.email} (un correo por registro).`}
+            </p>
+          ) : null}
+          {betssonDone.pending > 0 ? (
+            <p>
+              {betssonDone.pending === 1 ? "1 registro está" : `${betssonDone.pending} registros están`} en revisión. Sus sillas quedan guardadas por 24
+              horas; cuando lo aprobemos te enviamos la boleta a {betssonDone.email}.
+            </p>
+          ) : null}
+          {total === 0 ? <p>Listo.</p> : null}
+        </div>
         <p className="mt-4 text-xs text-white/50">Betsson patrocina este partido. +18 · Juega con responsabilidad.</p>
       </div>
     );
@@ -385,7 +533,7 @@ export function BoletaCheckoutSection({
       </h1>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         {betsson
-          ? "Regístrate en Betsson con el link del club, sube el pantallazo de tu perfil y elige tu silla. Es gratis: tu boleta con código QR llega a tu correo."
+          ? "Regístrate en Betsson con el link del club, sube el pantallazo de tu perfil y elige tu silla. Es gratis: tu boleta con código QR llega a tu correo. Puedes inscribir a varias personas: cada una con su propio registro de Betsson."
           : courtesy
           ? "Elige las sillas y los datos de cada titular. No se cobra: la boleta en PDF con código QR se envía al correo que indiques."
           : twoForOne
@@ -420,7 +568,7 @@ export function BoletaCheckoutSection({
               Registrarme en Betsson
             </a>
             <p className="text-xs text-white/60">
-              Un menor de edad puede entrar gratis acompañado por una persona registrada (una boleta extra por registro).
+              Cada persona registrada puede sumar UN menor de edad que la acompañe (una boleta extra por registro).
               Solo mayores de 18 pueden registrarse en Betsson. Juega con responsabilidad.
             </p>
           </div>
@@ -467,7 +615,7 @@ export function BoletaCheckoutSection({
               >
                 {selectedSeats.length === 0 ? (
                   <p className="rounded-xl border border-dashed border-white/15 bg-black/20 p-4 text-sm text-muted-foreground">
-                    {betsson ? "Haz clic en tu silla. Si te acompaña un menor de edad, elige una segunda silla para él (máximo 2)." : `Haz clic en una silla disponible del mapa. Puedes elegir hasta ${maxSeats}.`}
+                    {betsson ? `Haz clic en las sillas: una por cada persona registrada en Betsson, y una más si te acompaña un menor (1 menor por registro). Hasta ${maxSeats} sillas.` : `Haz clic en una silla disponible del mapa. Puedes elegir hasta ${maxSeats}.`}
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -658,7 +806,7 @@ export function BoletaCheckoutSection({
                         <div className="flex items-center gap-2">
                           <User className="size-4 text-primary" />
                           <span className="text-xs font-semibold uppercase tracking-wider text-white">
-                            {betsson ? (index === 0 ? "Persona registrada en Betsson" : "Menor de edad acompañante") : `Titular ${index + 1}`}
+                            {betsson ? (holderDrafts[index]?.isMinor ? `Menor acompañante · Registro ${registroNumber(index)}` : `Registro ${registroNumber(index)} · persona registrada en Betsson`) : `Titular ${index + 1}`}
                           </span>
                         </div>
                         <span className="font-mono text-sm text-primary">#{seat.id}</span>
@@ -681,13 +829,13 @@ export function BoletaCheckoutSection({
                           inputMode="numeric"
                           autoComplete="off"
                           maxLength={12}
-                            placeholder={betsson && index === 1 ? "Documento del menor (TI / registro civil)" : "Cédula"}
+                            placeholder={betsson && holderDrafts[index]?.isMinor ? "Documento del menor (TI / registro civil)" : "Cédula"}
                             value={holderDrafts[index]?.documentId ?? ""}
                             onChange={(e) => updateHolder(index, { documentId: e.target.value.replace(/\D/g, "") })}
                             className={fieldClassName}
                           />
                         </div>
-                        <div className={cn("relative sm:col-span-2", betsson && index === 1 && "hidden")}>
+                        <div className={cn("relative sm:col-span-2", betsson && holderDrafts[index]?.isMinor && "hidden")}>
                           <FieldIcon Icon={Phone} />
                           <input
                             type="tel"
@@ -699,45 +847,112 @@ export function BoletaCheckoutSection({
                           />
                         </div>
                       </div>
+
+                      {betsson ? (
+                        <div className="mt-3 space-y-3">
+                          <label
+                            className={cn(
+                              "flex items-start gap-2 text-xs",
+                              canToggleMinor(index) ? "cursor-pointer text-white/90" : "cursor-not-allowed text-white/40"
+                            )}
+                          >
+                            <input
+                              type="checkbox"
+                              disabled={!canToggleMinor(index)}
+                              checked={!!holderDrafts[index]?.isMinor}
+                              onChange={(e) => updateHolder(index, { isMinor: e.target.checked })}
+                              className="mt-0.5 accent-[#F26B21]"
+                            />
+                            <span>
+                              Esta boleta es para un menor de edad
+                              {!canToggleMinor(index) ? " (cada menor necesita otra persona registrada que lo acompañe)" : ""}
+                            </span>
+                          </label>
+
+                          {!holderDrafts[index]?.isMinor ? (
+                            <div>
+                              <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-white/25 bg-black/30 p-3 text-center text-xs text-muted-foreground transition-colors hover:border-[#F26B21]/60">
+                                {betssonImages[String(seat.id)] ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={betssonImages[String(seat.id)].preview} alt="Pantallazo seleccionado" className="max-h-44 w-auto rounded-md" />
+                                ) : (
+                                  <ImagePlus className="size-7 text-[#F26B21]" />
+                                )}
+                                <span>
+                                  {betssonImages[String(seat.id)]
+                                    ? "Toca para cambiar la imagen"
+                                    : "Sube el pantallazo del perfil de Betsson de esta persona (Datos Personales)"}
+                                </span>
+                                <input
+                                  type="file"
+                                  accept="image/png,image/jpeg,image/webp"
+                                  className="hidden"
+                                  onChange={(e) => pickBetssonImage(String(seat.id), e.target.files?.[0] ?? null)}
+                                />
+                              </label>
+                              {betssonChecks[String(seat.id)] ? (
+                                (() => {
+                                  const key = String(seat.id);
+                                  const check = betssonChecks[key];
+                                  const duplicated = duplicateEmailKeys.has(key);
+                                  const nameMismatch =
+                                    check.state !== "invalid" &&
+                                    !!check.name &&
+                                    holderDrafts[index]?.fullName.trim().length > 1 &&
+                                    !namesOverlap(check.name, holderDrafts[index].fullName);
+                                  const tone = duplicated || check.state === "invalid" ? "bad" : check.state === "valid" && !nameMismatch ? "good" : "warn";
+                                  return (
+                                    <p
+                                      className={cn(
+                                        "mt-1.5 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs",
+                                        tone === "good" && "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
+                                        tone === "warn" && "border-amber-500/40 bg-amber-500/10 text-amber-200",
+                                        tone === "bad" && "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                                      )}
+                                    >
+                                      {check.state === "checking" ? <Loader2 className="mt-0.5 size-3.5 shrink-0 animate-spin" /> : null}
+                                      <span>
+                                        {duplicated
+                                          ? "Este correo de Betsson ya está en otro registro de esta compra."
+                                          : check.message}
+                                        {nameMismatch ? ` El nombre del pantallazo (${check.name}) no coincide con el titular: pasará a revisión.` : ""}
+                                      </span>
+                                    </p>
+                                  );
+                                })()
+                              ) : null}
+                              {betssonErrors[String(seat.id)] ? (
+                                <p className="mt-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+                                  {betssonErrors[String(seat.id)]}
+                                </p>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                   ))}
                 </div>
 
                 {betsson ? (
                   <div className="space-y-3 rounded-xl border border-[#F26B21]/30 bg-[#F26B21]/5 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-white">Pantallazo de tu perfil de Betsson</p>
-                    <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-white/25 bg-black/30 p-4 text-center text-xs text-muted-foreground transition-colors hover:border-[#F26B21]/60">
-                      {betssonPreview ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={betssonPreview} alt="Pantallazo seleccionado" className="max-h-56 w-auto rounded-md" />
-                      ) : (
-                        <ImagePlus className="size-8 text-[#F26B21]" />
-                      )}
-                      <span>{betssonImage ? "Toca para cambiar la imagen" : "Toca para subir la imagen (Datos Personales de Betsson)"}</span>
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp"
-                        className="hidden"
-                        onChange={(e) => pickBetssonImage(e.target.files?.[0] ?? null)}
-                      />
-                    </label>
                     <p className="text-[11px] text-muted-foreground">
-                      Debe verse que es betsson.co y tu nombre y correo, tal cual aparecen en tu cuenta. Cada correo de Betsson y cada
-                      pantallazo solo se puede usar una vez.
+                      En cada pantallazo debe verse que es betsson.co y el nombre y correo de esa persona, tal cual aparecen en su cuenta.
+                      Cada correo de Betsson y cada pantallazo solo se puede usar una vez.
                     </p>
                     <label className="flex items-start gap-2 text-xs text-white/90">
                       <input type="checkbox" checked={confirmAdult} onChange={(e) => setConfirmAdult(e.target.checked)} className="mt-0.5 accent-[#F26B21]" />
-                      Soy mayor de 18 años y me registré en Betsson con el link del club.
+                      Todas las personas registradas son mayores de 18 años y se registraron en Betsson con el link del club.
                     </label>
-                    {selectedSeats.length === 2 ? (
+                    {minorIndexes.length > 0 ? (
                       <label className="flex items-start gap-2 text-xs text-white/90">
                         <input type="checkbox" checked={confirmMinor} onChange={(e) => setConfirmMinor(e.target.checked)} className="mt-0.5 accent-[#F26B21]" />
-                        La segunda boleta es para un menor de 18 años que va conmigo.
+                        {minorIndexes.length === 1 ? "La boleta marcada como menor es" : "Las boletas marcadas como menor son"} para menores de 18 años que van con la persona registrada.
                       </label>
                     ) : null}
                     <label className="flex items-start gap-2 text-xs text-white/90">
                       <input type="checkbox" checked={confirmData} onChange={(e) => setConfirmData(e.target.checked)} className="mt-0.5 accent-[#F26B21]" />
-                      Autorizo el tratamiento de mis datos y del pantallazo solo para validar mi registro y emitir mi boleta.
+                      Autorizo el tratamiento de los datos y de los pantallazos solo para validar los registros y emitir las boletas.
                     </label>
                   </div>
                 ) : null}
@@ -771,7 +986,7 @@ export function BoletaCheckoutSection({
                   >
                     {submitting ? (
                       <>
-                        <Loader2 className="mr-2 size-4 animate-spin" /> {betsson ? "Verificando tu pantallazo…" : courtesy ? "Emitiendo…" : "Conectando con Wompi…"}
+                        <Loader2 className="mr-2 size-4 animate-spin" /> {betsson ? "Verificando pantallazos…" : courtesy ? "Emitiendo…" : "Conectando con Wompi…"}
                       </>
                     ) : (
                       <>

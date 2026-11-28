@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { BETSSON_BUCKET } from "@/lib/betsson";
-import { issueBetssonTickets, notifyBetssonRejected } from "@/lib/betsson-server";
+import { issueBetssonTickets, notifyBetssonRejected, releaseBetssonHold } from "@/lib/betsson-server";
 
 const bodySchema = z.object({
   action: z.enum(["approve", "reject"]),
@@ -26,20 +26,20 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   if (parsed.data.action === "approve") {
-    const result = await issueBetssonTickets(params.id, auth.user.email ?? "admin");
+    const result = await issueBetssonTickets(params.id, { reviewer: auth.user.email ?? "admin", allowAlternates: true });
     if (!result.ok) {
       const status = result.code === "SEAT_NOT_AVAILABLE" ? 409 : 500;
       return NextResponse.json(
         {
           error:
             result.code === "SEAT_NOT_AVAILABLE"
-              ? "Una de las sillas ya fue tomada por otra persona. Recházala (con aviso) para que vuelva a intentar."
+              ? "Se vencieron las sillas guardadas y no quedan sillas libres en esa zona. Recházala (con aviso) para que vuelva a intentar."
               : result.message,
         },
         { status }
       );
     }
-    return NextResponse.json({ ok: true, emailSent: result.emailSent });
+    return NextResponse.json({ ok: true, emailSent: result.emailSent, reassigned: result.reassigned });
   }
 
   const reason = parsed.data.reason || "No pudimos validar tu pantallazo de Betsson.";
@@ -48,6 +48,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     .update({ status: "rejected", reason, reviewed_by: auth.user.email ?? "admin", reviewed_at: new Date().toISOString() })
     .eq("id", params.id);
   if (sub.image_path) await supabase.storage.from(BETSSON_BUCKET).remove([sub.image_path]);
+  await releaseBetssonHold(sub.purchase_id);
   await notifyBetssonRejected(sub.purchaser_email, reason);
   return NextResponse.json({ ok: true });
 }

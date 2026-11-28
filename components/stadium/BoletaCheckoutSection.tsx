@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { BetssonLogo } from "@/components/stadium/BetssonLogo";
+import { BetssonGuide } from "@/components/stadium/BetssonGuide";
 import { BETSSON_MAX_SEATS, BETSSON_REGISTER_URL, namesOverlap } from "@/lib/betsson";
 import { adminFetch, getSupabaseBrowser } from "@/lib/supabase-browser";
 import { StadiumGrandstandMap } from "@/components/stadium/StadiumGrandstandMap";
@@ -574,6 +575,8 @@ export function BoletaCheckoutSection({
           </div>
         </div>
       ) : null}
+
+      {betsson ? <BetssonGuide className="mt-6" /> : null}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(380px,100%)] lg:items-start">
         <div className="min-w-0">

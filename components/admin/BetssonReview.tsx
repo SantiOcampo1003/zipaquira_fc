@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { adminFetch } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
 
-type SeatInfo = { seatNumber: number; holderFullName: string; holderDocumentId: string; isMinor: boolean };
+type SeatInfo = { seatNumber: number | null; holderFullName: string; holderDocumentId: string; isMinor: boolean };
 type Item = {
   id: string;
   createdAt: string;
@@ -173,8 +173,8 @@ export function BetssonReview() {
                 </p>
                 <ul className="space-y-0.5">
                   {item.seats.map((s) => (
-                    <li key={s.seatNumber}>
-                      <span className="font-mono text-primary">#{s.seatNumber}</span> {s.holderFullName} · {s.holderDocumentId}
+                    <li key={`${s.seatNumber}-${s.holderDocumentId}`}>
+                      <span className="font-mono text-primary">{s.seatNumber ? `#${s.seatNumber}` : "General"}</span> {s.holderFullName} · {s.holderDocumentId}
                       {s.isMinor ? <span className="ml-1 text-xs text-amber-300">(menor)</span> : null}
                     </li>
                   ))}

@@ -22,14 +22,15 @@ export const maxDuration = 60;
  * se evalúa por separado. Requiere sesión de Google. Sin Wompi.
  */
 const personSchema = z.object({
-  seatNumber: z.number().int().min(1).max(568),
+  /** null en la tribuna General (sin silla). */
+  seatNumber: z.number().int().min(1).max(568).nullable(),
   holderFullName: z.string().trim().min(2),
   holderDocumentId: z.string().trim().regex(/^\d{5,12}$/, { message: "El documento debe tener solo números." }),
 });
 
 const schema = z.object({
   matchLabel: z.string().trim().max(120),
-  zoneId: z.enum(["verde", "blanca", "roja"]),
+  zoneId: z.enum(["verde", "blanca", "roja", "general"]),
   purchaserPhone: z.string().trim().min(7),
   confirmAdult: z.literal(true),
   confirmData: z.literal(true),
@@ -79,7 +80,12 @@ export async function POST(req: Request) {
     }
 
     const everyone = registrations.flatMap((r) => (r.minor ? [r.adult, r.minor] : [r.adult]));
-    if (new Set(everyone.map((p) => p.seatNumber)).size !== everyone.length) return fail("Elige sillas distintas.", 400);
+    if (zoneId === "general") {
+      if (everyone.some((p) => p.seatNumber !== null)) return fail("La tribuna General no tiene sillas.", 400);
+    } else {
+      if (everyone.some((p) => p.seatNumber === null)) return fail("Falta elegir la silla de cada persona.", 400);
+      if (new Set(everyone.map((p) => p.seatNumber)).size !== everyone.length) return fail("Elige sillas distintas.", 400);
+    }
     if (new Set(everyone.map((p) => p.holderDocumentId)).size !== everyone.length) {
       return fail("Cada persona debe tener un documento distinto.", 400);
     }

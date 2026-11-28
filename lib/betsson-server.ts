@@ -4,7 +4,8 @@ import { sendPlainEmail } from "@/lib/email";
 import { sendTicketEmailForPurchase } from "@/lib/ticket-delivery";
 
 export type BetssonSeat = {
-  seatNumber: number;
+  /** null en la tribuna General (sin silla). */
+  seatNumber: number | null;
   holderFullName: string;
   holderDocumentId: string;
   holderPhone: string;
@@ -138,6 +139,27 @@ class SeatTakenError extends Error {}
 /** Reserva (bloquea) las sillas de la solicitud; devuelve el id de la compra en awaiting_payment. */
 async function reserveSeats(sub: SubmissionRow, seats: BetssonSeat[], holdMinutes: number): Promise<string> {
   const supabase = getSupabaseAdmin();
+  // Tribuna General: boletas sin silla (no hay conflicto de sillas posible).
+  if (sub.zone_id === "general") {
+    const { data: reservedGeneral, error: generalError } = await supabase.rpc("reserve_general_tickets", {
+      p_purchaser_email: sub.purchaser_email,
+      p_purchaser_phone: sub.purchaser_phone,
+      p_match_id: sub.match_id,
+      p_hold_minutes: holdMinutes,
+      p_holders: seats.map((seat, i) => ({
+        abono_index: i + 1,
+        holder_full_name: seat.holderFullName,
+        holder_document_id: seat.holderDocumentId,
+        holder_phone: seat.holderPhone,
+      })),
+    });
+    if (generalError) {
+      console.error("[betsson] reserve general:", generalError.message);
+      throw new Error(generalError.message);
+    }
+    const generalRow = Array.isArray(reservedGeneral) ? reservedGeneral[0] : reservedGeneral;
+    return generalRow.purchase_id as string;
+  }
   const { data: reserved, error } = await supabase.rpc("reserve_boleta_online", {
     p_purchaser_email: sub.purchaser_email,
     p_purchaser_phone: sub.purchaser_phone,
@@ -256,9 +278,10 @@ export async function issueBetssonTickets(
       purchaseId = await reserveSeats(sub, seats, 20);
     } catch (err) {
       if (!(err instanceof SeatTakenError)) return { ok: false, code: "ERROR", message: "No pudimos reservar las sillas." };
-      const alternates = opts.allowAlternates
-        ? await findFreeSeats(sub.match_id, sub.zone_id, seats.length, seats[0].seatNumber)
-        : null;
+      const alternates =
+        opts.allowAlternates && sub.zone_id !== "general"
+          ? await findFreeSeats(sub.match_id, sub.zone_id, seats.length, seats[0].seatNumber ?? 0)
+          : null;
       if (!alternates) return { ok: false, code: "SEAT_NOT_AVAILABLE", message: "Una de las sillas ya fue tomada." };
       seats = seats.map((seat, i) => ({ ...seat, seatNumber: alternates[i] }));
       try {
@@ -317,7 +340,7 @@ function siteUrl(): string {
 export async function notifyAdminsPending(info: {
   purchaserEmail: string;
   holderName: string;
-  seatNumbers: number[];
+  seatNumbers: (number | null)[];
   zoneId: string;
   reason: string;
 }): Promise<void> {
@@ -327,8 +350,8 @@ export async function notifyAdminsPending(info: {
     const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;");
     const html = `<div style="font-family: sans-serif; color: #0B2810;">
       <h2>Solicitud de Betsson por revisar</h2>
-      <p><strong>${esc(info.holderName)}</strong> (${esc(info.purchaserEmail)}) pidió ${info.seatNumbers.length === 1 ? "la silla" : "las sillas"}
-      ${info.seatNumbers.map((n) => `#${n}`).join(", ")} de la zona ${esc(info.zoneId)}.</p>
+      <p><strong>${esc(info.holderName)}</strong> (${esc(info.purchaserEmail)}) pidió
+      ${info.zoneId === "general" ? `${info.seatNumbers.length} ${info.seatNumbers.length === 1 ? "entrada" : "entradas"} de la tribuna General (sin silla)` : `${info.seatNumbers.length === 1 ? "la silla" : "las sillas"} ${info.seatNumbers.map((n) => `#${n}`).join(", ")} de la zona ${esc(info.zoneId)}`}.</p>
       <p>Motivo de la revisión: ${esc(info.reason)}</p>
       <p>Las sillas están guardadas ${BETSSON_HOLD_HOURS} horas.</p>
       <p><a href="${siteUrl()}/admin/betsson" style="display:inline-block;background:#F26B21;color:#000;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;">Revisar solicitud</a></p>

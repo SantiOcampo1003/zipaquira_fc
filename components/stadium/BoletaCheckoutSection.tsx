@@ -71,9 +71,9 @@ function FieldIcon({ Icon }: { Icon: typeof Mail }) {
   );
 }
 
-function StepDots({ step }: { step: "seats" | "details" }) {
+function StepDots({ step, firstLabel = "Sillas" }: { step: "seats" | "details"; firstLabel?: string }) {
   const steps: { id: "seats" | "details"; label: string }[] = [
-    { id: "seats", label: "Sillas" },
+    { id: "seats", label: firstLabel },
     { id: "details", label: "Datos" },
   ];
   const activeIndex = steps.findIndex((s) => s.id === step);
@@ -112,6 +112,7 @@ export function BoletaCheckoutSection({
   matchLabel,
   userEmail = "",
   mode = "venta",
+  betssonTribuna = "catedral",
 }: {
   matchLabel: string;
   /** Correo de la cuenta de Google ya autenticada — si viene, el campo queda bloqueado. */
@@ -121,10 +122,13 @@ export function BoletaCheckoutSection({
    * se envía directo al correo · 2x1 (solo admin): paga 1 de cada 2 por Wompi.
    */
   mode?: "venta" | "cortesia" | "2x1" | "betsson";
+  /** Solo con mode="betsson": Catedral (silla numerada) o General (sin silla). */
+  betssonTribuna?: "catedral" | "general";
 }) {
   const courtesy = mode === "cortesia";
   const twoForOne = mode === "2x1";
   const betsson = mode === "betsson";
+  const general = betsson && betssonTribuna === "general";
   const maxSeats = betsson ? BETSSON_MAX_SEATS : MAX_SEATS;
   // Pantallazo y error por persona registrada (clave = número de silla).
   const [betssonImages, setBetssonImages] = useState<Record<string, BetssonImage>>({});
@@ -213,6 +217,22 @@ export function BoletaCheckoutSection({
     }
     load();
   }, [matchLabel]);
+
+  /** General no tiene sillas: cada "entrada" es una silla virtual (G1, G2…) solo para reutilizar las tarjetas. */
+  function virtualSeat(i: number): Seat {
+    return { id: `G${i + 1}`, zoneId: "verde", zoneName: "General", row: 1, seatNumber: 0, status: "available", price: 0 };
+  }
+
+  function setGeneralCount(n: number) {
+    const count = Math.max(1, Math.min(MAX_SEATS, n));
+    setSelectedSeats(Array.from({ length: count }, (_, i) => virtualSeat(i)));
+    setHolderDrafts((prev) => Array.from({ length: count }, (_, i) => prev[i] ?? { ...EMPTY_HOLDER }));
+  }
+
+  useEffect(() => {
+    if (general) setGeneralCount(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [general]);
 
   function toggleSeat(seat: Seat) {
     if (seat.status !== "available") return;
@@ -332,7 +352,8 @@ export function BoletaCheckoutSection({
   }
 
   async function handleBetsson() {
-    if (!allowedZoneId || !betssonReady || selectedSeats.length === 0) return;
+    const zoneForSubmit = general ? "general" : allowedZoneId;
+    if (!zoneForSubmit || !betssonReady || selectedSeats.length === 0) return;
     setSubmitting(true);
     setCheckoutError(null);
     setBetssonErrors({});
@@ -340,7 +361,7 @@ export function BoletaCheckoutSection({
       const { data: sessionData } = await getSupabaseBrowser().auth.getSession();
       const token = sessionData.session?.access_token;
       const person = (i: number) => ({
-        seatNumber: selectedSeats[i].seatNumber,
+        seatNumber: general ? null : selectedSeats[i].seatNumber,
         holderFullName: holderDrafts[i].fullName,
         holderDocumentId: holderDrafts[i].documentId,
       });
@@ -353,7 +374,7 @@ export function BoletaCheckoutSection({
         "data",
         JSON.stringify({
           matchLabel,
-          zoneId: allowedZoneId,
+          zoneId: zoneForSubmit,
           purchaserPhone,
           confirmAdult,
           confirmData,
@@ -407,7 +428,7 @@ export function BoletaCheckoutSection({
         }
       });
       setBetssonErrors(nextErrors);
-      setSeats((prev) => prev.map((s) => (doneSeatIds.has(String(s.id)) ? { ...s, status: "occupied" as Seat["status"] } : s)));
+      if (!general) setSeats((prev) => prev.map((s) => (doneSeatIds.has(String(s.id)) ? { ...s, status: "occupied" as Seat["status"] } : s)));
       setSelectedSeats((prev) => prev.filter((_, i) => !doneIdx.has(i)));
       setHolderDrafts((prev) => prev.filter((_, i) => !doneIdx.has(i)));
       const ok = results.length - failed.length;
@@ -534,7 +555,7 @@ export function BoletaCheckoutSection({
       </h1>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         {betsson
-          ? "Regístrate en Betsson con el link del club, sube el pantallazo de tu perfil y elige tu silla. Es gratis: tu boleta con código QR llega a tu correo. Puedes inscribir a varias personas: cada una con su propio registro de Betsson."
+          ? `Regístrate en Betsson con el link del club, sube el pantallazo de tu perfil y ${general ? "elige cuántas personas entran" : "elige tu silla"}. Es gratis: tu boleta con código QR llega a tu correo. Puedes inscribir a varias personas: cada una con su propio registro de Betsson.`
           : courtesy
           ? "Elige las sillas y los datos de cada titular. No se cobra: la boleta en PDF con código QR se envía al correo que indiques."
           : twoForOne
@@ -556,7 +577,7 @@ export function BoletaCheckoutSection({
               <span className="font-heading text-[#F26B21]">2.</span> Toma un pantallazo de tu perfil (Datos Personales).
             </li>
             <li className="rounded-xl border border-white/10 bg-black/30 p-3">
-              <span className="font-heading text-[#F26B21]">3.</span> Elige tu silla, sube el pantallazo y recibe tu boleta.
+              <span className="font-heading text-[#F26B21]">3.</span> {general ? "Dinos cuántas personas entran" : "Elige tu silla"}, sube el pantallazo y recibe tu boleta.
             </li>
           </ol>
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -578,8 +599,13 @@ export function BoletaCheckoutSection({
 
       {betsson ? <BetssonGuide className="mt-6" /> : null}
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(380px,100%)] lg:items-start">
-        <div className="min-w-0">
+      <div
+        className={cn(
+          "mt-6 grid gap-6 lg:items-start",
+          general ? "mx-auto max-w-xl" : "lg:grid-cols-[minmax(0,1fr)_min(380px,100%)]"
+        )}
+      >
+        <div className={cn("min-w-0", general && "hidden")}>
           <StadiumGrandstandMap
             seats={seats}
             selectedSeatIds={selectedSeats.map((s) => s.id)}
@@ -600,10 +626,10 @@ export function BoletaCheckoutSection({
             <div className="flex items-center gap-2">
               <Ticket className="size-5 shrink-0 text-primary" />
               <h2 className="font-heading text-lg uppercase tracking-wide text-white">
-                {step === "seats" ? "Tus sillas" : "Tus datos"}
+                {step === "seats" ? (general ? "Tus entradas" : "Tus sillas") : "Tus datos"}
               </h2>
             </div>
-            <StepDots step={step} />
+            <StepDots step={step} firstLabel={general ? "Personas" : "Sillas"} />
           </div>
 
           <AnimatePresence mode="wait">
@@ -616,7 +642,36 @@ export function BoletaCheckoutSection({
                 transition={{ duration: 0.2 }}
                 className="flex flex-col gap-4"
               >
-                {selectedSeats.length === 0 ? (
+                {general ? (
+                  <div className="rounded-xl border border-white/10 bg-black/30 p-4">
+                    <p className="text-sm text-white">¿Cuántas personas entran?</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Tribuna General: sin silla numerada. Cuenta una entrada por cada persona registrada en Betsson y una más por cada menor
+                      que la acompañe (1 menor por registro). Hasta {maxSeats}.
+                    </p>
+                    <div className="mt-3 flex items-center justify-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setGeneralCount(selectedSeats.length - 1)}
+                        disabled={selectedSeats.length <= 1}
+                        className="flex size-10 items-center justify-center rounded-full border border-white/20 text-xl text-white transition-colors hover:bg-white/10 disabled:opacity-30"
+                        aria-label="Una persona menos"
+                      >
+                        −
+                      </button>
+                      <span className="w-10 text-center font-heading text-3xl text-primary">{selectedSeats.length}</span>
+                      <button
+                        type="button"
+                        onClick={() => setGeneralCount(selectedSeats.length + 1)}
+                        disabled={selectedSeats.length >= maxSeats}
+                        className="flex size-10 items-center justify-center rounded-full border border-white/20 text-xl text-white transition-colors hover:bg-white/10 disabled:opacity-30"
+                        aria-label="Una persona más"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ) : selectedSeats.length === 0 ? (
                   <p className="rounded-xl border border-dashed border-white/15 bg-black/20 p-4 text-sm text-muted-foreground">
                     {betsson ? `Haz clic en las sillas: una por cada persona registrada en Betsson, y una más si te acompaña un menor (1 menor por registro). Hasta ${maxSeats} sillas.` : `Haz clic en una silla disponible del mapa. Puedes elegir hasta ${maxSeats}.`}
                   </p>
@@ -636,7 +691,7 @@ export function BoletaCheckoutSection({
                             {courtesy ? (
                               "Cortesía"
                             ) : betsson ? (
-                              i === 1 ? "Menor" : "Gratis"
+                              "Gratis"
                             ) : twoForOne ? (
                               "2x1"
                             ) : (
@@ -812,7 +867,7 @@ export function BoletaCheckoutSection({
                             {betsson ? (holderDrafts[index]?.isMinor ? `Menor acompañante · Registro ${registroNumber(index)}` : `Registro ${registroNumber(index)} · persona registrada en Betsson`) : `Titular ${index + 1}`}
                           </span>
                         </div>
-                        <span className="font-mono text-sm text-primary">#{seat.id}</span>
+                        <span className="font-mono text-sm text-primary">{general ? "General" : `#${seat.id}`}</span>
                       </div>
                       <div className="grid gap-2 sm:grid-cols-2">
                         <div className="relative">

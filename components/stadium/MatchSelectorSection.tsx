@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { ArrowLeft, CalendarDays, Loader2, MapPin, ShieldAlert, Ticket } from "lucide-react";
 import { useFanAuth } from "@/components/auth/FanAuthProvider";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { BetssonEntry } from "@/components/stadium/BetssonEntry";
 import { BoletaCheckoutSection } from "@/components/stadium/BoletaCheckoutSection";
 import { adminFetch } from "@/lib/supabase-browser";
 import { StadiumOverviewSelector } from "@/components/stadium/StadiumOverviewSelector";
@@ -221,7 +222,7 @@ export function MatchSelectorSection({ forcedMode }: { forcedMode?: "cortesia" |
 
     // Partido patrocinado por Betsson: el público entra con el registro de Betsson (sin Wompi).
     if (pickedMode === "betsson" || (!isAdmin && isBetssonMatch(selected.ticket_label))) {
-      return <BoletaCheckoutSection matchLabel={selected.ticket_label} mode="betsson" userEmail={user.email ?? ""} />;
+      return <BetssonEntry matchLabel={selected.ticket_label} userEmail={user.email ?? ""} />;
     }
 
     return <StadiumOverviewSelector matchLabel={selected.ticket_label} userEmail={user.email ?? ""} />;
